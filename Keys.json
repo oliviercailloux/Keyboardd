@@ -1,0 +1,273 @@
+[
+  [
+    {
+      "name": "ESC"
+    },
+    {
+      "name": "FK01"
+    },
+    {
+      "name": "FK02"
+    },
+    {
+      "name": "FK03"
+    },
+    {
+      "name": "FK04"
+    },
+    {
+      "name": "FK05"
+    },
+    {
+      "name": "FK06"
+    },
+    {
+      "name": "FK07"
+    },
+    {
+      "name": "FK08"
+    },
+    {
+      "name": "FK09"
+    },
+    {
+      "name": "FK10"
+    },
+    {
+      "name": "FK11"
+    },
+    {
+      "name": "FK12"
+    },
+    {
+      "name": "PRSC"
+    },
+    {
+      "name": "PAUS"
+    },
+    {
+      "name": "DELE"
+    }
+  ],
+  [
+    {
+      "name": "TLDE"
+    },
+    {
+      "name": "AE01"
+    },
+    {
+      "name": "AE02"
+    },
+    {
+      "name": "AE03"
+    },
+    {
+      "name": "AE04"
+    },
+    {
+      "name": "AE05"
+    },
+    {
+      "name": "AE06"
+    },
+    {
+      "name": "AE07"
+    },
+    {
+      "name": "AE08"
+    },
+    {
+      "name": "AE09"
+    },
+    {
+      "name": "AE10"
+    },
+    {
+      "name": "AE11"
+    },
+    {
+      "name": "AE12"
+    },
+    {
+      "name": "BKSP",
+      "size": 2
+    },
+    {
+      "name": "INS"
+    }
+  ],
+  [
+    {
+      "name": "TAB"
+    },
+    {
+      "name": "AD01"
+    },
+    {
+      "name": "AD02"
+    },
+    {
+      "name": "AD03"
+    },
+    {
+      "name": "AD04"
+    },
+    {
+      "name": "AD05"
+    },
+    {
+      "name": "AD06"
+    },
+    {
+      "name": "AD07"
+    },
+    {
+      "name": "AD08"
+    },
+    {
+      "name": "AD09"
+    },
+    {
+      "name": "AD10"
+    },
+    {
+      "name": "AD11"
+    },
+    {
+      "name": "AD12"
+    },
+    {
+      "name": "RTRN"
+    },
+    {
+      "name": "END"
+    }
+  ],
+  [
+    {
+      "name": "CAPS"
+    },
+    {
+      "name": "AC01"
+    },
+    {
+      "name": "AC02"
+    },
+    {
+      "name": "AC03"
+    },
+    {
+      "name": "AC04"
+    },
+    {
+      "name": "AC05"
+    },
+    {
+      "name": "AC06"
+    },
+    {
+      "name": "AC07"
+    },
+    {
+      "name": "AC08"
+    },
+    {
+      "name": "AC09"
+    },
+    {
+      "name": "AC10"
+    },
+    {
+      "name": "AC11"
+    },
+    {
+      "name": "AC12"
+    },
+    {
+      "name": "RTRN"
+    },
+    {
+      "name": "PGUP"
+    }
+  ],
+  [
+    {
+      "name": "LFSH"
+    },
+    {
+      "name": "LSGT"
+    },
+    {
+      "name": "AB01"
+    },
+    {
+      "name": "AB02"
+    },
+    {
+      "name": "AB03"
+    },
+    {
+      "name": "AB04"
+    },
+    {
+      "name": "AB05"
+    },
+    {
+      "name": "AB06"
+    },
+    {
+      "name": "AB07"
+    },
+    {
+      "name": "AB08"
+    },
+    {
+      "name": "AB09"
+    },
+    {
+      "name": "AB10"
+    },
+    {
+      "name": "RTSH"
+    },
+    {
+      "name": "UP"
+    },
+    {
+      "name": "PGDN"
+    }
+  ],
+  [
+    {
+      "name": "LCTL"
+    },
+    {
+      "name": "LWIN"
+    },
+    {
+      "name": "LALT"
+    },
+    {
+      "name": "SPCE"
+    },
+    {
+      "name": "RALT"
+    },
+    {
+      
+    },
+    {
+      "name": "RCTL"
+    },
+    {
+      "name": "LEFT"
+    },
+    {
+      "name": "DOWN"
+    },
+    {
+      "name": "RIGHT"
+    }
+  ]
+]
