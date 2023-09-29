@@ -1,8 +1,11 @@
 package io.github.oliviercailloux.keyboardd;
 
-import jakarta.json.bind.annotation.JsonbNillable;
-import jakarta.json.bind.annotation.JsonbProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record KeyboardKey (String name, @JsonbNillable() double size) {
-  
+public record KeyboardKey (String name, double size) {
+  @JsonCreator()
+  public KeyboardKey(@JsonProperty("name") String name, @JsonProperty("size") Double size) {
+    this(name, size == null ? 1d : size);
+  }
 }
