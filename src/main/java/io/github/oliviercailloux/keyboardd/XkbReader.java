@@ -21,7 +21,7 @@ public class XkbReader {
       Pattern.compile("^ *key <(?<name>.+)> \\{ \\[ (?<values>.+) \\] \\};$");
   private static final Pattern P_UNICODE = Pattern.compile("U(?<unicode>[0-9a-fA-F]+)");
 
-  private static final ImmutableMap<String, MnKeySym> symbols = KeySymReader.parse();
+  private static final ImmutableMap<String, MnKeySym> symbols = KeySymReader.parseAndPatch();
 
   public static ImmutableSet<Key> read(CharSource source) throws IOException {
     ImmutableList<String> lines = source.readLines();

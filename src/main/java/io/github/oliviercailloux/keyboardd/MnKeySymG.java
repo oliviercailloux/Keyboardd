@@ -8,7 +8,5 @@ public record MnKeySymG (String mnemonic, int code, Optional<Integer> unicode, S
     boolean deprecated) {
   public MnKeySymG {
     checkArgument(unicode.isEmpty() || comment.equals(""));
-    if (!comment.equals(""))
-      checkArgument(!deprecated);
   }
 }

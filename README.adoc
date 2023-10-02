@@ -1,0 +1,2 @@
+https://github.com/SmartLayer/MathLingua-Layout
+https://wiki.archlinux.org/title/Keyboard_input#Identifying_scancodes

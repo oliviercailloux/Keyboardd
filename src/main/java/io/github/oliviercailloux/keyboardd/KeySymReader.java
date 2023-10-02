@@ -1,12 +1,13 @@
 package io.github.oliviercailloux.keyboardd;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,16 +17,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
-
-import io.github.oliviercailloux.jaris.collections.CollectionUtils;
 
 /**
  * The header indicates that when multiple mnemonics map to a given code, only the first one should
@@ -38,7 +35,26 @@ import io.github.oliviercailloux.jaris.collections.CollectionUtils;
  * states, not all of these are marked as such (see for example XK_Oslash and XK_Ooblique, compare
  * with XK_ETH and XK_Eth).
  * 
- * Thus, this class does not consider that sym codes or unicode points should correspond to a single mnemonic.
+ * Thus, this class does not consider that sym codes or unicode points should correspond to a single
+ * mnemonic.
+ * 
+ * This class considers that XK_Greek_IOTAdiaeresis, with code 1957 = 0x07a5 and unicode empty and
+ * comment “old typo”, is deprecated, as there is also XK_Greek_IOTAdieresis mapping to the same
+ * code and unicode point 938 = U+03AA = Ϊ and no comment.
+ * 
+ * With this modification, among non-deprecated values, we have that two entries with the same code
+ * map to the same unicode point (present or absent).
+ * 
+ * Two pairs of mnemonics share a unicode point but different codes: #define XK_radical 0x08d6
+ * U+221A SQUARE ROOT (in XK_TECHNICAL) and #define XK_squareroot 0x100221A U+221A SQUARE ROOT (in
+ * XK_MATHEMATICAL); as well as #define XK_partialderivative 0x08ef U+2202 PARTIAL DIFFERENTIAL (in
+ * XK_TECHNICAL) and #define XK_partdifferential 0x1002202 U+2202 PARTIAL DIFFERENTIAL (in
+ * XK_MATHEMATICAL). This class patches those by assigning XK_squareroot 0x100221A to no unicode and
+ * comment “2√”; and XK_partdifferential 0x1002202 to U+1D6DB MATHEMATICAL BOLD PARTIAL
+ * DIFFERENTIAL.
+ * 
+ * With these two modifications, among non-deprecated values, we have that two entries with the same
+ * present unicode point map to the same code.
  */
 public class KeySymReader {
   @SuppressWarnings("unused")
@@ -55,21 +71,23 @@ public class KeySymReader {
   private static final ImmutableSet<Pattern> PATTERNS =
       ImmutableSet.of(P_XK_NO_COMMENT, P_XK_COMMENT, P_XK_UNICODE, P_XK_UNICODE_DEPRECATED);
 
-  public static ImmutableBiMap<String, MnKeySym> parse() {
-    CharSource source = Resources.asCharSource(KeySymReader.class.getResource("keysymdef.h"),
+  public static ImmutableBiMap<String, MnKeySym> parseAndPatch() {
+    CharSource keysymdef = Resources.asCharSource(KeySymReader.class.getResource("keysymdef.h"),
         StandardCharsets.UTF_8);
     try {
-      return parse(source);
+      ImmutableSet<MnKeySymG> syms = parseGToSet(keysymdef);
+    return strip(patchG(syms));
+    // return parse(source);
     } catch (IOException e) {
       throw new VerifyException(e);
     }
   }
 
   public static ImmutableBiMap<String, MnKeySymG> parseG() {
-    CharSource source = Resources.asCharSource(KeySymReader.class.getResource("keysymdef.h"),
+    CharSource keysymdef = Resources.asCharSource(KeySymReader.class.getResource("keysymdef.h"),
         StandardCharsets.UTF_8);
     try {
-      return parseG(source);
+      return parseG(keysymdef);
     } catch (IOException e) {
       throw new VerifyException(e);
     }
@@ -77,16 +95,37 @@ public class KeySymReader {
 
   public static ImmutableBiMap<String, MnKeySym> parse(CharSource keysymdef) throws IOException {
     ImmutableSet<MnKeySymG> syms = parseGToSet(keysymdef);
+    return strip(syms);
+  }
+
+  private static ImmutableBiMap<String, MnKeySym> strip(ImmutableSet<MnKeySymG> syms) {
     ImmutableSet<MnKeySym> symsNotDepr = syms.stream().filter(s -> !s.deprecated())
         .map(s -> new MnKeySym(s.mnemonic(), s.code(), s.unicode(), s.comment()))
         .collect(ImmutableSet.toImmutableSet());
     {
       ImmutableSetMultimap<Integer, MnKeySym> byCode =
           Maps.toMap(symsNotDepr, MnKeySym::code).asMultimap().inverse();
-      ImmutableSet<Integer> duplicateCodes = byCode.keySet().stream().filter(c -> byCode.get(c).size() >= 2)
-          .collect(ImmutableSet.toImmutableSet());
+      ImmutableSet<Integer> duplicateCodes = byCode.keySet().stream()
+          .filter(c -> byCode.get(c).size() >= 2).collect(ImmutableSet.toImmutableSet());
       LOGGER.debug("Duplicate codes: {}.", duplicateCodes);
+      ImmutableSet<Collection<MnKeySym>> nonUnique = byCode.asMap().values().stream()
+          .filter(s -> s.stream().map(MnKeySym::unicode).distinct().count() != 1)
+          .collect(ImmutableSet.toImmutableSet());
+      nonUnique.stream().forEach(n -> LOGGER.warn("Non unique: {}.", n));
+      verify(nonUnique.isEmpty());
     }
+    {
+      ImmutableSet<MnKeySym> symsWithUnicode = symsNotDepr.stream()
+          .filter(s -> s.unicode().isPresent()).collect(ImmutableSet.toImmutableSet());
+      ImmutableSetMultimap<Integer, MnKeySym> byUnicode =
+          Maps.toMap(symsWithUnicode, s -> s.unicode().get()).asMultimap().inverse();
+      ImmutableSet<Collection<MnKeySym>> nonUnique = byUnicode.asMap().values().stream()
+          .filter(s -> s.stream().map(MnKeySym::code).distinct().count() != 1)
+          .collect(ImmutableSet.toImmutableSet());
+      nonUnique.stream().forEach(n -> LOGGER.warn("Non unique: {}.", n));
+      verify(nonUnique.isEmpty());
+    }
+
     return symsNotDepr.stream()
         .collect(ImmutableBiMap.toImmutableBiMap(MnKeySym::mnemonic, s -> s));
   }
@@ -96,13 +135,37 @@ public class KeySymReader {
     return syms.stream().collect(ImmutableBiMap.toImmutableBiMap(MnKeySymG::mnemonic, s -> s));
   }
 
+  private static ImmutableSet<MnKeySymG> patchG(Set<MnKeySymG> syms) {
+    LinkedHashSet<MnKeySymG> patching = new LinkedHashSet<>(syms);
+    {
+      boolean removed = patching
+          .remove(new MnKeySymG("Greek_IOTAdiaeresis", 1957, Optional.empty(), "old typo", false));
+      verify(removed);
+      patching.add(new MnKeySymG("Greek_IOTAdiaeresis", 1957, Optional.empty(), "old typo", true));
+    } 
+    {
+      boolean removed =
+          patching.remove(new MnKeySymG("squareroot", 16785946, Optional.of(8730), "", false));
+      verify(removed);
+      patching.add(new MnKeySymG("squareroot", 16785946, Optional.empty(), "2√", true));
+    }
+    {
+      boolean removed =
+          patching.remove(new MnKeySymG("partdifferential", 
+              16785922, Optional.of(8706), "", false));
+      verify(removed);
+      patching.add(new MnKeySymG("partdifferential", 16785922, Optional.of(120539), "", true));
+    }
+    return ImmutableSet.copyOf(patching);
+  }
+
   private static ImmutableSet<MnKeySymG> parseGToSet(CharSource keysymdef) throws IOException {
     ImmutableList<String> lines = keysymdef.readLines();
 
     final ImmutableSet.Builder<MnKeySymG> keySymBuilder = new ImmutableSet.Builder<>();
 
     for (String line : lines) {
-      Optional<Matcher> matcherOpt = matcher(line);
+      Optional<Matcher> matcherOpt = ParseUtils.matcherOpt(line, PATTERNS);
       if (!matcherOpt.isPresent())
         continue;
       Matcher matcher = matcherOpt.orElseThrow(VerifyException::new);
@@ -129,18 +192,5 @@ public class KeySymReader {
     }
 
     return keySymBuilder.build();
-  }
-
-  private static Optional<Matcher> matcher(String line) {
-    final ImmutableSet.Builder<Matcher> matchersBuilder = new ImmutableSet.Builder<>();
-    for (Pattern pattern : PATTERNS) {
-      Matcher matcher = pattern.matcher(line);
-      if (matcher.matches())
-        matchersBuilder.add(matcher);
-    }
-    ImmutableSet<Matcher> matchers = matchersBuilder.build();
-    verify(matchers.size() <= 1);
-
-    return matchers.stream().collect(MoreCollectors.toOptional());
   }
 }
