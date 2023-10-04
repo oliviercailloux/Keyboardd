@@ -115,8 +115,9 @@ public class KeyboardReaderTests {
 
     KeyboardLayoutBuilder parsed = KeyboardLayoutBuilder.parse();
     KeyboardLayout layout = parsed.getLayout(source);
-    ImmutableList<KeyboardKey> row =
-        ImmutableList.of(new KeyboardKey("TAB", 1.5d), new KeyboardKey("AD01", 1d));
-    assertEquals(ImmutableList.of(row), layout.rows());
+    ImmutableList<ImmutableList<KeyboardKey>> rows = layout.rows();
+    assertEquals(6, rows.size());
+    ImmutableList<KeyboardKey> row0 = rows.get(0);
+    assertEquals(16, row0.size());
   }
 }
