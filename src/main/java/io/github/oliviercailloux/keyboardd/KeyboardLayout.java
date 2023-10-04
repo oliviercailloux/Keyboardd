@@ -13,7 +13,7 @@ public class KeyboardLayout {
     return new KeyboardLayout(rows);
   }
 
-  /** With no empty list. Allows for duplicates (example, CTRL). */
+  /** With no empty list. Allows for duplicates (not required usually as even similar keys such as the left shift and right shift keys send different codes, it seems, but some keyboards might differ from mine in that respect). */
   private final ImmutableList<ImmutableList<KeyboardKey>> rows;
 
   private KeyboardLayout(List<? extends List<KeyboardKey>> rows) {

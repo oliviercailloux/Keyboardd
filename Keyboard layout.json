@@ -90,7 +90,8 @@
       "name": "AE12"
     },
     {
-      "name": "BKSP"
+      "name": "BKSP",
+      "size": 2
     },
     {
       "name": "INS"
@@ -98,8 +99,7 @@
   ],
   [
     {
-      "name": "TAB",
-      "size": 1.7
+      "name": "TAB"
     },
     {
       "name": "AD01"
@@ -182,10 +182,10 @@
       "name": "AC11"
     },
     {
-      "name": "AC12"
+      "name": "BKSL"
     },
     {
-      "name": "ENTER"
+      "name": "RTRN"
     },
     {
       "name": "PGUP"
@@ -196,7 +196,10 @@
       "name": "LFSH"
     },
     {
-      "name": "LT"
+      "name": "LSGT"
+    },
+    {
+      "name": "AB01"
     },
     {
       "name": "AB02"
@@ -226,10 +229,7 @@
       "name": "AB10"
     },
     {
-      "name": "AB11"
-    },
-    {
-      "name": "SHFT"
+      "name": "RTSH"
     },
     {
       "name": "UP"
@@ -240,25 +240,23 @@
   ],
   [
     {
-      "name": "CTRL"
+      "name": "LCTL"
     },
     {
-      "name": "WIN"
+      "name": "LWIN"
     },
     {
-      "name": "ALT"
+      "name": "LALT"
     },
     {
-      "name": "SPC"
+      "name": "SPCE"
     },
     {
-      "name": "ALTGR"
+      "name": "RALT"
     },
+    {},
     {
-      "name": "NULL"
-    },
-    {
-      "name": "CTRL"
+      "name": "RCTL"
     },
     {
       "name": "LEFT"
@@ -267,7 +265,7 @@
       "name": "DOWN"
     },
     {
-      "name": "RIGHT"
+      "name": "RGHT"
     }
   ]
 ]

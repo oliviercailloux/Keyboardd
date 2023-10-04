@@ -97,9 +97,21 @@ public class KeyboardReaderTests {
   }
 
   @Test
-  public void testRead() throws Exception {
+  public void testReadSimple() throws Exception {
     CharSource source = Resources.asCharSource(
         XkbReaderTests.class.getResource("Keyboard layout simple.json"), StandardCharsets.UTF_8);
+
+    KeyboardLayoutBuilder parsed = KeyboardLayoutBuilder.parse();
+    KeyboardLayout layout = parsed.getLayout(source);
+    ImmutableList<KeyboardKey> row =
+        ImmutableList.of(new KeyboardKey("TAB", 1.5d), new KeyboardKey("AD01", 1d));
+    assertEquals(ImmutableList.of(row), layout.rows());
+  }
+
+  @Test
+  public void testReadFull() throws Exception {
+    CharSource source = Resources.asCharSource(
+        XkbReaderTests.class.getResource("Keyboard layout full.json"), StandardCharsets.UTF_8);
 
     KeyboardLayoutBuilder parsed = KeyboardLayoutBuilder.parse();
     KeyboardLayout layout = parsed.getLayout(source);

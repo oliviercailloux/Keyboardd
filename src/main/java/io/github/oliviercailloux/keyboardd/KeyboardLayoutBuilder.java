@@ -54,7 +54,9 @@ public class KeyboardLayoutBuilder {
         // checkArgument(keys.size() == names.size(), keysDupl);
         ImmutableSet<String> namesMissing =
             Sets.difference(names, namesToCodes.keySet()).immutableCopy();
-        verify(namesMissing.isEmpty(), namesMissing.toString());
+        String miss = namesMissing.iterator().next();
+        verify(miss.isEmpty());
+        verify(namesMissing.isEmpty(), ""+namesMissing.size());
       }
       return KeyboardLayout.fromRows(rows);
     }
