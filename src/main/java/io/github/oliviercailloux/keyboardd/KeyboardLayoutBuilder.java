@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharSource;
@@ -45,7 +46,12 @@ public class KeyboardLayoutBuilder {
             rows.stream().flatMap(r -> r.stream()).collect(ImmutableList.toImmutableList());
         ImmutableSet<String> names =
             keys.stream().map(KeyboardKey::name).collect(ImmutableSet.toImmutableSet());
-        checkArgument(keys.size() == names.size());
+        // ImmutableMultiset<KeyboardKey> keysMulti = ImmutableMultiset.copyOf(keys);
+        // ImmutableSet<KeyboardKey> keysDupl = keysMulti.elementSet().stream()
+        //     .filter(s -> keysMulti.count(s) >= 2).collect(ImmutableSet.toImmutableSet());
+        // KeyboardKey firstDupl = keysDupl.iterator().next();
+        // LOGGER.info("First dupl {}, count {}.", firstDupl, keysMulti.count(firstDupl));
+        // checkArgument(keys.size() == names.size(), keysDupl);
         ImmutableSet<String> namesMissing =
             Sets.difference(names, namesToCodes.keySet()).immutableCopy();
         verify(namesMissing.isEmpty(), namesMissing.toString());

@@ -13,7 +13,7 @@ public class KeyboardLayout {
     return new KeyboardLayout(rows);
   }
 
-  /** With no empty list. */
+  /** With no empty list. Allows for duplicates (example, CTRL). */
   private final ImmutableList<ImmutableList<KeyboardKey>> rows;
 
   private KeyboardLayout(List<? extends List<KeyboardKey>> rows) {
