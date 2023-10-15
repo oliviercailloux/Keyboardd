@@ -91,7 +91,7 @@
     },
     {
       "name": "BKSP",
-      "size": 2
+      "size": 3.14
     },
     {
       "name": "INS"
@@ -99,7 +99,8 @@
   ],
   [
     {
-      "name": "TAB"
+      "name": "TAB",
+      "size": 2.1
     },
     {
       "name": "AD01"
@@ -138,7 +139,8 @@
       "name": "AD12"
     },
     {
-      "name": "RTRN"
+      "name": "RTRN",
+      "size": 2.29
     },
     {
       "name": "END"
@@ -146,7 +148,8 @@
   ],
   [
     {
-      "name": "CAPS"
+      "name": "CAPS",
+      "size": 2.7
     },
     {
       "name": "AC01"
@@ -185,7 +188,8 @@
       "name": "BKSL"
     },
     {
-      "name": "RTRN"
+      "name": "RTRN",
+      "size": 1.69
     },
     {
       "name": "PGUP"
@@ -226,10 +230,12 @@
       "name": "AB09"
     },
     {
-      "name": "AB10"
+      "name": "AB10",
+      "size": 1.67
     },
     {
-      "name": "RTSH"
+      "name": "RTSH",
+      "size": 2.72
     },
     {
       "name": "UP"
@@ -240,23 +246,31 @@
   ],
   [
     {
-      "name": "LCTL"
+      "name": "LCTL",
+      "size": 1.67
     },
     {
-      "name": "LWIN"
+      "name": "LWIN",
+      "size": 1.66
     },
     {
-      "name": "LALT"
+      "name": "LALT",
+      "size": 1.67
     },
     {
-      "name": "SPCE"
+      "name": "SPCE",
+      "size": 10.28
     },
     {
-      "name": "RALT"
+      "name": "RALT",
+      "size": 1.67
     },
-    {},
     {
-      "name": "RCTL"
+      "size": 1.67
+    },
+    {
+      "name": "RCTL",
+      "size": 1.47
     },
     {
       "name": "LEFT"

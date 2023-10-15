@@ -52,8 +52,10 @@ public class KeyboardLayoutBuilder {
         // KeyboardKey firstDupl = keysDupl.iterator().next();
         // LOGGER.info("First dupl {}, count {}.", firstDupl, keysMulti.count(firstDupl));
         // checkArgument(keys.size() == names.size(), keysDupl);
+        final ImmutableSet<String> knownNames = new ImmutableSet.Builder<String>().addAll(namesToCodes.keySet()).add("").build();
+        
         ImmutableSet<String> namesMissing =
-            Sets.difference(names, namesToCodes.keySet()).immutableCopy();
+            Sets.difference(names, knownNames).immutableCopy();
         // String miss = namesMissing.iterator().next();
         // verify(miss.isEmpty());
         verify(namesMissing.isEmpty(), namesMissing.toString());
