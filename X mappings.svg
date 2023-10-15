@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 170" width="650" height="170">
+  <defs>
+    <marker id="head" orient="auto-start-reverse" markerWidth="3" markerHeight="4" refX="2" refY="2">
+      <path d="M 0,0 V 4 L 2,2 Z" />
+    </marker>
+  </defs>
+  <style>
+    rect {
+      fill-opacity: 0;
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    path.source {
+      stroke: black;
+      stroke-width: 2px;
+      stroke-dasharray: 5px;
+    }
+  </style>
+  <text x="50" y="20">X key name</text>
+  <path class="source" d="M 100,20 h 100" marker-end="url(#head)" />
+  <text x="150" y="9">xkb_symbols</text>
+  <text x="380" y="20">(Keysym mnemonic or Unicode code point)*</text>
+  
+  <path class="source" d="M 50,30  v 30" marker-end="url(#head)" />
+  <text style="text-anchor: left;" x="80" y="45">evdev</text>
+  <text x="50" y="72">X keycode</text>
+  
+  <text x="200" y="100">Keysym mnemonic</text>
+  <path class="source" d="M 270,100 h 280" marker-end="url(#head)" />
+  <text x="600" y="100">Keysym code</text>
+
+  <text x="100" y="120">(explicit)</text>
+  <text x="400" y="120">xkbcommon-keysyms.h, keysymdef.h, X11::XStringToKeysym?</text>
+  <path class="source" d="M 190,110 L 50,130" marker-end="url(#head)" />
+  
+  <text x="70" y="140">(Unicode code point)?</text>
+  <text x="250" y="140">Unicode code point</text>
+  <path class="source" d="M 320,140 h 230" marker-start="url(#head)" marker-end="url(#head)" />
+  <text x="600" y="140">Keysym code</text>
+  
+  <text x="400" y="160">(implicit)</text>
+</svg>
