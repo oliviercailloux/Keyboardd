@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableBiMap;
 
+import io.github.oliviercailloux.keyboardd.draft.EvdevReader;
+
 public class EvdevReaderTests {
   @Test
   public void testEvdevRead() throws Exception {

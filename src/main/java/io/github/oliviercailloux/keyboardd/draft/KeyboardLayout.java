@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.draft;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+
+import io.github.oliviercailloux.keyboardd.draft.KeyboardKey;
 
 public class KeyboardLayout {
   static KeyboardLayout fromRows(List<? extends List<KeyboardKey>> rows) {

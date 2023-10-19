@@ -14,6 +14,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
+import io.github.oliviercailloux.keyboardd.draft.KeySymReader;
+import io.github.oliviercailloux.keyboardd.draft.MnKeySym;
+import io.github.oliviercailloux.keyboardd.draft.MnKeySymG;
+
 public class KeySymReaderTests {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(KeySymReaderTests.class);

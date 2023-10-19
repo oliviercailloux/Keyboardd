@@ -13,6 +13,8 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
 import io.github.oliviercailloux.jaris.xml.DomHelper;
+import io.github.oliviercailloux.keyboardd.draft.Drawer;
+import io.github.oliviercailloux.keyboardd.draft.KeyboardLayout;
 
 public class DrawerTests {
   @Test

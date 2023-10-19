@@ -13,17 +13,17 @@ image::Keyboard.svg[Signal and codes from keyboard to system, opts=inline]
 ** Examples. Pressing ESC sends usage code `0x29` (41); TAB sends usage code `0x2B` (43); the key next to it (with https://en.wikipedia.org/wiki/Keycap[keycap] `A` on my AZERTY keyboard) sends `0×14` (20); E sends `0×08` (8). Left Windows key sends `0×E3` (227), left Ctrl sends `0×E0` (224), left Alt sends `0×E2` (226), right Windows sends `0×E7` (231).
 * The motherboard translates the usage code to a https://en.wikipedia.org/wiki/Scancode[scancode] that reaches the operating system.
 ** https://wiki.archlinux.org/title/Keyboard_input#Identifying_scancodes[Use] `showkey -s` to see those (https://manpages.ubuntu.com/manpages/focal/man1/showkey.1.html[approximately]), preferrably in a virtual console.
-** Examples. Pressing ESC sends scancode `0x01` (1); TAB sends scancode `0x0F` (15); the key next to it sends `0x10` (16). Left Windows key sends `0xE0 5B` (224 then 91), left Ctrl sends `0x1D 9D` (29 then 158), left Alt sends `0x38 B8` (56 then 200), right Windows sends `0xE0 EC` (224 then 92).
+** Examples. Pressing ESC sends scancode `0x01` (1); TAB sends scancode `0x0F` (15); the key next to it sends `0x10` (16); E sends `0×12` (18). Left Windows key sends `0xE0 5B` (224 then 91), left Ctrl sends `0x1D 9D` (29 then 158), left Alt sends `0x38 B8` (56 then 200), right Windows sends `0xE0 EC` (224 then 92).
 * The Linux kernel https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h[transforms] this into a kernel https://wiki.archlinux.org/title/Map_scancodes_to_keycodes[keycode].
 ** Use `showkey` to see those, preferrably in a virtual console.
 // https://cgit.freedesktop.org/evtest/tree/evtest.c
 ** Alternatively, use https://wiki.archlinux.org/title/Keyboard_input#Using_evtest[`evtest`].
 ** Use `sudo evemu-describe` to see the whole conversion table. This program https://github.com/bentiss/evemu/blob/master/src/evemu.c#L351[maps] scancodes to (US?) https://gitlab.freedesktop.org/libevdev/libevdev/blob/master/include/linux/freebsd/input-event-codes.h[keycap] https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h[names], such as KEY_TAB, KEY_Q.
-** Examples. Pressing ESC corresponds to kernel keycode 1; TAB corresponds to kernel keycode 15; the key next to it corresponds to kernel keycode 16. Left Windows key corresponds to kernel keycode 125, left Ctrl to 29, left Alt to 56, right Windows to 126.
+** Examples. Pressing ESC corresponds to kernel keycode 1; TAB corresponds to kernel keycode 15; the key next to it corresponds to kernel keycode 16; E corresponds to keycode 18. Left Windows key corresponds to kernel keycode 125, left Ctrl to 29, left Alt to 56, right Windows to 126.
 ** AFAIK, these kernel keycodes are Linux specific (in the sense that I don’t know of another system that uses the same mapping from scancode to integer).
 * Wayland (using libxkbcommon) maps those kernel keycodes to https://www.x.org/releases/current/doc/xproto/x11protocol.html#Keyboards[X keycodes], https://cgit.freedesktop.org/xorg/driver/xf86-input-evdev/tree/src/evdev.c#n280[with] X keycode = kernel keycode + 8 (https://unix.stackexchange.com/a/364652[thanks]).
 ** Use `wev` to see those (fails for some keys which are bound by Wayland, such as my left Windows key).
-** Examples. Pressing ESC corresponds to X keycode 9; TAB corresponds to X keycode 23; the key next to it corresponds to X keycode 24. Left Ctrl key corresponds to X keycode 37, left Alt to 64, right Windows to 134.
+** Examples. Pressing ESC corresponds to X keycode 9; TAB corresponds to X keycode 23; the key next to it corresponds to X keycode 24; E corresponds to X keycode 26. Left Ctrl key corresponds to X keycode 37, left Alt to 64, right Windows to 134.
 * X mapping sources (files and libraries) permit to associate these X keycodes to keysym codes, keysym mnemonics and Unicode code points (see below).
 
 These translations from kernel to X keycodes to X key names is https://github.com/xkbcommon/libxkbcommon/blob/master/tools/interactive-wayland.c#L47[also called] “evdev keycodes” to “evdev XKB keycode”, https://xkbcommon.org/doc/current/md_doc_keymap_format_text_v1.html#autotoc_md22[or] “hardware/evdev scancodes” to “xkb keycodes”, https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/keycodes/evdev[or] “evdev scancodes” to “something resembling xfree86 keycodes”.
@@ -37,29 +37,113 @@ image::X mappings.svg[Mappings and sources, opts=inline]
  
 * To the X keycodes https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/keycodes/evdev[correspond] X key names.
 ** A given X key name corresponds to exactly one X keycode.
-A given X keycode corresponds to one or more X key name.
+A given X keycode corresponds to one or more X key name (through aliases); for example, both the `<AC12>` and `<BKSL>` X key names map to X keycode 51.
 ** Examples. `<ESC>` maps to X keycode 9, `<TAB>` to X keycode 23, `<AD01>` to 24, `<AD03>` to 26, `<LWIN>` to 133, `<LCTL>` to 37, `<LALT>` to 64, `<RWIN>` to 134.
 ** https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/tree/master/keycodes[Other files] define https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/keycodes/aliases[more] (or https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/keycodes/sun[different]) mappings.
 ** Some of the X keycodes in the `evdev` file are https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/.gitlab-ci/generate-evdev-keycodes.py[generated] from the kernel keycodes.
-* The `https://github.com/xkbcommon/libxkbcommon/blob/master/include/xkbcommon/xkbcommon-keysyms.h[xkbcommon-keysyms.h]` file maps keysym mnemonics and some Unicode code points (UCPs) to keysym codes (also called keysym link:https://www.x.org/releases/current/doc/xproto/x11protocol.html#keysym_encoding[values]).
-** The file maps each keysym mnemonic (prefixed with `XKB_KEY_`) to a single keysym code. Some of these keysym mnemonics are deprecated. Conversely, not every keysym codes are associated to a keysym mnemonic: some are associated to none; some to more than one, for, example, both the “dead_tilde” and “dead_perispomeni” (non deprecated) mnemonics map to 0×FE53.
-** The file explicitly maps some keysym mnemonics to UCPs. Thus, a given keysym mnemonic is mapped to zero or one UCP. Conversely, not every UCP maps to a single keysym mnemonic, and of course, many UCPs are not mapped to any keysym mnemonic, thus, a given UCP is mapped to zero, one or more keysym mnemonics.
-** For example, UCP U+20 is explicitely mapped to the keysym mnemonics _space_ and _KP_space_, and corresponding codes 0×0020 and 0×FF80.
-** The file also describes an implicit mapping from any UCP _u_ (at least 0×100) to keysym code 0×1000000 + _u_.
-** The file header indicates that its keysym codes are defined in the X Window System Protocol standard https://www.x.org/releases/current/doc/xproto/x11protocol.html#keysym_encoding[Appendix A], but the file contains new keysym codes that are not in Appendix A, such as 0×1008124b, to which `XF86CameraAccessEnable` is mapped.
-** The file changes https://github.com/xkbcommon/libxkbcommon/commits/master/include/xkbcommon/xkbcommon-keysyms.h[frequently]. My copy in this repository is named after the commit that it https://github.com/xkbcommon/libxkbcommon/commit/238d132406d8dc1123cbcaf68ab12d34c505e7e4[comes from]; another one comes from the https://packages.debian.org/bookworm/amd64/libxkbcommon-dev/filelist[debian bookworm] distribution, apparently version 1.5.0-1; identical to version https://raw.githubusercontent.com/xkbcommon/libxkbcommon/xkbcommon-1.5.0/include/xkbcommon/xkbcommon-keysyms.h[1.5.0] from commit https://github.com/xkbcommon/libxkbcommon/commit/7062ab[7062ab].
-* The correspondance between keysym codes and keysym mnemonics is also defined in a https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/master/include/X11/keysymdef.h[file] from https://packages.debian.org/bookworm/x11proto-dev[x11proto-dev] that uses XK_ prefixes (I have not checked whether they are identical apart from that, I suppose that the libxkbcommon one is the authoritative source).
-** libxkbcommon commit https://github.com/xkbcommon/libxkbcommon/commit/49690d936bf6cc6bf85058c1f0a545f0d5e37c77[49690d] (Sept 2023) updated the files `xkbcommon-keysyms.h` and `ks_tables.h` using the latest xorgproto at the time (referring to xorgproto commit 1c8128).
-* The X key names are associated to keysym mnemonics or UCP, through local “symbol” https://xkbcommon.org/doc/current/keymap-text-format-v1.html#autotoc_md42[configuration files].
+* The X key names are associated, through local “symbol” https://xkbcommon.org/doc/current/keymap-text-format-v1.html#autotoc_md42[configuration files] (more generally, through a https://github.com/xkbcommon/libxkbcommon/blob/master/doc/introduction-to-xkb.md[keymap]), to keysym entries, each being a keysym mnemonic or a Unicode code point (UCP) or a keysym code.
 ** For example, the “link:https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/us#L90[English (US, intl., with dead keys)]” xkb layout (together with the https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/pc[common] mappings?) maps `<ESC>` to `Escape`, `<TAB>` to `Tab` and `ISO_Left_Tab`, `<AD01>` to `q`, `Q`, `adiaeresis` and `Adiaeresis`, `<AD03>` to `e`, `E`, `eacute` and `Eacute`, `<LWIN>` to `Super_L`, `<LCTL>` to `Control_L`, `<LALT>` to `Alt_L` and `Meta_L`, `<RWIN>` to `Super_R`.
-** The “link:https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/fr[French (alt.)]” xkb layout maps `<AD01>` to `a`, `A`, `ae` and `AE` and maps `<AE04>` to `apostrophe`, `4`, `braceleft` and keycode 0×1002014 (itself implicitly associated to to U+2014, em dash).
+** The “link:https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/fr#L120[French (alt.)]” xkb layout maps `<AD01>` to `a`, `A`, `ae` and `AE` and maps `<AE04>` to `apostrophe`, `4`, `braceleft` and keycode 0×1002014 (itself implicitly associated to U+2014, em dash, see below).
+** The “link:https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/fr#L417[French (BEPO)]” xkb layout maps `<AC08>` to `s`, `S`, `ssharp` and U+1E9E LATIN CAPITAL LETTER SHARP S (ẞ).
 ** Some of the https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/symbols/inet[associations] between X key names (of the form `<Ixxx>`) and keysym mnemonics are https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/blob/master/.gitlab-ci/generate-evdev-keysyms.py[generated] from the kernel keycodes.
+* The `https://github.com/xkbcommon/libxkbcommon/blob/master/include/xkbcommon/xkbcommon-keysyms.h[xkbcommon-keysyms.h]` file maps keysym mnemonics and some UCPs to keysym codes (also called keysym link:https://www.x.org/releases/current/doc/xproto/x11protocol.html#keysym_encoding[values]).
+** The file maps each keysym mnemonic (prefixed with `XKB_KEY_`) to a single keysym code. Some of these keysym mnemonics are deprecated. Conversely, not every keysym codes are associated to a keysym mnemonic: some are associated to none; some to more than one; for, example, both the “dead_tilde” and “dead_perispomeni” (non deprecated) keysym mnemonics map to 0×FE53.
+** The file explicitly maps some keysym mnemonics to UCPs. Thus, a given keysym mnemonic is mapped to zero or one UCP. Conversely, not every UCP maps to a single keysym mnemonic, and of course, many UCPs are not mapped to any keysym mnemonic, thus, a given UCP is mapped to zero, one or more keysym mnemonics; for example, both the _space_ and _KP_space_ keysym mnemonics (with corresponding keysym codes 0×0020 and 0×FF80) map to UCP U+20.
+** The file also describes an implicit mapping from any UCP _u_ (at least 0×100) to keysym code 0×1000000 + _u_.
+** The file header indicates that its keysym codes are defined in the X Window System Protocol standard https://www.x.org/releases/current/doc/xproto/x11protocol.html#keysym_encoding[Appendix A], but the file contains new keysym codes that are not in Appendix A, such as 0×1008124b, to which `XF86CameraAccessEnable` is mapped, or 0×FE8D, to which
+https://gitlab.freedesktop.org/xorg/proto/xorgproto/commit/b11152992d689e2f6a7d0d8c0a76d2644c52e15b[`dead_hamza`] is mapped (and which is also not defined in https://www.x.org/releases/current/doc/kbproto/xkbproto.html#new_keysyms["The X Keyboard Extension: Protocol Specification", Appendix C]).
+** The file changes https://github.com/xkbcommon/libxkbcommon/commits/master/include/xkbcommon/xkbcommon-keysyms.h[frequently]. My copy in this repository is named after the commit that it https://github.com/xkbcommon/libxkbcommon/commit/238d132406d8dc1123cbcaf68ab12d34c505e7e4[comes from]; another one comes from the https://packages.debian.org/bookworm/amd64/libxkbcommon-dev/filelist[debian bookworm] distribution, apparently version 1.5.0-1; identical to version https://raw.githubusercontent.com/xkbcommon/libxkbcommon/xkbcommon-1.5.0/include/xkbcommon/xkbcommon-keysyms.h[1.5.0] from commit https://github.com/xkbcommon/libxkbcommon/commit/7062ab[7062ab].
+** Examples. The keysym mnemonic `Escape` is mapped to 0×FF1B and UCP U+1B ESCAPE, `Tab` to 0×FF09 and UCP U+9 CHARACTER TABULATION, `ISO_Left_Tab` to 0×FE20 (and no UCP), `q` to 0×71 and UCP U+71 LATIN SMALL LETTER Q, `Q` to 0×51 and UCP U+51 LATIN CAPITAL LETTER Q, `adiaeresis` to 0×E4 and UCP U+E4 LATIN SMALL LETTER A WITH DIAERESIS, `Adiaeresis` to 0×C4 and UCP U+C4 LATIN CAPITAL LETTER A WITH DIAERESIS, `a` to 0×61, `A` to 0×41, `ae` to 0×E6, `AE` to 0×C6, `e` to 0×65, `E` to 0×45, `eacute` to 0×E9, `Eacute` to 0×C9, `s` to 0×73, `S` to 0×53, `ssharp` to 0×DF (each with their corresponding UCP), `Super_L` to 0×FFEB, `Control_L` to 0×FFE3, `Alt_L` to 0×FFE9, `Meta_L` to 0×FFE7, `Super_R` to 0×FFEC (all of these without UCP).
+** The correspondance between keysym codes and keysym mnemonics comes from the `https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/master/include/X11/keysymdef.h[keysymdef.h]`, `https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/master/include/X11/XF86keysym.h[XF86keysym.h]` and other files from xorgproto that use a slightly different format (and XK_ prefixes). The `libxkbcommon` library https://github.com/xkbcommon/libxkbcommon/blob/master/scripts/makeheader#L62-L66[includes] these files and https://github.com/xkbcommon/libxkbcommon/blob/master/scripts/update-keysyms[writes] `xkbcommon-keysyms.h`. Commit https://github.com/xkbcommon/libxkbcommon/commit/49690d936bf6cc6bf85058c1f0a545f0d5e37c77[49690d] (Sept 2023) updated the files `xkbcommon-keysyms.h` and `ks_tables.h` using the latest xorgproto at the time (referring to xorgproto commit https://gitlab.freedesktop.org/xorg/proto/xorgproto/commit/1c8128d72df22843a2022576850bc5ab5e3a46ea[1c8128]), which reflects “latest available keys from Linux kernel”, as discussed https://lists.freedesktop.org/archives/wayland-devel/2023-October/043121.html[here] (adds for example `XF86XK_CameraAccessEnable` to `XF86keysym.h`). The debian bookworm (https://packages.debian.org/bookworm/x11proto-dev[v2022.1-1]) https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/25f3278b/include/X11/keysymdef.h[version] comes from commit https://salsa.debian.org/xorg-team/proto/xorgproto/blob/xorgproto-2022.1-1/include/X11/keysymdef.h[25f3278b].
+** Also `libx11` uses https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/configure.ac#L258-278[these] xorgproto files to https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/util/makekeys.c[build] its `ks_tables.h` file, which is https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/StrKeysym.c[used] to define `XStringToKeysym`.
 
-Other info
+== Domain model
+A map from X to Y is complete iff its set of keys equals the set of legal values for X. When a map is specified to be non bijective or incomplete, it means: not necessarily bijective, not necessarily complete.
+A map is a function that knows its set of keys and values.
 
-** Perhaps the https://github.com/java-native-access/jna/blob/237206727cab3cdfd0285ed57035ab3b64179ed4/contrib/x11/src/jnacontrib/x11/api/X11KeySymDef.java#L67[jna] library permits to access this? Perhaps the definition of this is https://github.com/mirror/libX11/blob/master/src/xkb/XKBlibint.h[here] but I can’t read this.
-** See https://github.com/mirror/libX11/blob/master/src/util/makekeys.c, which defines KeySym.
-** See mainly: https://github.com/xkbcommon/libxkbcommon/blob/238d132406d8dc1123cbcaf68ab12d34c505e7e4/include/xkbcommon/xkbcommon.h#L168-L204
+Physical keyboard
+
+* A set of physical keys
+* A physical key is a position and a canonical X key name
+
+Visible keyboard
+
+* A set of representable keys
+* A representable key is a position and a representation
+* A representation is a String or an SVG icon
+
+X keys
+
+* Map (non bijective, complete) from X key name to X keycode
+* Map (non bijective, complete) from X key name to whether it is an alias
+* Bijective map (complete) from X keycode to canonical X key name (the one that is not an alias).
+* Can be obtained from the two maps from X key name here above
+* Can be obtained from the maps from X keycode here above (then has no aliases)
+* Can be obtained from parsing evdev
+* Provide “without aliases” method which returns an X keys without aliases
+* Can be obtained from lib? TODO
+
+Keyboard map
+
+* Map (non bijective, incomplete) from X key name to a list of keysym entries
+* A keysym entry is a keysym mnemonic, a UCP or a keysym code
+* Can be obtained from parsing a symbols file? TODO
+* Can be obtained from lib? TODO
+* Provide “canonicalize” method, given an X keys, that returns a Keyboard map using only canonical X key names.
+
+Keysym mnemonics
+
+* Map (non bijective, complete) from keysym mnemonic to keysym code
+* Map (non bijective, complete) from keysym mnemonic to whether it is deprecated
+* Bijective map (incomplete) from keysym code to canonical keysym mnemonic: the first listed non deprecated one or the first listed if all deprecated
+* Map (non bijective, incomplete) from keysym mnemonic to UCP
+* Can also build such a bijective map without any deprecated
+* Can be obtained from such a bijective map (then, no deprecated)
+* Can be obtained from parsing a keysyms file? TODO
+* Can be obtained from lib? TODO
+
+Keysym UCPs
+
+* Map (non bijective, incomplete) from keysym code to UCP
+* Implicit: Map UCP to keysym code (bijective, complete), when inverted is a bijective, incomplete
+* Can be obtained from Implicit
+* Explicit: can be obtained from Keysym mnemonics (combining keysym code to canonical keysym mnemonic then keysym mnemonic to UCP)
+* Both: implicit and explicit combined (resulting map still incomplete as some keysym code that explicitly corresponds to some canonical keysym mnemonic may have no associated UCP)
+* Can be obtained from lib? TODO
+
+// Keysym representations
+
+// * Map (non bijective, complete) from keysym code to representation
+// * Can be obtained from Keysym UCPs (typically through keysym UCPs both; keeps only printable UCPs)
+// * Can be obtained from Keysym UCPs together with Keysym mnemonics (fall backs on the mnemonics if no printable UCP; the resulting map is complete)
+// * Provide “falling back to” method? TODO
+// * Note that these maps must compute. TODO
+
+// Encoded keyboard map
+
+// * Map (non bijective, incomplete) from X key name to a list of encoded keysym entries
+// * An encoded keysym entry is a keysym mnemonic and keysym code, a UCP and keysym code or a keysym code
+// * Can be obtained from a Keyboard map and a Keysym mnemonics and a Keysym UCPs?
+
+Visible keyboard map
+
+* Map (non bijective, incomplete) from X key name to a list of representations
+* Does _not_ contain a Keyboard map (so that can be used for any display of keyboard shortcuts such as for VSCode)
+* Can be obtained from a Keyboard map and a mapping from keysym entry to representation
+* Direct: a mapping from keysym entry to representation (as close as possible to the raw source) from a Keysym mnemonics and a Keysym UCPs and a map (non bijective, incomplete) from UCP to representation: transform a keysym code to its UCP or canonical mnemonic if no printable UCP, a keysym mnemonic to its natural string representation, and UCP to representation.
+* Canonic: a mapping from keysym entry to representation (canonicalizing as much as possible then using the provided transformations) from a Keysym mnemonics and a Keysym UCPs and a map (non bijective, incomplete) from keysym canonical mnemonic to representation and a map (non bijective, incomplete) from UCP to representation: transform a keysym code to its canonical mnemonic or UCP if no mnemonic, a keysym mnemonic to its canonical mnemonic, a canonical mnemonic to UCP (using the Keysym mnemonics) or to representation if no UCP, and UCP to representation.
+
+Functional keyboard
+
+* A set of functional keys
+* A functional key is a position and a list of representations
+* Can be obtained from a Physical keyboard and a Visible keyboard map
+
+== Libraries
+
+https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/xkb/XKBBind.c[impl] of XkbKeycodeToKeysym, XKeycodeToKeysym, XKeysymToKeycode and more complicated functions (https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/KeyBind.c[older one]; some related https://github.com/mirror/libX11/blob/master/src/xkb/XKBlibint.h[headers]). https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/StrKeysym.c[Impl] of XStringToKeysym only.
+
+** See mainly: https://github.com/xkbcommon/libxkbcommon/blob/238d132406d8dc1123cbcaf68ab12d34c505e7e4/include/xkbcommon/xkbcommon.h#L168-L204[impl] of libxkbcommon xkb_keysym_get_name, xkb_keysym_from_name, xkb_keysym_to_utf8, xkb_keymap_num_layouts_for_key and so on.
 
 On my Debian system:
 
@@ -70,11 +154,6 @@ On my Debian system:
 * libx11-dev, requiring https://packages.debian.org/bookworm/all/x11proto-dev/filelist, containing /usr/include/X11/keysymdef.h, but non mandatory
 * I can load the "X11" library and call XStringToKeysym("KP_Space"). “XKeycodeToKeysym predates the XKB extension. If you want to lookup a KeySym while using XKB you have to use XkbKeycodeToKeysym.” -- https://linux.die.net/man/3/xstringtokeysym 
 * xkbkeycodetokeysym https://linux.die.net/man/3/xkbkeycodetokeysym 
-* https://gitlab.freedesktop.org/search?search=XStringToKeysym&nav_source=navbar&project_id=701&group_id=2211&search_code=true&repository_ref=master
-* X11 uses https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/StrKeysym.c[uses] “ks_tables.h”, and https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/util/makekeys.c[makekeys] builds “ks_tables.h” https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/configure.ac#L258-278[from] the keysymdef.h file (apparently https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/configure.ac#L263[from] xproto).
-* https://packages.debian.org/bookworm/libx11-6
-* libxkbcommon is actively developed: https://lists.freedesktop.org/archives/wayland-devel/2023-October/043121.html, says uses xproto commit 1c8128, https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/commit/1c8128d72df22843a2022576850bc5ab5e3a46ea, which reflects “latest available keys from Linux kernel” (adds for example XF86XK_CameraAccessEnable to xorgproto/include/X11/XF86keysym.h)
-* Also, xkbcommon https://github.com/xkbcommon/libxkbcommon/blob/6073565903488cb5b9a8d37fdc4a7c2f9d7ad04d/scripts/makeheader#L62[includes] the keysymdef.h file from somewhere else; and https://github.com/xkbcommon/libxkbcommon/blob/6073565903488cb5b9a8d37fdc4a7c2f9d7ad04d/scripts/update-keysyms[writes] xkbcommon-keysyms.h
 
 TODO integrate https://who-t.blogspot.com/2021/01/auto-updating-xkb-for-new-kernel.html
 Also integrate https://github.com/xkbcommon/libxkbcommon/blob/6073565903488cb5b9a8d37fdc4a7c2f9d7ad04d/include/xkbcommon/xkbcommon.h#L204

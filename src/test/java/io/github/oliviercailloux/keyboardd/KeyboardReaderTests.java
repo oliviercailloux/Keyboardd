@@ -15,6 +15,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
+import io.github.oliviercailloux.keyboardd.draft.KeyboardKey;
+import io.github.oliviercailloux.keyboardd.draft.KeyboardLayout;
+
 public class KeyboardReaderTests {
   @Test
   public void testKey() throws Exception {

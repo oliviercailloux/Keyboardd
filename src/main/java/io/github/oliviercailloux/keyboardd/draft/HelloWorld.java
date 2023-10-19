@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.draft;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

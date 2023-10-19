@@ -15,6 +15,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
+import io.github.oliviercailloux.keyboardd.draft.Key;
+import io.github.oliviercailloux.keyboardd.draft.XkbReader;
+
 public class XkbReaderTests {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(XkbReaderTests.class);

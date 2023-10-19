@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.draft;
 
 public enum LineKind {
   COMMENT,

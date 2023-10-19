@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.draft;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

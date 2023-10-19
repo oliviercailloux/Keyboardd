@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.draft;
 
 import com.sun.jna.Structure;
 import com.sun.jna.Structure.FieldOrder;
