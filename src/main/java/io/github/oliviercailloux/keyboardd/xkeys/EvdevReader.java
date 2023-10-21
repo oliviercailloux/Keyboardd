@@ -1,10 +1,9 @@
-package io.github.oliviercailloux.keyboardd.draft;
+package io.github.oliviercailloux.keyboardd.xkeys;
 
 import static com.google.common.base.Verify.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,23 +17,26 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
-/** No support for aliases. */
-public class EvdevReader {
+import io.github.oliviercailloux.keyboardd.draft.ParseUtils;
+
+class EvdevReader {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(EvdevReader.class);
 
   private static final Pattern P_NOTHING = Pattern.compile("^[ \\t]*$");
   private static final Pattern P_COMMENT = Pattern.compile("^[ \\t]*((//)|#).*");
-  private static final Pattern P_OTHER =
-      Pattern.compile("^[ \\t]*((default .*)|(xkb_keycodes.*)|(};$)|(minimum.*)|(maximum.*)|(alias .*)|(indicator .*))");
+  private static final Pattern P_OTHER = Pattern.compile(
+      "^[ \\t]*((default .*)|(xkb_keycodes.*)|(};$)|(minimum.*)|(maximum.*)|(indicator .*))");
   private static final Pattern P_NAME_CODE =
       Pattern.compile("^[ \\t]*<(?<name>[^>]+)>[ \\t]*=[ \\t]*(?<code>[0-9]+);.*");
+  private static final Pattern P_ALIAS_NAME_CODE = Pattern.compile(
+      "^[ \\t]*alias[ \\t]+<(?<new_name>[^>]+)>[ \\t]*=[ \\t]*<(?<previous_name>[^>]+)>;.*");
   private static final ImmutableSet<Pattern> PATTERNS =
       ImmutableSet.of(P_NOTHING, P_COMMENT, P_OTHER, P_NAME_CODE);
 
-  public static ImmutableBiMap<String, Integer> parse() {
+  public static Xkeys latest() {
     CharSource evdev =
-        Resources.asCharSource(EvdevReader.class.getResource("evdev"), StandardCharsets.UTF_8);
+        Resources.asCharSource(EvdevReader.class.getResource("evdev - 733b90"), StandardCharsets.UTF_8);
     try {
       return parse(evdev);
     } catch (IOException e) {
@@ -42,10 +44,11 @@ public class EvdevReader {
     }
   }
 
-  private static ImmutableBiMap<String, Integer> parse(CharSource evdev) throws IOException {
+  public static Xkeys parse(CharSource evdev) throws IOException {
     ImmutableList<String> lines = evdev.readLines();
 
-    final ImmutableBiMap.Builder<String, Integer> builder = new ImmutableBiMap.Builder<>();
+    final ImmutableBiMap.Builder<String, Short> builder = new ImmutableBiMap.Builder<>();
+    final ImmutableBiMap.Builder<String, String> builderAliases = new ImmutableBiMap.Builder<>();
 
     for (String line : lines) {
       Matcher matcher = ParseUtils.matcher(line, PATTERNS);
@@ -55,15 +58,19 @@ public class EvdevReader {
         continue;
       } else if (matcher.pattern().equals(P_OTHER)) {
         continue;
-      } else {
-        verify(matcher.pattern().equals(P_NAME_CODE));
+      } else if(matcher.pattern().equals(P_NAME_CODE)) {
         String name = matcher.group("name");
         String codeStr = matcher.group("code");
-        int code = Integer.parseInt(codeStr);
+        short code = Short.parseShort(codeStr);
         builder.put(name, code);
+      } else {
+        verify(matcher.pattern().equals(P_ALIAS_NAME_CODE));
+        String newName = matcher.group("new_name");
+        String previousName = matcher.group("previous_name");
+        builderAliases.put(newName, previousName);
       }
     }
 
-    return builder.build();
+    return Xkeys.fromMaps(builder.build(), builderAliases.build());
   }
 }

@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharSource;
 
+import io.github.oliviercailloux.keyboardd.xkeys.EvdevReader;
+
 public class KeyboardLayoutBuilder {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(KeyboardLayoutBuilder.class);
