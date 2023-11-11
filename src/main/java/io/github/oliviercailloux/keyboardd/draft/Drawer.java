@@ -15,6 +15,9 @@ import com.google.common.io.MoreFiles;
 import com.google.common.math.DoubleMath;
 
 import io.github.oliviercailloux.jaris.xml.DomHelper;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKey;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboardReader;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
@@ -27,7 +30,7 @@ public class Drawer {
   private static final Logger LOGGER = LoggerFactory.getLogger(Drawer.class);
 
   public static void main(String[] args) throws Exception {
-    KeyboardLayout layout = KeyboardLayoutBuilder.parse().getLayout(
+    JsonPhysicalKeyboard layout = JsonPhysicalKeyboardReader.parse().getLayout(
         MoreFiles.asCharSource(Path.of("Keyboard layout Elite K70.json"), StandardCharsets.UTF_8));
     Document doc = forPrint(layout);
     // Document doc = forScreen(layout);
@@ -35,11 +38,11 @@ public class Drawer {
     Files.writeString(Path.of("out.svg"), svg);
   }
 
-  static Document forPrint(KeyboardLayout layout) {
+  static Document forPrint(JsonPhysicalKeyboard layout) {
     return draw(layout, DoublePoint.zero(), 96d);
   }
 
-  static Document forScreen(KeyboardLayout layout) {
+  static Document forScreen(JsonPhysicalKeyboard layout) {
     /*
      * Scaling for my bigger screen (27 ″, 2560×1440 pixels). Real diag is 68.2 cm = 26.85 ″.
      */
@@ -49,7 +52,7 @@ public class Drawer {
     return doc;
   }
 
-  public static Document draw(KeyboardLayout layout, DoublePoint start, double dpi) {
+  public static Document draw(JsonPhysicalKeyboard layout, DoublePoint start, double dpi) {
     /*
      * Use wev (speaking in base 10) to read keycodes for physical keys such as 10 for key 1 (also
      * gives keysyms depending on logical state such as 38, &, or 49, 1). The file
@@ -118,9 +121,9 @@ public class Drawer {
     // doc.getDocumentElement().appendChild(line.getElement());
 
     DoublePoint pos = startScaled;
-    for (ImmutableList<KeyboardKey> row : layout.rows()) {
-      for (KeyboardKey key : row) {
-        double keyWidth = key.size() == 1d ? defaultWidth : key.size();
+    for (ImmutableList<JsonPhysicalKey> row : layout.rows()) {
+      for (JsonPhysicalKey key : row) {
+        double keyWidth = key.width() == 1d ? defaultWidth : key.width();
         PositiveSize size = PositiveSize.given(keyWidth, defaultHeight).mult(scale);
         RectangleElement rect = h.rectangle().setRounding(10d).setStart(pos).setSize(size);
         doc.getDocumentElement().appendChild(rect.getElement());

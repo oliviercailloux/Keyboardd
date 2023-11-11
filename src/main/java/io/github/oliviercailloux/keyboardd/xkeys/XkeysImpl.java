@@ -3,15 +3,22 @@ package io.github.oliviercailloux.keyboardd.xkeys;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class XkeysImpl implements Xkeys {
+class XkeysImpl implements Xkeys {
+  @SuppressWarnings("unused")
+  private static final Logger LOGGER = LoggerFactory.getLogger(XkeysImpl.class);
+
   private final ImmutableBiMap<String, Short> codeByCanonical;
   private final ImmutableMap<String, String> canonicalByAlias;
 
@@ -92,23 +99,50 @@ public class XkeysImpl implements Xkeys {
     checkArgument(aliases().contains(keyName));
     return canonicalByAlias.get(keyName);
   }
-  
-    @Override
-    public short code(String keyName) {
-      return codeByCanonical.get(canonical(keyName));
-    }
+
+  @Override
+  public short code(String keyName) {
+    return codeByCanonical.get(canonical(keyName));
+  }
 
   @Override
   public ImmutableSet<String> names(short code) {
     checkArgument(codes().contains(code));
     String canonical = canonicalByCode().get(code);
     ImmutableSet<String> aliases = aliases(canonical);
-    final ImmutableSet.Builder<String> all = new ImmutableSet.Builder<String>().add(canonical).addAll(aliases);
+    final ImmutableSet.Builder<String> all =
+        new ImmutableSet.Builder<String>().add(canonical).addAll(aliases);
     return all.build();
   }
 
   @Override
   public ImmutableMap<String, Short> codeByName() {
     return Maps.toMap(names(), this::code);
+  }
+
+  @Override
+  public Xkeys withoutAliases() {
+    return XkeysImpl.fromMaps(codeByCanonical, ImmutableMap.of());
+  }
+
+  @Override
+  public boolean equals(Object o2) {
+    if (!(o2 instanceof XkeysImpl)) {
+      return false;
+    }
+    final XkeysImpl t2 = (XkeysImpl) o2;
+    return codeByCanonical.equals(t2.codeByCanonical)
+        && canonicalByAlias.equals(t2.canonicalByAlias);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(codeByCanonical, canonicalByAlias);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("codeByCanonical", codeByCanonical)
+        .add("canonicalByAlias", canonicalByAlias).toString();
   }
 }

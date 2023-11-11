@@ -24,6 +24,8 @@ import com.google.common.collect.MoreCollectors;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
+import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
+
 /**
  * The header indicates that when multiple mnemonics map to a given code, only the first one should
  * be considered non deprecated. However, this seems contradictory with a part of the file which,

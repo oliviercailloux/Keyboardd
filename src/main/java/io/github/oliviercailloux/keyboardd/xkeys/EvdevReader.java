@@ -13,11 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
-import io.github.oliviercailloux.keyboardd.draft.ParseUtils;
+import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 
 class EvdevReader {
   @SuppressWarnings("unused")
@@ -30,9 +31,9 @@ class EvdevReader {
   private static final Pattern P_NAME_CODE =
       Pattern.compile("^[ \\t]*<(?<name>[^>]+)>[ \\t]*=[ \\t]*(?<code>[0-9]+);.*");
   private static final Pattern P_ALIAS_NAME_CODE = Pattern.compile(
-      "^[ \\t]*alias[ \\t]+<(?<new_name>[^>]+)>[ \\t]*=[ \\t]*<(?<previous_name>[^>]+)>;.*");
+      "^[ \\t]*alias[ \\t]+<(?<newName>[^>]+)>[ \\t]*=[ \\t]*<(?<previousName>[^>]+)>;.*");
   private static final ImmutableSet<Pattern> PATTERNS =
-      ImmutableSet.of(P_NOTHING, P_COMMENT, P_OTHER, P_NAME_CODE);
+      ImmutableSet.of(P_NOTHING, P_COMMENT, P_OTHER, P_NAME_CODE, P_ALIAS_NAME_CODE);
 
   public static Xkeys latest() {
     CharSource evdev =
@@ -48,7 +49,7 @@ class EvdevReader {
     ImmutableList<String> lines = evdev.readLines();
 
     final ImmutableBiMap.Builder<String, Short> builder = new ImmutableBiMap.Builder<>();
-    final ImmutableBiMap.Builder<String, String> builderAliases = new ImmutableBiMap.Builder<>();
+    final ImmutableMap.Builder<String, String> builderAliases = new ImmutableMap.Builder<>();
 
     for (String line : lines) {
       Matcher matcher = ParseUtils.matcher(line, PATTERNS);
@@ -65,8 +66,8 @@ class EvdevReader {
         builder.put(name, code);
       } else {
         verify(matcher.pattern().equals(P_ALIAS_NAME_CODE));
-        String newName = matcher.group("new_name");
-        String previousName = matcher.group("previous_name");
+        String newName = matcher.group("newName");
+        String previousName = matcher.group("previousName");
         builderAliases.put(newName, previousName);
       }
     }

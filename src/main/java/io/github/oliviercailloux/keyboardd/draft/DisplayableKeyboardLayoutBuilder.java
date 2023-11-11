@@ -8,19 +8,25 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharSource;
 
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKey;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboardReader;
+
 public class DisplayableKeyboardLayoutBuilder {
-  public static DisplayableKeyboardLayout build(CharSource layout, CharSource xkb) throws IOException {
-    KeyboardLayout l = KeyboardLayoutBuilder.parse().getLayout(layout);
+  public static DisplayableKeyboardLayout build(CharSource layout, CharSource xkb)
+      throws IOException {
+    JsonPhysicalKeyboard l = JsonPhysicalKeyboardReader.parse().getLayout(layout);
     ImmutableSet<Key> keys = XkbReader.read(xkb);
-    ImmutableMap<String, ImmutableList<KeyMapping>> keyValues = keys.stream().collect(ImmutableMap.toImmutableMap(k -> k.name(), k -> k.values()));
-    ImmutableList<ImmutableList<KeyboardKey>> rows = l.rows();
-    for (ImmutableList<KeyboardKey> row : rows) {
+    ImmutableMap<String, ImmutableList<KeyMapping>> keyValues =
+        keys.stream().collect(ImmutableMap.toImmutableMap(k -> k.name(), k -> k.values()));
+    ImmutableList<ImmutableList<JsonPhysicalKey>> rows = l.rows();
+    for (ImmutableList<JsonPhysicalKey> row : rows) {
       final ImmutableList.Builder<DisplayableKey> newRow = new ImmutableList.Builder<>();
-      for (KeyboardKey key : row) {
+      for (JsonPhysicalKey key : row) {
         String name = key.name();
         ImmutableList<KeyMapping> values = keyValues.get(name);
       }
     }
-    
+
   }
 }

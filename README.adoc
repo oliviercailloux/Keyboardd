@@ -61,11 +61,6 @@ https://gitlab.freedesktop.org/xorg/proto/xorgproto/commit/b11152992d689e2f6a7d0
 A map from X to Y is complete iff its set of keys equals the set of legal values for X. When a map is specified to be non bijective or incomplete, it means: not necessarily bijective, not necessarily complete.
 A map is a function that knows its set of keys and values.
 
-Physical keyboard
-
-* A set of physical keys
-* A physical key is a position and a canonical X key name
-
 Visible keyboard
 
 * A set of representable keys
@@ -73,15 +68,6 @@ Visible keyboard
 * A representation is a String or an SVG icon
 
 X keys
-
-* Map (non bijective, complete) from X key name to X keycode
-* Map (non bijective, complete) from X key name to whether it is an alias
-* Bijective map (complete) from X keycode to canonical X key name (the one that is not an alias).
-* Can be obtained from the two maps from X key name here above
-* Can be obtained from the maps from X keycode here above (then has no aliases)
-* Can be obtained from parsing evdev
-* Provide “without aliases” method which returns an X keys without aliases
-* Can be obtained from lib? TODO
 
 Keyboard map
 
@@ -138,6 +124,20 @@ Functional keyboard
 * A set of functional keys
 * A functional key is a position and a list of representations
 * Can be obtained from a Physical keyboard and a Visible keyboard map
+
+== Implementation
+The code uses these abbreviations.
+
+* `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
+* `canonical` is an X key name that is not an alias
+* `alias` is an X key name that is an alias
+* `code` as `short` is an X keycode
+* `code` as `int` is a keysym code
+* `mnemonic` is a keysym mnemonic.
+
+The argument names use the non-abbreviated names; the method names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
+
+The non-abbreviated name of a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`. The word `aliasXKeyName` refers to an X key name that is an alias, it has no abbreviation.
 
 == Libraries
 

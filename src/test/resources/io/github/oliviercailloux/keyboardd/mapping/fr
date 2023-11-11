@@ -27,7 +27,7 @@ xkb_symbols "letters" {
   key <AD05> { [ t, T, thorn, THORN, U03C4, U03A4 ] };
   key <AD06> { [ y, Y, ydiaeresis, Ydiaeresis, U03C8, U03A8 ] };
   key <AD07> { [ u, U, ucircumflex, Ucircumflex, U03C5, U03A5 ] };
-  key <AD08> { [ i, I, icircumflex, Icircumflex, U03B9, U0399] };
+  key <AD08> { [ i, I, icircumflex, Icircumflex, U03B9, U0399 ] };
   key <AD09> { [ o, O, oe, OE, U03BF, U039F ] };
   key <AD10> { [ p, P, ocircumflex, Ocircumflex, U03C0, U03A0, U03C0, U03A0 ] };
   key <AC01> { [ q, Q, adiaeresis, Adiaeresis, U03B8, U0398 ] };
@@ -85,60 +85,13 @@ partial
 xkb_symbols "keypad" {
   key <NMLK> { [a, b, c, d, e, f, g, h] };
 //  key <KPAD> {
-//  // ∫, ∪, ∬, ⊕ Circled Plus
-//  symbols[Group1] = [ U222B, U222A, U222C, U2295, i, j, k, l ]
+//  symbols[Group1] = [ U222B, U222A, U222C, U2295, i, j, k, l ]// ∫, ∪, ∬, ⊕ Circled Plus
 //  };
-  key <KPSU> {
-  // −, ∩, ¬, ⊖
-  symbols[Group1] = [ U2212, U2229, U00AC, U2296 ]
-  };
-  key <KPMU> {
-  // ×, ⋅ Dot Operator, ∨, ⊗
-  symbols[Group1] = [ U00D7, U22C5, U2228, U2297 ]
-  };
-  key <KPDV> {
-  // ∕ Division Slash, ÷, ∧, ⊘
-  symbols[Group1] = [ U2215, U00F7, U2227, U2298 ]
-  };
-  key <KP0> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP1> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP2> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP3> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP4> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP5> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP6> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP7> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP8> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
-  key <KP9> {
-  // α, Α, ↙, ⇙
-  symbols[Group1] = [ U03B1, U0391, U2199, U21D9 ]
-  };
+  key <KPSU> { [ U2212, U2229, U00AC, U2296 ]};// −, ∩, ¬, ⊖
+  key <KPMU> { [ U00D7, U22C5, U2228, U2297 ]};// ×, ⋅ Dot Operator, ∨, ⊗
+  key <KPDV> { [ U2215, U00F7, U2227, U2298 ]};// ∕ Division Slash, ÷, ∧, ⊘
+  key <KP0> { [ U03B1, U0391, U2199, U21D9 ]};// α, Α, ↙, ⇙
+  key <KP1> { [ U03B1, U0391, U2199, U21D9 ]};// α, Α, ↙, ⇙
+  key <KP2> { [ U03B1, U0391, U2199, U21D9 ]};// α, Α, ↙, ⇙
 };
 

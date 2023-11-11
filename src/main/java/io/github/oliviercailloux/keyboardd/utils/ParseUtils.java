@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.draft;
+package io.github.oliviercailloux.keyboardd.utils;
 
 import static com.google.common.base.Verify.verify;
 

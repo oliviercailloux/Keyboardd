@@ -19,7 +19,7 @@ import com.google.common.io.CharSource;
  * <li>Can be obtained from the maps from X keycode here above (then has no aliases)</li>
  * <li>Can be obtained from parsing evdev</li>
  * <li>Provide “without aliases” method which returns an X keys without aliases</li>
- * <li>TODO Can be obtained from lib?</li>
+ * <li>Can be obtained from lib?</li>
  * </ul>
  */
 public interface Xkeys {
@@ -29,12 +29,12 @@ public interface Xkeys {
 
   /**
    * 
-   * @param codes
-   * @param canonicalByAlias keys are all aliases, values are only canonicals
+   * @param xKeycodes
+   * @param canonicalXKeyNameByAlias keys are all aliases, values are only canonicals
    * @return
    */
-  public static Xkeys fromMaps(Map<String, Short> codes, Map<String, String> canonicalByAlias) {
-    return XkeysImpl.fromMaps(codes, canonicalByAlias);
+  public static Xkeys fromMaps(Map<String, Short> xKeycodes, Map<String, String> canonicalXKeyNameByAlias) {
+    return XkeysImpl.fromMaps(xKeycodes, canonicalXKeyNameByAlias);
   }
 
   public static Xkeys fromSource(CharSource source) throws IOException {
@@ -70,10 +70,10 @@ public interface Xkeys {
 
   /**
    * 
-   * @param canonical
+   * @param canonicalXKeyName
    * @return may be empty, not containing the canonical
    */
-  ImmutableSet<String> aliases(String canonical);
+  ImmutableSet<String> aliases(String canonicalXKeyName);
 
   /**
    * 
@@ -120,4 +120,9 @@ public interface Xkeys {
    * @return key set equals the legal names; values equals the legal codes;
    */
   ImmutableMap<String, Short> codeByName();
+
+  Xkeys withoutAliases();
+
+  @Override
+  boolean equals(Object o2);
 }
