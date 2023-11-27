@@ -5,8 +5,6 @@ import static com.google.common.base.Verify.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -16,20 +14,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.VerifyException;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
-import io.github.oliviercailloux.keyboardd.draft.MnKeySym;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
-import io.github.oliviercailloux.keyboardd.xkeys.Xkeys;
 
 /**
+ * Reads data as found in a xkbcommon-keysyms.h file and returns a set of mnemonics.
+ * 
+ * old
+ * 
  * Among non-deprecated values, we have that two entries with the same code map to the same unicode
  * point (present or absent)?
  * 
@@ -75,7 +74,8 @@ class KeySymReader {
     }
 
     public static ParsedMnemonic deprecated(String mnemonic, int code) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), "deprecated", true, false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), "deprecated", true, false, false,
+          "");
     }
 
     public static ParsedMnemonic commented(String mnemonic, int code, String comment) {
@@ -84,7 +84,8 @@ class KeySymReader {
     }
 
     public static ParsedMnemonic alias(String mnemonic, int code, String comment, String aliasRef) {
-      checkArgument(comment.toLowerCase().startsWith("alias for "));
+      checkArgument(comment.toLowerCase().startsWith("alias for ")
+          || comment.toLowerCase().startsWith("same as xkb_key_"));
       return new ParsedMnemonic(mnemonic, code, Optional.empty(), comment, false, true, false,
           aliasRef);
     }
@@ -104,6 +105,7 @@ class KeySymReader {
     }
 
     public ParsedMnemonic {
+      checkArgument(!mnemonic.isEmpty());
       checkArgument(unicode.isEmpty() || comment.equals(""));
       if (specific) {
         checkArgument(unicode.isPresent());
@@ -123,96 +125,217 @@ class KeySymReader {
 
   private static final Pattern P_XKB_NO_COMMENT =
       Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)$");
-  private static final Pattern P_XKB_COMMENT_ALIAS = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* [aA]lias for (?<alias>[^\\*]+) \\*/$");
-  private static final Pattern P_XKB_COMMENT_DEPRECATED_ALIAS = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated alias for (?<aliasDeprecated>[^\\*]+) \\*/$");
-  private static final Pattern P_XKB_COMMENT_DEPRECATED = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated(?<commentRemaining>[^\\*]*) \\*/$");
-  private static final Pattern P_XKB_COMMENT = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* (?<comment>[^U][^\\* ]*( [^\\* ]+)*) +\\*/$");
-  private static final Pattern P_XKB_UNICODE = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
   private static final Pattern P_XKB_UNICODE_MORE_SPECIFIC = Pattern.compile(
       "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\*<U\\+(?<unicodeSpecific>[0-9a-fA-F]+) [^\\*]*>\\*/$");
   private static final Pattern P_XKB_UNICODE_DEPRECATED = Pattern.compile(
       "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\*\\(U\\+(?<unicodeDeprecated>[0-9a-fA-F]+) [^\\*]*\\)\\*/$");
-  private static final ImmutableSet<Pattern> PATTERNS = ImmutableSet.of(P_XKB_NO_COMMENT,
-      P_XKB_COMMENT, P_XKB_UNICODE, P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED);
+  private static final Pattern P_XKB_COMMENT = Pattern.compile(
+      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
+  private static final Pattern P_XKB_COMMENT_ALIAS = Pattern.compile(
+      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* ([aA]lias for |[sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
+  private static final Pattern P_XKB_COMMENT_UNICODE = Pattern.compile(
+      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
+  private static final Pattern P_XKB_COMMENT_DEPRECATED = Pattern.compile(
+      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated((, )| )?(?<commentRemaining>[^\\*]*) \\*/$");
+  private static final Pattern P_XKB_COMMENT_DEPRECATED_ALIAS = Pattern.compile(
+      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated alias for (?<aliasDeprecated>[^\\*]+) \\*/$");
+  private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
+      P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
   private static final ImmutableSet<Pattern> PATTERNS_COMMENTS =
-      ImmutableSet.of(P_XKB_COMMENT_ALIAS, P_XKB_COMMENT_DEPRECATED_ALIAS);
+      ImmutableSet.of(P_XKB_COMMENT_ALIAS, P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
 
+      /**
+       * Returns the latest version of the mnemonics.
+       * <p>Among all non-deprecated mns assigned to a given sym, if not empty, exactly one is not an
+     * alias, and all others are aliases of that one.
+     * <p>Each sym has all (possibly 0) the same ucps.
+     * <p>Multiple codes may may to a given ucp (eg mnemonic exclam, code 0x21, ucp U+0021 EXCLAMATION MARK, and mnemonic absent, code 0x1000021, ucp U+0021).
+       * @return the latest version of the mnemonics.
+       */
   public static ImmutableSet<ParsedMnemonic> latest() {
-    CharSource keysyms =
-        Resources.asCharSource(KeySymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
+    ImmutableSet<ParsedMnemonic> latestRaw = latestRaw();
+    ImmutableSet<ParsedMnemonic> patched = patch(latestRaw);
+    check(patched);
+    return patched;
+  }
+
+  static ImmutableSet<ParsedMnemonic> latestRaw() {
+    CharSource keysyms = Resources.asCharSource(
+        KeySymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
     try {
       return parse(keysyms);
     } catch (IOException e) {
       throw new VerifyException(e);
     }
   }
+
   public static ImmutableSet<ParsedMnemonic> parse(CharSource keysyms) throws IOException {
     ImmutableList<String> lines = keysyms.readLines();
 
     final ImmutableSet.Builder<ParsedMnemonic> keySymBuilder = new ImmutableSet.Builder<>();
 
     for (String line : lines) {
-      Optional<Matcher> matcherOpt = ParseUtils.matcherOpt(line, PATTERNS);
-      if (!matcherOpt.isPresent())
+      Optional<Matcher> matcherStartOpt = ParseUtils.matcherOpt(line, PATTERNS_START);
+      if (!matcherStartOpt.isPresent())
         continue;
-      Matcher matcher = matcherOpt.orElseThrow(VerifyException::new);
-      ParsedMnemonic parsed = parseLine(matcher);
+      Matcher matcherStart = matcherStartOpt.orElseThrow(VerifyException::new);
+      ParsedMnemonic parsed = parseLine(matcherStart);
       keySymBuilder.add(parsed);
 
     }
     return keySymBuilder.build();
   }
 
-  private static ParsedMnemonic parseLine(Matcher matcher) {
+  private static ParsedMnemonic parseLine(Matcher matcherStart) {
     ParsedMnemonic parsed;
-    String name = matcher.group("name");
-    String codeStr = matcher.group("code");
+    String name = matcherStart.group("name");
+    String codeStr = matcherStart.group("code");
     int code = Integer.parseInt(codeStr, 16);
-    if (matcher.pattern().equals(P_XKB_NO_COMMENT)) {
+    if (matcherStart.pattern().equals(P_XKB_NO_COMMENT)) {
       parsed = ParsedMnemonic.noComment(name, code);
-    } else if (matcher.pattern().equals(P_XKB_UNICODE)) {
-      String unicodeStr = matcher.group("unicode");
-      int unicode = Integer.parseInt(unicodeStr, 16);
-      parsed = ParsedMnemonic.unicode(name, code, unicode);
-    } else if (matcher.pattern().equals(P_XKB_UNICODE_DEPRECATED)) {
-      String unicodeStr = matcher.group("unicodeDeprecated");
-      int unicode = Integer.parseInt(unicodeStr, 16);
-      parsed = (ParsedMnemonic.deprecatedUnicode(name, code, unicode));
-    } else if (matcher.pattern().equals(P_XKB_UNICODE_MORE_SPECIFIC)) {
-      String unicodeStr = matcher.group("unicodeSpecific");
+    } else if (matcherStart.pattern().equals(P_XKB_UNICODE_MORE_SPECIFIC)) {
+      String unicodeStr = matcherStart.group("unicodeSpecific");
       int unicode = Integer.parseInt(unicodeStr, 16);
       parsed = (ParsedMnemonic.specificUnicode(name, code, unicode));
+    } else if (matcherStart.pattern().equals(P_XKB_UNICODE_DEPRECATED)) {
+      String unicodeStr = matcherStart.group("unicodeDeprecated");
+      int unicode = Integer.parseInt(unicodeStr, 16);
+      parsed = (ParsedMnemonic.deprecatedUnicode(name, code, unicode));
     } else {
-      verify(matcher.pattern().equals(P_XKB_COMMENT));
-      String comment = matcher.group("comment");
-      Optional<Matcher> matcherCOpt = ParseUtils.matcherOpt(matcher.group(), PATTERNS_COMMENTS);
-      if (!matcherCOpt.isPresent()) {
-        Matcher matcherSub = P_XKB_COMMENT_DEPRECATED.matcher(matcher.group());
-        if (matcherSub.matches()) {
-          String remaining = matcherSub.group("commentRemaining");
-          parsed = (ParsedMnemonic.deprecatedComment(name, code, comment, remaining));
-        } else {
-          parsed = (ParsedMnemonic.commented(name, code, comment));
-        }
-      }
-      else {
-        Matcher matcherC = matcherCOpt.orElseThrow(VerifyException::new);
-        if (matcherC.pattern().equals(P_XKB_COMMENT_ALIAS)) {
-          String aliasRef = matcherC.group("alias");
-          parsed = (ParsedMnemonic.alias(name, code, comment, aliasRef));
-        } else if (matcherC.pattern().equals(P_XKB_COMMENT_DEPRECATED_ALIAS)) {
-          String aliasRef = matcherC.group("aliasDeprecated");
-          parsed = (ParsedMnemonic.deprecatedAlias(name, code, comment, aliasRef));
-        } else {
-          throw new VerifyException();
-        }
+      verify(matcherStart.pattern().equals(P_XKB_COMMENT));
+      String comment = matcherStart.group("comment");
+      Optional<Matcher> matcherCommentsOpt =
+          ParseUtils.matcherOpt(matcherStart.group(), PATTERNS_COMMENTS);
+      if (!matcherCommentsOpt.isPresent()) {
+        parsed = (ParsedMnemonic.commented(name, code, comment));
+      } else {
+        Matcher matcherComments = matcherCommentsOpt.orElseThrow(VerifyException::new);
+        parsed = parseLineComments(name, code, comment, matcherComments);
       }
     }
     return parsed;
+  }
+
+  private static ParsedMnemonic parseLineComments(String name, int code, String comment,
+      Matcher matcherComments) {
+    ParsedMnemonic parsed;
+    if (matcherComments.pattern().equals(P_XKB_COMMENT_ALIAS)) {
+      String aliasRef = matcherComments.group("alias");
+      parsed = (ParsedMnemonic.alias(name, code, comment, aliasRef));
+    } else if (matcherComments.pattern().equals(P_XKB_COMMENT_UNICODE)) {
+      String unicodeStr = matcherComments.group("unicode");
+      int unicode = Integer.parseInt(unicodeStr, 16);
+      parsed = ParsedMnemonic.unicode(name, code, unicode);
+    } else {
+      verify(matcherComments.pattern().equals(P_XKB_COMMENT_DEPRECATED));
+      String remaining = matcherComments.group("commentRemaining");
+      Matcher matcherCommentsDeprecated =
+          P_XKB_COMMENT_DEPRECATED_ALIAS.matcher(matcherComments.group());
+      if (matcherCommentsDeprecated.matches()) {
+        String aliasRef = matcherCommentsDeprecated.group("aliasDeprecated");
+        parsed = (ParsedMnemonic.deprecatedAlias(name, code, comment, aliasRef));
+      } else {
+        parsed = (ParsedMnemonic.deprecatedComment(name, code, comment, remaining));
+      }
+    }
+    return parsed;
+  }
+
+  static ImmutableSet<ParsedMnemonic> patch(Set<ParsedMnemonic> mns) {
+    final ImmutableMap.Builder<ParsedMnemonic, ParsedMnemonic> transformerBuilder =
+        new ImmutableMap.Builder<>();
+    transformerBuilder.put(ParsedMnemonic.commented("Kanji_Bangou", 65335, "Codeinput"),
+        ParsedMnemonic.alias("Kanji_Bangou", 65335, "Alias for Codeinput", "Codeinput"));
+    transformerBuilder.put(
+        ParsedMnemonic.commented("Hangul_Codeinput", 65335, "Hangul code input mode"),
+        ParsedMnemonic.alias("Hangul_Codeinput", 65335, "Alias for Codeinput", "Codeinput"));
+    transformerBuilder.put(
+        ParsedMnemonic.commented("Hangul_SingleCandidate", 65340, "Single candidate"),
+        ParsedMnemonic.alias("Hangul_SingleCandidate", 65340, "Alias for SingleCandidate",
+            "SingleCandidate"));
+    transformerBuilder.put(ParsedMnemonic.commented("Zen_Koho", 65341, "Multiple/All Candidate(s)"),
+        ParsedMnemonic.alias("Zen_Koho", 65341, "Alias for MultipleCandidate",
+            "MultipleCandidate"));
+    transformerBuilder.put(
+        ParsedMnemonic.commented("Hangul_MultipleCandidate", 65341, "Multiple candidate"),
+        ParsedMnemonic.alias("Hangul_MultipleCandidate", 65341, "Alias for MultipleCandidate",
+            "MultipleCandidate"));
+    transformerBuilder.put(ParsedMnemonic.commented("Mae_Koho", 65342, "Previous Candidate"),
+        ParsedMnemonic.alias("Mae_Koho", 65342, "Alias for PreviousCandidate",
+            "PreviousCandidate"));
+    transformerBuilder.put(
+        ParsedMnemonic.commented("Hangul_PreviousCandidate", 65342, "Previous candidate"),
+        ParsedMnemonic.alias("Hangul_PreviousCandidate", 65342, "Alias for PreviousCandidate",
+            "PreviousCandidate"));
+    ImmutableMap<ParsedMnemonic, ParsedMnemonic> transformer = transformerBuilder.build();
+
+    ImmutableSet<ParsedMnemonic> transformed = mns.stream().map(m -> transformer.getOrDefault(m, m))
+        .collect(ImmutableSet.toImmutableSet());
+    return transformed;
+  }
+
+  static void check(Set<ParsedMnemonic> mns) {
+    /*
+     * Among all non-deprecated mns assigned to a given sym, if not empty [such as #define XKB_KEY_topleftradical                0x08a2  /*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)], exactly one is not an
+     * alias, and all others are aliases of that one.
+     */
+    ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
+        mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code, m -> m));
+    for (int code : mnsByCode.keySet()) {
+      ImmutableSet<ParsedMnemonic> mnsForCode = mnsByCode.get(code);
+      ImmutableSet<ParsedMnemonic> nonDeprs =
+          mnsForCode.stream().filter(m -> !m.deprecated).collect(ImmutableSet.toImmutableSet());
+      if (nonDeprs.isEmpty()) {
+        // LOGGER.info("No non deprecated for code {}.", code);
+        continue;
+      }
+      ImmutableSet<ParsedMnemonic> nonAliases =
+          nonDeprs.stream().filter(m -> !m.alias).collect(ImmutableSet.toImmutableSet());
+      // if (nonAliases.size() != 1) {
+      // LOGGER.info("Non aliases: {}.", nonAliases);
+      // continue;
+      // }
+      verify(nonAliases.size() == 1, nonAliases.toString());
+      ParsedMnemonic nonAlias = nonAliases.stream().collect(MoreCollectors.onlyElement());
+      ImmutableSet<ParsedMnemonic> aliases =
+          nonDeprs.stream().filter(m -> m.alias).collect(ImmutableSet.toImmutableSet());
+      verify(aliases.size() == nonDeprs.size() - 1);
+      for (ParsedMnemonic alias : aliases) {
+        verify(alias.remainingComment.equals(nonAlias.mnemonic),
+            "Alias %s for %s.".formatted(alias, nonAlias.mnemonic));
+      }
+
+      /* Each sym has only ucps or none, and all the same. */
+      ImmutableSet<Optional<Integer>> ucpsAll =
+          mnsForCode.stream().filter(m -> !m.deprecated()).filter(m -> !m.alias()).map(m -> m.unicode()).collect(ImmutableSet.toImmutableSet());
+          
+          verify(ucpsAll.size() <= 1, "Code 0x%s, unics %s.".formatted(Integer.toHexString(code), ucpsAll.toString()));
+    }
+
+    /*
+     * Each unicode …? The test fails for the KP mnemonics if including specific ones: KP_Add to
+     * KP_Divide, KP_0 to KP_9, KP_Return, KP_Tab, KP_Space, KP_Equal, KP_Separator, KP_Decimal. The
+     * test fails for many mnemonics if including deprecated ones: period and decimalpoint, less and
+     * leftcaret, underscore and underbar, macron and overbar, topleftradical and upleftcorner,
+     * horizconnector and horizlinescan5, includedin and leftshoe, … Anyway, this is hopeless, I
+     * suppose, as any ucp is automatically mapped to a code, which, I suppose, differs very often
+     * from the mnemonic one. I’d better assume (reasonably, I suppose) that any X system will do
+     * the same thing when facing two keysym codes that are standardly mapped to the same unicode
+     * (such as the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code
+     * 0x1000021 corresponding to U+0021 EXCLAMATION MARK), and thus not try to make ucps
+     * distinguish these keysym codes.
+     */
+    ImmutableSetMultimap<Integer,
+        ParsedMnemonic> mnsByUcp = mns.stream().filter(m -> !m.deprecated())
+            .filter(m -> !m.specific()).filter(m -> m.unicode().isPresent())
+            .collect(ImmutableSetMultimap.toImmutableSetMultimap(
+                m -> m.unicode().orElseThrow(VerifyException::new), m -> m));
+    for (int ucp : mnsByUcp.keySet()) {
+      ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
+      if (mnsForUcp.size() != 1) {
+        LOGGER.info("Ucp {} mns {}.", ucp, mnsForUcp);
+      }
+      // verify(mnsForUcp.size() == 1, "Ucp %s, mns %s.".formatted(ucp, mnsForUcp.toString()));
+    }
   }
 }
