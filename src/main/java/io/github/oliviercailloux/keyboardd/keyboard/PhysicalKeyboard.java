@@ -25,15 +25,10 @@ public class PhysicalKeyboard {
 
   private PhysicalKeyboard(Set<PhysicalKey> physicalKeys) {
     this.keys = ImmutableSet.copyOf(physicalKeys);
-    Set<? extends GeometricKey> geometricKeys = physicalKeys;
-    validateCorners(geometricKeys);
-  }
-
-  static void validateCorners(Set<? extends GeometricKey> geometricKeys) {
     ImmutableMultiset<DoublePoint> corners =
-        geometricKeys.stream().map(k -> k.topLeftCorner()).collect(ImmutableMultiset.toImmutableMultiset());
+        physicalKeys.stream().map(k -> k.topLeftCorner()).collect(ImmutableMultiset.toImmutableMultiset());
     checkArgument(corners.size() == corners.entrySet().size());
-    if (!geometricKeys.isEmpty())
+    if (!physicalKeys.isEmpty())
       checkArgument(corners.stream().anyMatch(c -> c.equals(DoublePoint.zero())));
   }
 

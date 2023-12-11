@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.keyboard;
+package io.github.oliviercailloux.keyboardd.visible;
 
 import java.util.Map;
 
