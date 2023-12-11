@@ -9,6 +9,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 
 public class KeysymEntry {
+  public enum Kind {
+    MNEMONIC, UCP, CODE
+  }
+
   public static KeysymEntry mnemonic(String keysymMnemonic) {
     return new KeysymEntry(keysymMnemonic, null, null);
   }
@@ -39,6 +43,15 @@ public class KeysymEntry {
     code = keysymCode;
   }
 
+  public Kind kind() {
+    if (mnemonic != null)
+      return Kind.MNEMONIC;
+    if (ucp != null)
+      return Kind.UCP;
+    assert code != null;
+    return Kind.CODE;
+  }
+  
   public Optional<String> mnemonic() {
     return Optional.ofNullable(mnemonic);
   }
