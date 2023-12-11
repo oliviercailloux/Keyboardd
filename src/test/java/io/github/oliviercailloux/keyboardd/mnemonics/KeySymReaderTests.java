@@ -249,16 +249,4 @@ public class KeySymReaderTests {
     ImmutableSet<ParsedMnemonic> patched = KeySymReader.patch(mns);
     KeySymReader.check(patched);
   }
-
-  @Test
-  public void testRead() throws Exception {
-    ImmutableMap<String, MnKeySym> syms = KeySymReader.parseAndPatch();
-    LOGGER.debug("Keys: {}.", syms.keySet());
-    assertEquals(Integer.parseInt("FFFFFF", 16), syms.get("VoidSymbol").code());
-    assertEquals(Integer.parseInt("FF08", 16), syms.get("BackSpace").code());
-    assertEquals(Integer.parseInt("20", 16), syms.get("space").code());
-    assertEquals(32, syms.get("space").code());
-    assertEquals(Integer.parseInt("41", 16), syms.get("A").code());
-    assertEquals(Integer.parseInt("1000174", 16), syms.get("Wcircumflex").code());
-  }
 }

@@ -129,13 +129,15 @@ Functional keyboard
 The code uses these abbreviations.
 
 * `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
-* `canonical` is an X key name that is not an alias
-* `alias` is an X key name that is an alias
+* `canonical name` (or `canonical`, to be changed) is an X key name that is not an alias
+* `alias name` (or `alias`, to be changed) is an X key name that is an alias
 * `code` as `short` is an X keycode
 * `code` as `int` is a keysym code
-* `mnemonic` is a keysym mnemonic.
+* `mnemonic` is a keysym mnemonic (when not specifying whether it’s a canonical mnemonic or an alias)
+* `canonical mnemonic` is a keysym mnemonic that is not an alias
+* `alias mnemonic`
 
-The argument names use the non-abbreviated names; the method names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
+The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
 
 The non-abbreviated name of a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`. The word `aliasXKeyName` refers to an X key name that is an alias, it has no abbreviation.
 
