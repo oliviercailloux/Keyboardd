@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.visible;
+package io.github.oliviercailloux.keyboardd.representable;
 
 import java.util.Map;
 
@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import io.github.oliviercailloux.keyboardd.Representation;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry;
 

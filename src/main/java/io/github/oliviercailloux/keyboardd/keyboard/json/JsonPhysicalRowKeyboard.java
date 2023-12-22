@@ -12,9 +12,9 @@ import io.github.oliviercailloux.keyboardd.keyboard.PhysicalKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 
-public class JsonPhysicalKeyboard {
-  static JsonPhysicalKeyboard fromRows(List<? extends List<JsonPhysicalKey>> rows) {
-    return new JsonPhysicalKeyboard(rows);
+public class JsonPhysicalRowKeyboard {
+  static JsonPhysicalRowKeyboard fromRows(List<? extends List<JsonPhysicalRowKey>> rows) {
+    return new JsonPhysicalRowKeyboard(rows);
   }
 
   /**
@@ -22,15 +22,15 @@ public class JsonPhysicalKeyboard {
    * the left shift and right shift keys send different codes, it seems, but some keyboards might
    * differ from mine in that respect).
    */
-  private final ImmutableList<ImmutableList<JsonPhysicalKey>> rows;
+  private final ImmutableList<ImmutableList<JsonPhysicalRowKey>> rows;
 
-  private JsonPhysicalKeyboard(List<? extends List<JsonPhysicalKey>> rows) {
+  private JsonPhysicalRowKeyboard(List<? extends List<JsonPhysicalRowKey>> rows) {
     checkArgument(rows.stream().noneMatch(r -> r.isEmpty()));
-    this.rows = rows.stream().map(r -> ImmutableList.<JsonPhysicalKey>copyOf(r))
+    this.rows = rows.stream().map(r -> ImmutableList.<JsonPhysicalRowKey>copyOf(r))
         .collect(ImmutableList.toImmutableList());
   }
 
-  public ImmutableList<ImmutableList<JsonPhysicalKey>> rows() {
+  public ImmutableList<ImmutableList<JsonPhysicalRowKey>> rows() {
     return rows;
   }
 
@@ -38,8 +38,8 @@ public class JsonPhysicalKeyboard {
     DoublePoint currentCorner = DoublePoint.zero();
 
     final ImmutableSet.Builder<PhysicalKey> keys = new ImmutableSet.Builder<>();
-    for (ImmutableList<JsonPhysicalKey> row : rows) {
-      for (JsonPhysicalKey sourceKey : row) {
+    for (ImmutableList<JsonPhysicalRowKey> row : rows) {
+      for (JsonPhysicalRowKey sourceKey : row) {
         double targetWidth = sourceKey.width() * scale.x();
         PhysicalKey targetKey = PhysicalKey.from(currentCorner,
             PositiveSize.given(targetWidth, scale.y()), sourceKey.xKeyName());

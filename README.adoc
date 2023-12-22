@@ -125,6 +125,14 @@ Functional keyboard
 * A functional key is a position and a list of representations
 * Can be obtained from a Physical keyboard and a Visible keyboard map
 
+SVG keyboardd: includes a “key representation zone” for each key (and other elements as desired). A key representation zone is an SVG rectangle with an attribute that indicates the (canonical?) X key name. (Do not need to be unique; the only limitation is that if they are duplicated, they will also always have the same representation, which I think is reasonable, though it is permitted to add attributes to distinguish them.) The SVG may draw complex shapes for each key; may use the key representation zone to draw the key or make it invisible… When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
+
+SVG physical keyboardd: an SVG keyboardd where the key representation zone is an element that draws the x key name.
+
+SVG functional keyboardd: an SVG keyboardd where the key representation zone contains one or more representations that illustrate the behavior of the key (in a large sense, so representing what is displayed on the keyboard is allowed, including if all keys are black as for a blind keyboard). As a file format, this is therefore equivalent to an SVG keyboardd, but as a class concept it differs as its purpose is to use the mappings defined in the OS.
+
+We also need a standard attribute "key-id" to identify keys that do not send anything, such as the Fn key (and to distinguish keys with identical x-key-name if this exists).
+
 == Implementation
 The code uses these abbreviations.
 
@@ -140,6 +148,39 @@ The code uses these abbreviations.
 The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
 
 The non-abbreviated name of a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`. The word `aliasXKeyName` refers to an X key name that is an alias, it has no abbreviation.
+
+== Usage
+Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.
+Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
+Modify the SVG manually.
+
+== From notes in drawer
+    /*
+     * Also, key F1 sends keycode 67, F2 sends keycode 68, Fn+F1 sends keycode 179, sym XF86Tools
+     * (269025153), Fn+F2 sends keycode 122, sym XF86AudioLowerVolume (269025041). evdev maps
+     * keycode 179 to I179 and keycode 122 to VOL-.
+     * 
+     */
+
+    /*
+     * We want to render at chosen font size, so no scaling. Thus, we have to choose the key size
+     * accordingly. It is hopeless to display the real key size (in real cm), however (requires
+     * knowing the number of dpi). But we can print it. I have some impression that FF prints at 96
+     * DPI. Eog seems to print at 72 DPI (configurable). Let’s go for 96 DPI for the standard.
+     * 
+     * Firefox uses GTK3 on my system.
+     */
+    /* Requires Batik for BBox (on SVGSVGElement or SVGLocatable or such). */
+
+This should be used after parsing the simple layout json file, to scale the physical keyboard, then output another json file.
+
+    double defaultHeight = 1.4d;
+    double defaultWidth = 1.25d;
+    /* inter h varies. Average is 29.6 cm for total length for 16 standard keys and 15 sep. */
+    double interH = (29.6d - 16d * defaultWidth) / 15d;
+    verify(DoubleMath.fuzzyEquals(interH, 0.64d, 1e-4d));
+    double interV = 0.52d;
+    /* Total height is 11 cm (measured), that is 6*height + 5*interV. */
 
 == Libraries
 

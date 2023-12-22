@@ -11,6 +11,9 @@ import com.google.common.collect.ImmutableSet;
 
 import io.github.oliviercailloux.svgb.DoublePoint;
 
+/** With rectangle keys. The SvgPK is a more general concept. 
+ * The unit is 1 cm.
+*/
 public class PhysicalKeyboard {
   public static PhysicalKeyboard from(Set<PhysicalKey> physicalKeys) {
     return new PhysicalKeyboard(physicalKeys);

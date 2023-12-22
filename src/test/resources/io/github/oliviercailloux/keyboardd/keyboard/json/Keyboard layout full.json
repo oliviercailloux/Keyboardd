@@ -1,270 +1,270 @@
 [
   [
     {
-      "name": "ESC"
+      "xKeyName": "ESC"
     },
     {
-      "name": "FK01"
+      "xKeyName": "FK01"
     },
     {
-      "name": "FK02"
+      "xKeyName": "FK02"
     },
     {
-      "name": "FK03"
+      "xKeyName": "FK03"
     },
     {
-      "name": "FK04"
+      "xKeyName": "FK04"
     },
     {
-      "name": "FK05"
+      "xKeyName": "FK05"
     },
     {
-      "name": "FK06"
+      "xKeyName": "FK06"
     },
     {
-      "name": "FK07"
+      "xKeyName": "FK07"
     },
     {
-      "name": "FK08"
+      "xKeyName": "FK08"
     },
     {
-      "name": "FK09"
+      "xKeyName": "FK09"
     },
     {
-      "name": "FK10"
+      "xKeyName": "FK10"
     },
     {
-      "name": "FK11"
+      "xKeyName": "FK11"
     },
     {
-      "name": "FK12"
+      "xKeyName": "FK12"
     },
     {
-      "name": "PRSC"
+      "xKeyName": "PRSC"
     },
     {
-      "name": "PAUS"
+      "xKeyName": "PAUS"
     },
     {
-      "name": "DELE"
+      "xKeyName": "DELE"
     }
   ],
   [
     {
-      "name": "TLDE"
+      "xKeyName": "TLDE"
     },
     {
-      "name": "AE01"
+      "xKeyName": "AE01"
     },
     {
-      "name": "AE02"
+      "xKeyName": "AE02"
     },
     {
-      "name": "AE03"
+      "xKeyName": "AE03"
     },
     {
-      "name": "AE04"
+      "xKeyName": "AE04"
     },
     {
-      "name": "AE05"
+      "xKeyName": "AE05"
     },
     {
-      "name": "AE06"
+      "xKeyName": "AE06"
     },
     {
-      "name": "AE07"
+      "xKeyName": "AE07"
     },
     {
-      "name": "AE08"
+      "xKeyName": "AE08"
     },
     {
-      "name": "AE09"
+      "xKeyName": "AE09"
     },
     {
-      "name": "AE10"
+      "xKeyName": "AE10"
     },
     {
-      "name": "AE11"
+      "xKeyName": "AE11"
     },
     {
-      "name": "AE12"
+      "xKeyName": "AE12"
     },
     {
-      "name": "BKSP",
+      "xKeyName": "BKSP",
       "width": 2
     },
     {
-      "name": "INS"
+      "xKeyName": "INS"
     }
   ],
   [
     {
-      "name": "TAB"
+      "xKeyName": "TAB"
     },
     {
-      "name": "AD01"
+      "xKeyName": "AD01"
     },
     {
-      "name": "AD02"
+      "xKeyName": "AD02"
     },
     {
-      "name": "AD03"
+      "xKeyName": "AD03"
     },
     {
-      "name": "AD04"
+      "xKeyName": "AD04"
     },
     {
-      "name": "AD05"
+      "xKeyName": "AD05"
     },
     {
-      "name": "AD06"
+      "xKeyName": "AD06"
     },
     {
-      "name": "AD07"
+      "xKeyName": "AD07"
     },
     {
-      "name": "AD08"
+      "xKeyName": "AD08"
     },
     {
-      "name": "AD09"
+      "xKeyName": "AD09"
     },
     {
-      "name": "AD10"
+      "xKeyName": "AD10"
     },
     {
-      "name": "AD11"
+      "xKeyName": "AD11"
     },
     {
-      "name": "AD12"
+      "xKeyName": "AD12"
     },
     {
-      "name": "RTRN"
+      "xKeyName": "RTRN"
     },
     {
-      "name": "END"
+      "xKeyName": "END"
     }
   ],
   [
     {
-      "name": "CAPS"
+      "xKeyName": "CAPS"
     },
     {
-      "name": "AC01"
+      "xKeyName": "AC01"
     },
     {
-      "name": "AC02"
+      "xKeyName": "AC02"
     },
     {
-      "name": "AC03"
+      "xKeyName": "AC03"
     },
     {
-      "name": "AC04"
+      "xKeyName": "AC04"
     },
     {
-      "name": "AC05"
+      "xKeyName": "AC05"
     },
     {
-      "name": "AC06"
+      "xKeyName": "AC06"
     },
     {
-      "name": "AC07"
+      "xKeyName": "AC07"
     },
     {
-      "name": "AC08"
+      "xKeyName": "AC08"
     },
     {
-      "name": "AC09"
+      "xKeyName": "AC09"
     },
     {
-      "name": "AC10"
+      "xKeyName": "AC10"
     },
     {
-      "name": "AC11"
+      "xKeyName": "AC11"
     },
     {
-      "name": "BKSL"
+      "xKeyName": "BKSL"
     },
     {
-      "name": "RTRN"
+      "xKeyName": "RTRN"
     },
     {
-      "name": "PGUP"
+      "xKeyName": "PGUP"
     }
   ],
   [
     {
-      "name": "LFSH"
+      "xKeyName": "LFSH"
     },
     {
-      "name": "LSGT"
+      "xKeyName": "LSGT"
     },
     {
-      "name": "AB01"
+      "xKeyName": "AB01"
     },
     {
-      "name": "AB02"
+      "xKeyName": "AB02"
     },
     {
-      "name": "AB03"
+      "xKeyName": "AB03"
     },
     {
-      "name": "AB04"
+      "xKeyName": "AB04"
     },
     {
-      "name": "AB05"
+      "xKeyName": "AB05"
     },
     {
-      "name": "AB06"
+      "xKeyName": "AB06"
     },
     {
-      "name": "AB07"
+      "xKeyName": "AB07"
     },
     {
-      "name": "AB08"
+      "xKeyName": "AB08"
     },
     {
-      "name": "AB09"
+      "xKeyName": "AB09"
     },
     {
-      "name": "AB10"
+      "xKeyName": "AB10"
     },
     {
-      "name": "RTSH"
+      "xKeyName": "RTSH"
     },
     {
-      "name": "UP"
+      "xKeyName": "UP"
     },
     {
-      "name": "PGDN"
+      "xKeyName": "PGDN"
     }
   ],
   [
     {
-      "name": "LCTL"
+      "xKeyName": "LCTL"
     },
     {
-      "name": "LWIN"
+      "xKeyName": "LWIN"
     },
     {
-      "name": "LALT"
+      "xKeyName": "LALT"
     },
     {
-      "name": "SPCE"
+      "xKeyName": "SPCE"
     },
     {
-      "name": "RALT"
+      "xKeyName": "RALT"
     },
     {
-      "name": "RCTL"
+      "xKeyName": "RCTL"
     },
     {
-      "name": "LEFT"
+      "xKeyName": "LEFT"
     },
     {
-      "name": "DOWN"
+      "xKeyName": "DOWN"
     },
     {
-      "name": "RGHT"
+      "xKeyName": "RGHT"
     }
   ]
 ]

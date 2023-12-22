@@ -1,11 +1,11 @@
 [
   [
     {
-      "name": "TAB",
+      "xKeyName": "TAB",
       "width": 1.5
     },
     {
-      "name": "AD01"
+      "xKeyName": "AD01"
     }
   ]
 ]

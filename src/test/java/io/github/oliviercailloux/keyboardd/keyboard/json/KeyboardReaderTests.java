@@ -28,8 +28,8 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(getClass().getResource("Key name size.json"),
         StandardCharsets.UTF_8);
     try (Reader r = source.openStream()) {
-      JsonPhysicalKey k = mapper.readValue(r, JsonPhysicalKey.class);
-      assertEquals(new JsonPhysicalKey("Ploum", 1.5d), k);
+      JsonPhysicalRowKey k = mapper.readValue(r, JsonPhysicalRowKey.class);
+      assertEquals(new JsonPhysicalRowKey("Ploum", 1.5d), k);
     }
   }
 
@@ -40,8 +40,8 @@ public class KeyboardReaderTests {
     CharSource source =
         Resources.asCharSource(getClass().getResource("Key name.json"), StandardCharsets.UTF_8);
     try (Reader r = source.openStream()) {
-      JsonPhysicalKey k = mapper.readValue(r, JsonPhysicalKey.class);
-      assertEquals(new JsonPhysicalKey("Ploum", 1d), k);
+      JsonPhysicalRowKey k = mapper.readValue(r, JsonPhysicalRowKey.class);
+      assertEquals(new JsonPhysicalRowKey("Ploum", 1d), k);
     }
   }
 
@@ -52,8 +52,8 @@ public class KeyboardReaderTests {
     CharSource source =
         Resources.asCharSource(getClass().getResource("Key size.json"), StandardCharsets.UTF_8);
     try (Reader r = source.openStream()) {
-      JsonPhysicalKey k = mapper.readValue(r, JsonPhysicalKey.class);
-      assertEquals(new JsonPhysicalKey("", 1.5d), k);
+      JsonPhysicalRowKey k = mapper.readValue(r, JsonPhysicalRowKey.class);
+      assertEquals(new JsonPhysicalRowKey("", 1.5d), k);
     }
   }
 
@@ -64,11 +64,11 @@ public class KeyboardReaderTests {
     CharSource source =
         Resources.asCharSource(getClass().getResource("Key row.json"), StandardCharsets.UTF_8);
     JavaType type =
-        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalKey.class);
+        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalRowKey.class);
     try (Reader r = source.openStream()) {
-      List<JsonPhysicalKey> ks = mapper.readValue(r, type);
-      ImmutableList<JsonPhysicalKey> row = ImmutableList.of(new JsonPhysicalKey("Name1", 1.5d),
-          new JsonPhysicalKey("Name2", 1d), new JsonPhysicalKey("", 1.5d));
+      List<JsonPhysicalRowKey> ks = mapper.readValue(r, type);
+      ImmutableList<JsonPhysicalRowKey> row = ImmutableList.of(new JsonPhysicalRowKey("Name1", 1.5d),
+          new JsonPhysicalRowKey("Name2", 1d), new JsonPhysicalRowKey("", 1.5d));
       assertEquals(row, ks);
     }
   }
@@ -80,14 +80,14 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(
         getClass().getResource("Keyboard layout unknown mnemonics.json"), StandardCharsets.UTF_8);
     JavaType type =
-        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalKey.class);
+        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalRowKey.class);
     JavaType type2 = mapper.getTypeFactory().constructCollectionType(List.class, type);
     try (Reader r = source.openStream()) {
-      List<List<JsonPhysicalKey>> ks = mapper.readValue(r, type2);
-      ImmutableList<JsonPhysicalKey> row1 = ImmutableList.of(new JsonPhysicalKey("Name1", 1.5d),
-          new JsonPhysicalKey("Name2", 1d), new JsonPhysicalKey("", 1.5d));
-      ImmutableList<JsonPhysicalKey> row2 = ImmutableList.of(new JsonPhysicalKey("Name3", 1.5d),
-          new JsonPhysicalKey("Name4", 1d), new JsonPhysicalKey("", 1.5d));
+      List<List<JsonPhysicalRowKey>> ks = mapper.readValue(r, type2);
+      ImmutableList<JsonPhysicalRowKey> row1 = ImmutableList.of(new JsonPhysicalRowKey("Name1", 1.5d),
+          new JsonPhysicalRowKey("Name2", 1d), new JsonPhysicalRowKey("", 1.5d));
+      ImmutableList<JsonPhysicalRowKey> row2 = ImmutableList.of(new JsonPhysicalRowKey("Name3", 1.5d),
+          new JsonPhysicalRowKey("Name4", 1d), new JsonPhysicalRowKey("", 1.5d));
       assertEquals(ImmutableList.of(row1, row2), ks);
     }
   }
@@ -97,9 +97,9 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(
         getClass().getResource("Keyboard layout simple.json"), StandardCharsets.UTF_8);
 
-    JsonPhysicalKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
-    ImmutableList<JsonPhysicalKey> row =
-        ImmutableList.of(new JsonPhysicalKey("TAB", 1.5d), new JsonPhysicalKey("AD01", 1d));
+    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
+    ImmutableList<JsonPhysicalRowKey> row =
+        ImmutableList.of(new JsonPhysicalRowKey("TAB", 1.5d), new JsonPhysicalRowKey("AD01", 1d));
     assertEquals(ImmutableList.of(row), parsed.rows());
   }
 
@@ -108,10 +108,10 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(getClass().getResource("Keyboard layout full.json"),
         StandardCharsets.UTF_8);
 
-    JsonPhysicalKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
-    ImmutableList<ImmutableList<JsonPhysicalKey>> rows = parsed.rows();
+    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
+    ImmutableList<ImmutableList<JsonPhysicalRowKey>> rows = parsed.rows();
     assertEquals(6, rows.size());
-    ImmutableList<JsonPhysicalKey> row0 = rows.get(0);
+    ImmutableList<JsonPhysicalRowKey> row0 = rows.get(0);
     assertEquals(16, row0.size());
   }
 

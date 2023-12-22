@@ -18,14 +18,14 @@ public class JsonPhysicalKeyboardReader {
   private JsonPhysicalKeyboardReader() {
   }
 
-  public static JsonPhysicalKeyboard jsonPhysicalKeyboard(CharSource source) throws IOException {
+  public static JsonPhysicalRowKeyboard jsonPhysicalKeyboard(CharSource source) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     JavaType listOfKeysType =
-        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalKey.class);
+        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalRowKey.class);
     JavaType listOfListOfKeysType = mapper.getTypeFactory().constructCollectionType(List.class, listOfKeysType);
     try (Reader reader = source.openStream()) {
-      List<List<JsonPhysicalKey>> rows = mapper.readValue(reader, listOfListOfKeysType);
-      return JsonPhysicalKeyboard.fromRows(rows);
+      List<List<JsonPhysicalRowKey>> rows = mapper.readValue(reader, listOfListOfKeysType);
+      return JsonPhysicalRowKeyboard.fromRows(rows);
     }
   }
 }

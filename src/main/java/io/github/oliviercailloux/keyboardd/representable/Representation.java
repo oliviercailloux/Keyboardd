@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd;
+package io.github.oliviercailloux.keyboardd.representable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

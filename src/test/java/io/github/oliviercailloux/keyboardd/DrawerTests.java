@@ -14,7 +14,7 @@ import com.google.common.io.Resources;
 
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.keyboardd.draft.Drawer;
-import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalRowKeyboard;
 
 public class DrawerTests {
   @Test
@@ -24,7 +24,7 @@ public class DrawerTests {
     String expected = Files.readString(
         Path.of(DrawerTests.class.getResource("Keyboard layout unknown mnemonics.json").toURI()));
 
-    JsonPhysicalKeyboard layout = JsonPhysicalKeyboardReader.parse().getLayout(source);
+    JsonPhysicalRowKeyboard layout = JsonPhysicalKeyboardReader.parse().getLayout(source);
     Document doc = Drawer.draw(layout);
     String svg = DomHelper.domHelper().toString(doc);
     Files.writeString(Path.of("out.svg"), svg);
