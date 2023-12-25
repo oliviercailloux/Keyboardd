@@ -94,10 +94,10 @@ public class SvgKeyboard {
    */
   public static SvgKeyboard from(PhysicalKeyboard physicalKeyboard) {
     final DomHelper d = DomHelper.domHelper();
-    final Document doc = d.svg();
+    final SvgDocumentHelper h = SvgDocumentHelper.using(d);
+    final Document doc = h.document();
     doc.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kdd",
         KEYBOARDD_NS);
-    final SvgDocumentHelper h = SvgDocumentHelper.using(doc);
     /*
      * Not sure the dominant baseline trick is appropriate when the baselines are not uniform (p VS
      * t), but that’ll do for now as we write capital letters.
