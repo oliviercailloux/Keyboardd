@@ -317,21 +317,21 @@ public class SvgKeyboard {
   public SvgKeyboard withRepresentation(VisibleKeyboardMap visibleKeyboardMap) {
     // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object .
     // TODO the transformer approach does not reuse the existing namespace, it ignores it and creates new prefixes. This works but is ugly. Also, we should be able to create an empty document using JARIS (otherwise import is forbidden).
-    // DOMResult result = new DOMResult();
-    // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
-    // Document docCopy = (Document) result.getNode();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db;
-        try {
-          db = dbf.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-          throw new RuntimeException(e);
-        }
-        Document docCopy = db.newDocument();
+    DOMResult result = new DOMResult();
+    XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
+    Document docCopy = (Document) result.getNode();
+        // DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        // DocumentBuilder db;
+        // try {
+        //   db = dbf.newDocumentBuilder();
+        // } catch (ParserConfigurationException e) {
+        //   throw new RuntimeException(e);
+        // }
+        // Document docCopy = db.newDocument();
+        // Node rootCopy = docCopy.importNode(doc.getDocumentElement(), true);
+        // docCopy.appendChild(rootCopy);
     // final DomHelper d = DomHelper.domHelper();
     // final Document docCopy = d.svg();
-    Node rootCopy = docCopy.importNode(doc.getDocumentElement(), true);
-    docCopy.appendChild(rootCopy);
     // docCopy.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kddd",
     //     KEYBOARDD_NS);
     ImmutableSet<Element> ourElements = coveredElements;
