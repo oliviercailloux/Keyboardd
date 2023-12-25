@@ -45,6 +45,115 @@ public class SvgKeyboard {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(SvgKeyboard.class);
 
+  public static void main(String[] args) {
+    final DomHelper d = DomHelper.domHelper();
+    final SvgDocumentHelper hDoc = SvgDocumentHelper.using(d);
+    final Document doc = hDoc.document();
+    doc.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kdd",
+    KEYBOARDD_NS);
+    /*
+     * Not sure the dominant baseline trick is appropriate when the baselines are not uniform (p VS
+     * t), but that’ll do for now as we write capital letters.
+     */
+    StyleElement style = hDoc.style().setContent("""
+        rect {
+          fill-opacity: 0;
+          stroke: black;
+          stroke-width: 1px;
+        }
+        text{
+          text-anchor: middle;
+          dominant-baseline: middle;
+          font-size: small;
+        }
+        """);
+    doc.getDocumentElement().appendChild(style.getElement());
+
+    double dpi = 96d;
+    double dotsPerCm = dpi / 2.54d;
+
+    DoublePoint start = DoublePoint.zero();
+    ImmutableMap.Builder<Element, String> reprsBuilder = ImmutableMap.builder();
+    ImmutableSet.Builder<Element> coveredsBuilder = ImmutableSet.builder();
+    PhysicalKey key = PhysicalKey.from(DoublePoint.zero(), PositiveSize.square(1d), "Name");
+      DoublePoint posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
+      PositiveSize sizeScaled = key.size().mult(dotsPerCm);
+      RectangleElement rect =
+          hDoc.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
+      rect.getElement().setAttributeNS(KEYBOARDD_NS, "kdd:x-key-name", key.xKeyName());
+      doc.getDocumentElement().appendChild(rect.getElement());
+      reprsBuilder.put(rect.getElement(), key.xKeyName());
+      TextElement text = hDoc.text().setBaselineStart(posScaled.plus(sizeScaled.mult(0.5d)))
+          .setContent(key.xKeyName());
+      doc.getDocumentElement().appendChild(text.getElement());
+      Element covered = text.getElement();
+      coveredsBuilder.add(covered);
+
+    ImmutableSet<Element> coveredElements = coveredsBuilder.build();
+    ImmutableMap<Element, String> canonicalNameByKeyRepresentationZone = reprsBuilder.build();
+    SvgKeyboard svgKeyboard = new SvgKeyboard(doc, canonicalNameByKeyRepresentationZone, coveredElements);
+
+    DOMResult result = new DOMResult();
+    XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
+    Document docCopy = (Document) result.getNode();
+    // docCopy.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kddd",
+    //     KEYBOARDD_NS);
+    ImmutableSet<Element> ourElements = coveredElements;
+    ImmutableSet.Builder<Element> correspondingElementsBuilder = ImmutableSet.builder();
+    ImmutableSet<Element> correspondingElements = correspondingElementsBuilder.build();
+    
+      Element root = doc.getDocumentElement();
+      verify(!covered.equals(root));
+      ImmutableList.Builder<Integer> builder = ImmutableList.builder();
+      Element current = covered;
+      do {
+        Element parent = (Element) current.getParentNode();
+        ImmutableList<Node> children = DomHelper.toList(parent.getChildNodes());
+        int index = children.indexOf(current);
+        builder.add(index);
+        current = parent;
+      } while (!current.equals(root));
+      ImmutableList<Integer> located = builder.build().reverse();
+    
+    // for (Element covered : ourElements) {
+      correspondingElementsBuilder.add(retrieveFrom(docCopy, located));
+    // }
+    for (Element element : correspondingElements) {
+      element.getParentNode().removeChild(element);
+    }
+    ImmutableMap<Element, String> nameByZone = DomHelper
+        .toElements(docCopy.getElementsByTagNameNS(SVG_NS, "rect")).stream()
+        .filter(e -> e.hasAttributeNS(KEYBOARDD_NS, "x-key-name")).collect(
+            ImmutableMap.toImmutableMap(e -> e, e -> e.getAttributeNS(KEYBOARDD_NS, "x-key-name")));
+    ImmutableList<RectangleElement> allZones = nameByZone.keySet().stream()
+        .map(RectangleElement::using).collect(ImmutableList.toImmutableList());
+    ImmutableSet.Builder<Element> covereds = ImmutableSet.builder();
+    SvgDocumentHelper h = SvgDocumentHelper.using(docCopy);
+    String xKeyName = "Name";
+      ImmutableList<RectangleElement> zones = allZones.stream()
+          .filter(e -> e.getElement().getAttributeNS(KEYBOARDD_NS, "x-key-name").equals(xKeyName))
+          .collect(ImmutableList.toImmutableList());
+      for (RectangleElement zone : zones) {
+        zone.getElement().setAttributeNS(KEYBOARDD_NS, "kdd:x-key-name", xKeyName);
+        PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
+        LineColDivision div = LineColDivision.forNb(1);
+        ImmutableSet<PositiveSize> offsets = div.offsets(PositiveSize.square(1d));
+        UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
+        Representation r = Representation.fromString("NameRepr");
+          PositiveSize offset = offsetsIt.next();
+          Element svgRepr = toSvg(h, r);
+          Element g = h.g().translate(startOffset.plus(offset)).getElement();
+          g.appendChild(svgRepr);
+          Node prev = zone.getElement().getNextSibling();
+          zone.getElement().getParentNode().insertBefore(g, prev);
+          covereds.add(g);
+          covereds.add(svgRepr);
+        verify(!offsetsIt.hasNext());
+    }
+    SvgKeyboard resultSvg = new SvgKeyboard(docCopy, nameByZone, covereds.build());
+    LOGGER.info(d.toString(resultSvg.getDocument()));
+  }
+  
   private static record LineColDivision (int n, int nbCols, int nbLines) {
     public static LineColDivision forNb(int n) {
       /*
