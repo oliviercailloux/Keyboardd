@@ -10,8 +10,8 @@ text{
   font-size: small;
 }
 </style>
-    <rect height="75.59055118110236" rx="10.0" width="113.38582677165354" kdd:x-key-name="TAB"/>
+    <rect height="75.59055118110236" kdd:x-key-name="TAB" rx="10.0" width="113.38582677165354"/>
     <text x="56.69291338582677" y="37.79527559055118">TAB</text>
-    <rect height="75.59055118110236" rx="10.0" width="75.59055118110236" x="151.1811023622047" kdd:x-key-name="AD01" y="0.0"/>
+    <rect height="75.59055118110236" kdd:x-key-name="AD01" rx="10.0" width="75.59055118110236" x="151.1811023622047" y="0.0"/>
     <text x="188.97637795275588" y="37.79527559055118">AD01</text>
 </svg>

@@ -236,7 +236,7 @@ public class SvgKeyboard {
       PositiveSize sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
           h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
-      rect.getElement().setAttributeNS(KEYBOARDD_NS, "x-key-name", key.xKeyName());
+      rect.getElement().setAttributeNS(KEYBOARDD_NS, "kdd:x-key-name", key.xKeyName());
       doc.getDocumentElement().appendChild(rect.getElement());
       /*
        * TODO should not include the text elements here: should produce an SVG with only the
@@ -353,7 +353,7 @@ public class SvgKeyboard {
           .collect(ImmutableList.toImmutableList());
       ImmutableList<Representation> reprs = visibleKeyboardMap.representations(xKeyName);
       for (RectangleElement zone : zones) {
-        zone.getElement().setAttributeNS(KEYBOARDD_NS, "x-key-name", xKeyName);
+        zone.getElement().setAttributeNS(KEYBOARDD_NS, "kdd:x-key-name", xKeyName);
         DoublePoint start = zone.getStart();
         PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
         LineColDivision div = LineColDivision.forNb(reprs.size());
