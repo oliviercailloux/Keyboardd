@@ -1,8 +1,8 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class Representation {
@@ -28,11 +28,21 @@ public class Representation {
       this.svg = null;
   }
 
+  public boolean isString() {
+    return string != null;
+  }
+
+  public boolean isSvg() {
+    return svg != null;
+  }
+  
   public String string() {
+    checkState(string != null);
     return string;
   }
 
   public Element svg() {
+    checkState(svg != null);
     return svg;
   }
 }

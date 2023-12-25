@@ -97,7 +97,7 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(
         getClass().getResource("Keyboard layout simple.json"), StandardCharsets.UTF_8);
 
-    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
+    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.rowKeyboard(source);
     ImmutableList<JsonPhysicalRowKey> row =
         ImmutableList.of(new JsonPhysicalRowKey("TAB", 1.5d), new JsonPhysicalRowKey("AD01", 1d));
     assertEquals(ImmutableList.of(row), parsed.rows());
@@ -108,7 +108,7 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(getClass().getResource("Keyboard layout full.json"),
         StandardCharsets.UTF_8);
 
-    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source);
+    JsonPhysicalRowKeyboard parsed = JsonPhysicalKeyboardReader.rowKeyboard(source);
     ImmutableList<ImmutableList<JsonPhysicalRowKey>> rows = parsed.rows();
     assertEquals(6, rows.size());
     ImmutableList<JsonPhysicalRowKey> row0 = rows.get(0);
@@ -129,7 +129,7 @@ public class KeyboardReaderTests {
         PhysicalKey.from(DoublePoint.given(7d, 3.2d), PositiveSize.given(3d, 2d), "R2K2");
     PhysicalKeyboard expected = PhysicalKeyboard.from(ImmutableSet.of(r1k1, r1k2, r2k1, r2k2));
 
-    PhysicalKeyboard keyboard = JsonPhysicalKeyboardReader.jsonPhysicalKeyboard(source)
+    PhysicalKeyboard keyboard = JsonPhysicalKeyboardReader.rowKeyboard(source)
         .toPhysicalKeyboard(PositiveSize.given(3d, 2d), PositiveSize.given(1d, 1.2d));
     assertEquals(expected, keyboard);
   }

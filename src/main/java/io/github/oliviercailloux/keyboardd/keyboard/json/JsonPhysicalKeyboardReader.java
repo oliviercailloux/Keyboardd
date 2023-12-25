@@ -18,7 +18,7 @@ public class JsonPhysicalKeyboardReader {
   private JsonPhysicalKeyboardReader() {
   }
 
-  public static JsonPhysicalRowKeyboard jsonPhysicalKeyboard(CharSource source) throws IOException {
+  public static JsonPhysicalRowKeyboard rowKeyboard(CharSource source) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     JavaType listOfKeysType =
         mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalRowKey.class);

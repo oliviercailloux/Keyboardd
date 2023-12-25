@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
@@ -47,7 +48,15 @@ public class VisibleKeyboardMap {
     this.representations = ImmutableListMultimap.copyOf(representations);
   }
 
-  public ImmutableList<Representation> representations(String xKeyName) {
-    return representations.get(xKeyName);
+  public ImmutableSet<String> canonicalNames() {
+    return representations.keySet();
+  }
+
+  public ImmutableList<Representation> representations(String xCanonicalKeyName) {
+    return representations.get(xCanonicalKeyName);
+  }
+
+  public ImmutableListMultimap<String, Representation> representations() {
+    return representations;
   }
 }
