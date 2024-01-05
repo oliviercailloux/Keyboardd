@@ -4,23 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
-
-import io.github.oliviercailloux.keyboardd.XkbReaderTests;
-import io.github.oliviercailloux.keyboardd.draft.Key;
-import io.github.oliviercailloux.keyboardd.draft.XkbReader;
 import io.github.oliviercailloux.keyboardd.xkeys.Xkeys;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeyboardMapTests {
   @SuppressWarnings("unused")
