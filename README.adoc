@@ -133,6 +133,36 @@ SVG functional keyboardd: an SVG keyboardd where the key representation zone con
 
 We also need a standard attribute "key-id" to identify keys that do not send anything, such as the Fn key (and to distinguish keys with identical x-key-name if this exists).
 
+== SVG
+svg global : a une taille en cm. Pour l’affichage à l’écran ; l’impression.
+Ceci détermine la taille d’une touche en cm.
+Ceci détermine la taille d’une zone.
+Si on me donne un SVG sans taille, je l’étend sur la zone.
+Si le SVG a une taille, je la respecte et met le SVG au centre de la zone si ça rentre. Si le SVG est trop grand, je le rétréci à la taille de la zone.
+
+SVG doc
+	<?xml version="1.0" standalone="yes"?>
+	https://svgwg.org/svg2-draft/struct.html#NewDocument
+	
+SVG taille ?
+	https://www.w3.org/Graphics/SVG/IG/resources/svgprimer.html
+	https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Getting_Started
+	https://svgwg.org/svg2-draft/struct.html
+	
+Apache ?
+	https://svgwg.org/svg2-draft/types.html#InterfaceSVGElement
+	The SVGGraphicsElement interface represents SVG elements whose primary purpose is to directly render graphics into a group.
+	The getBBox method is used to compute the bounding box of the current element.
+
+https://sourceforge.net/p/axsl/code/HEAD/tree/trunk/svg-dom/src/main/resources/
+https://central.sonatype.com/artifact/org.axsl.org.w3c.dom.svg/svg-dom-java
+https://www.javadoc.io/doc/org.axsl.org.w3c.dom.svg/svg-dom-java/latest/index.html
+https://xmlgraphics.apache.org/batik/javadoc/ (should give up on batik which relies on SVG 1.0, says sourceforge, https://stackoverflow.com/questions/13676937/how-to-find-package-org-w3c-dom-svg)
+https://www.w3.org/TR/SVG11/java.html
+https://www.javadoc.io/doc/org.apache.xmlgraphics/xmlgraphics-commons/latest/index.html
+https://www.javadoc.io/doc/org.apache.xmlgraphics/batik-all/latest/index.html
+https://xmlgraphics.apache.org/batik/using/scripting/java.html (might include batik-all or some similar stuff, to get SVG 1.0, to get the BBox; though this is incompatible with the SVG 1.1 interface as it uses the same class names): https://stackoverflow.com/questions/34078251/getbbox-for-embedded-svg-element-with-batik
+
 == Implementation
 The code uses these abbreviations.
 
@@ -153,6 +183,12 @@ The non-abbreviated name of a canonical X key name is (following the https://goo
 Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.
 Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
 Modify the SVG manually.
+
+== TODO
+Finish test, using a clean fr mapping. Why is it not displaying the unicode equivalent?
+Embed an SVG document as representation (not just an element!). How to do this cleanly?
+Allow mapping from multiple fr-like files?
+Checkstyle and XKeyName?
 
 == From notes in drawer
     /*
