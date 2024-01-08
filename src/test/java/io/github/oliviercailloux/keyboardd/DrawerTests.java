@@ -53,7 +53,7 @@ public class DrawerTests {
         layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
     SvgKeyboard svgK = SvgKeyboard.from(physicalKeyboard);
     CharSource kbMapSource =
-        Resources.asCharSource(KeyboardMapTests.class.getResource("fr"), StandardCharsets.UTF_8);
+        Resources.asCharSource(KeyboardMapTests.class.getResource("Two keys"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = SimpleSymbolsReader.read(kbMapSource);
     SvgKeyboard svgR = svgK.withRepresentation(VisibleKeyboardMap.from(kbMap, ImmutableMap.of()));
     String svg = DomHelper.domHelper().toString(svgR.getDocument());
