@@ -27,8 +27,8 @@ import com.google.common.collect.UnmodifiableIterator;
 
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlTransformer;
-import io.github.oliviercailloux.keyboardd.keyboard.PhysicalKey;
-import io.github.oliviercailloux.keyboardd.keyboard.PhysicalKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.RectangularKey;
+import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
@@ -37,7 +37,7 @@ import io.github.oliviercailloux.svgb.SvgDocumentHelper;
 import io.github.oliviercailloux.svgb.TextElement;
 
 /*
- * A more general concept than a PhysicalKeyboard (because keys do not have to be rectangle here).
+ * A more general concept than a RectangularKeyboard (because keys do not have to be rectangle here).
  * Useful in FunctionalKeyboard: parse SVG so as to have the mapping of geometric keys and x key
  * names.
  */
@@ -92,7 +92,7 @@ public class SvgKeyboard {
   /**
    * 1 unit in the given physical keyboard is rendered as 1 cm at 96 DPI (thus as 96/2.54 ≅ 38 dots)
    */
-  public static SvgKeyboard from(PhysicalKeyboard physicalKeyboard) {
+  public static SvgKeyboard from(RectangularKeyboard physicalKeyboard) {
     final DomHelper d = DomHelper.domHelper();
     final SvgDocumentHelper h = SvgDocumentHelper.using(d);
     final Document doc = h.document();
@@ -122,7 +122,7 @@ public class SvgKeyboard {
     DoublePoint start = DoublePoint.zero();
     ImmutableMap.Builder<Element, String> reprsBuilder = ImmutableMap.builder();
     ImmutableSet.Builder<Element> coveredsBuilder = ImmutableSet.builder();
-    for (PhysicalKey key : physicalKeyboard.keys()) {
+    for (RectangularKey key : physicalKeyboard.keys()) {
       DoublePoint posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
       PositiveSize sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =

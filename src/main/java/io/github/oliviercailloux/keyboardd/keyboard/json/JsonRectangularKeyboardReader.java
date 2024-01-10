@@ -11,21 +11,21 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharSource;
 
-public class JsonPhysicalKeyboardReader {
+public class JsonRectangularKeyboardReader {
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(JsonPhysicalKeyboardReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(JsonRectangularKeyboardReader.class);
 
-  private JsonPhysicalKeyboardReader() {
+  private JsonRectangularKeyboardReader() {
   }
 
-  public static JsonPhysicalRowKeyboard rowKeyboard(CharSource source) throws IOException {
+  public static JsonRectangularRowKeyboard rowKeyboard(CharSource source) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     JavaType listOfKeysType =
-        mapper.getTypeFactory().constructCollectionType(List.class, JsonPhysicalRowKey.class);
+        mapper.getTypeFactory().constructCollectionType(List.class, JsonRectangularRowKey.class);
     JavaType listOfListOfKeysType = mapper.getTypeFactory().constructCollectionType(List.class, listOfKeysType);
     try (Reader reader = source.openStream()) {
-      List<List<JsonPhysicalRowKey>> rows = mapper.readValue(reader, listOfListOfKeysType);
-      return JsonPhysicalRowKeyboard.fromRows(rows);
+      List<List<JsonRectangularRowKey>> rows = mapper.readValue(reader, listOfListOfKeysType);
+      return JsonRectangularRowKeyboard.fromRows(rows);
     }
   }
 }

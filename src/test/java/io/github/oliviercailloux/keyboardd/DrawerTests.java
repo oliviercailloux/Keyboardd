@@ -13,9 +13,9 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
 import io.github.oliviercailloux.jaris.xml.DomHelper;
-import io.github.oliviercailloux.keyboardd.keyboard.PhysicalKeyboard;
-import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalKeyboardReader;
-import io.github.oliviercailloux.keyboardd.keyboard.json.JsonPhysicalRowKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
+import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMapTests;
 import io.github.oliviercailloux.keyboardd.mapping.SimpleSymbolsReader;
@@ -27,13 +27,13 @@ public class DrawerTests {
   @Test
   public void testDraw() throws Exception {
     CharSource source = Resources.asCharSource(
-        JsonPhysicalKeyboardReader.class.getResource("Keyboard layout simple.json"),
+        JsonRectangularKeyboardReader.class.getResource("Keyboard layout simple.json"),
         StandardCharsets.UTF_8);
     String expected = Files
         .readString(Path.of(SvgKeyboard.class.getResource("Keyboard simple scale 2.svg").toURI()));
 
-    JsonPhysicalRowKeyboard layout = JsonPhysicalKeyboardReader.rowKeyboard(source);
-    PhysicalKeyboard physicalKeyboard =
+    JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
+    RectangularKeyboard physicalKeyboard =
         layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
     SvgKeyboard svgK = SvgKeyboard.from(physicalKeyboard);
     String svg = DomHelper.domHelper().toString(svgK.getDocument());
@@ -43,13 +43,13 @@ public class DrawerTests {
   @Test
   public void testReDraw() throws Exception {
     CharSource source = Resources.asCharSource(
-        JsonPhysicalKeyboardReader.class.getResource("Keyboard layout simple.json"),
+        JsonRectangularKeyboardReader.class.getResource("Keyboard layout simple.json"),
         StandardCharsets.UTF_8);
     String expected = Files
         .readString(Path.of(SvgKeyboard.class.getResource("Keyboard simple scale 2.svg").toURI()));
 
-    JsonPhysicalRowKeyboard layout = JsonPhysicalKeyboardReader.rowKeyboard(source);
-    PhysicalKeyboard physicalKeyboard =
+    JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
+    RectangularKeyboard physicalKeyboard =
         layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
     SvgKeyboard svgK = SvgKeyboard.from(physicalKeyboard);
     CharSource kbMapSource =

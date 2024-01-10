@@ -57,37 +57,18 @@ https://gitlab.freedesktop.org/xorg/proto/xorgproto/commit/b11152992d689e2f6a7d0
 ** The correspondance between keysym codes and keysym mnemonics comes from the `https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/master/include/X11/keysymdef.h[keysymdef.h]`, `https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/master/include/X11/XF86keysym.h[XF86keysym.h]` and other files from xorgproto that use a slightly different format (and XK_ prefixes). The `libxkbcommon` library https://github.com/xkbcommon/libxkbcommon/blob/master/scripts/makeheader#L62-L66[includes] these files and https://github.com/xkbcommon/libxkbcommon/blob/master/scripts/update-keysyms[writes] `xkbcommon-keysyms.h`. Commit https://github.com/xkbcommon/libxkbcommon/commit/49690d936bf6cc6bf85058c1f0a545f0d5e37c77[49690d] (Sept 2023) updated the files `xkbcommon-keysyms.h` and `ks_tables.h` using the latest xorgproto at the time (referring to xorgproto commit https://gitlab.freedesktop.org/xorg/proto/xorgproto/commit/1c8128d72df22843a2022576850bc5ab5e3a46ea[1c8128]), which reflects “latest available keys from Linux kernel”, as discussed https://lists.freedesktop.org/archives/wayland-devel/2023-October/043121.html[here] (adds for example `XF86XK_CameraAccessEnable` to `XF86keysym.h`). The debian bookworm (https://packages.debian.org/bookworm/x11proto-dev[v2022.1-1]) https://gitlab.freedesktop.org/xorg/proto/xorgproto/blob/25f3278b/include/X11/keysymdef.h[version] comes from commit https://salsa.debian.org/xorg-team/proto/xorgproto/blob/xorgproto-2022.1-1/include/X11/keysymdef.h[25f3278b].
 ** Also `libx11` uses https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/configure.ac#L258-278[these] xorgproto files to https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/util/makekeys.c[build] its `ks_tables.h` file, which is https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/StrKeysym.c[used] to define `XStringToKeysym`.
 
-== Domain model
-A map from X to Y is complete iff its set of keys equals the set of legal values for X. When a map is specified to be non bijective or incomplete, it means: not necessarily bijective, not necessarily complete.
-A map is a function that knows its set of keys and values.
+== Concepts
+* _X keys_: the set of X key names (canonical and aliases) and corresponding X keycodes available on a system; typically read from an `evdev` file
+* _Keysym mnemonics_: the set of keysym mnemonics available on a system, together with information per mnemonic (the keysym code it maps to, whether it is an alias or is deprecated, which UCP corresponds to it if any, …); typically read from a `xkbcommon-keysyms.h` file
+* _UCP by keysym code_: maps keysym codes to their corresponding UCP (for those codes which have one)
+* _Keyboard map_: a subset of X key names, each mapped to a list of keysym entries (where a keysym entry is either a keysym mnemonic, a UCP or a keysym code, see above); typically defined in a set of local “symbol” configuration files
+* _Visible keyboard map_: a subset of X key names, each mapped to a list of representations
+* _Physical keyboard_: a set of physical keys (each with a position, a possibly complex shape, and the X keycode that the key sends when pressed)
+* _Rectangular keyboard_: a physical keyboard whose keys all have a rectangular shape
+* _Functional keyboard_: a physical keyboard that also associates each key with a (possibly empty) list of representations
 
-Visible keyboard
-
-* A set of representable keys
-* A representable key is a position and a representation
-* A representation is a String or an SVG icon
-
-X keys
-
-Keyboard map
-
-* Map (non bijective, incomplete) from X key name to a list of keysym entries
-* A keysym entry is a keysym mnemonic, a UCP or a keysym code
-* Can be obtained from parsing a symbols file? TODO
-* Can be obtained from lib? TODO
-* Provide “canonicalize” method, given an X keys, that returns a Keyboard map using only canonical X key names.
-
-Keysym mnemonics
-
-* Map (non bijective, complete) from keysym mnemonic to keysym code
-* Map (non bijective, complete) from keysym mnemonic to whether it is deprecated
-* Bijective map (incomplete) from keysym code to canonical keysym mnemonic: the first listed non deprecated one or the first listed if all deprecated
-* Map (non bijective, incomplete) from keysym mnemonic to UCP
-* Can also build such a bijective map without any deprecated
-* Can be obtained from such a bijective map (then, no deprecated)
-* Can be obtained from parsing a keysyms file? TODO
-* Can be obtained from lib? TODO
-
+== This library
+* _Representation_: a String or an SVG icon
 Keysym UCPs
 
 * Map (non bijective, incomplete) from keysym code to UCP
@@ -96,6 +77,9 @@ Keysym UCPs
 * Explicit: can be obtained from Keysym mnemonics (combining keysym code to canonical keysym mnemonic then keysym mnemonic to UCP)
 * Both: implicit and explicit combined (resulting map still incomplete as some keysym code that explicitly corresponds to some canonical keysym mnemonic may have no associated UCP)
 * Can be obtained from lib? TODO
+
+A map from X to Y is complete iff its set of keys equals the set of legal values for X. When a map is specified to be non bijective or incomplete, it means: not necessarily bijective, not necessarily complete.
+A map is a function that knows its set of keys and values.
 
 // Keysym representations
 

@@ -14,9 +14,9 @@ import io.github.oliviercailloux.svgb.DoublePoint;
 /** With rectangle keys. The SvgPK is a more general concept. 
  * The unit is 1 cm.
 */
-public class PhysicalKeyboard {
-  public static PhysicalKeyboard from(Set<PhysicalKey> physicalKeys) {
-    return new PhysicalKeyboard(physicalKeys);
+public class RectangularKeyboard {
+  public static RectangularKeyboard from(Set<RectangularKey> physicalKeys) {
+    return new RectangularKeyboard(physicalKeys);
   }
 
   /**
@@ -24,9 +24,9 @@ public class PhysicalKeyboard {
    * the left shift and right shift keys send different codes, it seems, but some keyboards might
    * differ from mine in that respect).
    */
-  private final ImmutableSet<PhysicalKey> keys;
+  private final ImmutableSet<RectangularKey> keys;
 
-  private PhysicalKeyboard(Set<PhysicalKey> physicalKeys) {
+  private RectangularKeyboard(Set<RectangularKey> physicalKeys) {
     this.keys = ImmutableSet.copyOf(physicalKeys);
     ImmutableMultiset<DoublePoint> corners =
         physicalKeys.stream().map(k -> k.topLeftCorner()).collect(ImmutableMultiset.toImmutableMultiset());
@@ -35,16 +35,16 @@ public class PhysicalKeyboard {
       checkArgument(corners.stream().anyMatch(c -> c.equals(DoublePoint.zero())));
   }
 
-  public ImmutableSet<PhysicalKey> keys() {
+  public ImmutableSet<RectangularKey> keys() {
     return keys;
   }
 
   @Override
   public boolean equals(Object o2) {
-    if (!(o2 instanceof PhysicalKeyboard)) {
+    if (!(o2 instanceof RectangularKeyboard)) {
       return false;
     }
-    final PhysicalKeyboard t2 = (PhysicalKeyboard) o2;
+    final RectangularKeyboard t2 = (RectangularKeyboard) o2;
     return keys.equals(t2.keys);
   }
   
