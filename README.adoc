@@ -1,6 +1,6 @@
 = Keyboardd
 
-A keyboard displayer app.
+A keyboard drawer library, to be used on systems governed by XKB (including Wayland). Can be used to parse and manipulate keyboard maps (keyboard layouts) and display them as SVG.
 
 == This library
 * _Representation_: a String or an SVG icon
