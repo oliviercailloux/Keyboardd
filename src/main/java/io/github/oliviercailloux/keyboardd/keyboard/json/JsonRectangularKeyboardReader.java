@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharSource;
 
+/** A reader of a json object that represents a rectangular keyboard (meaning a keyboard including only rectangular keys), described row by row.*/
 public class JsonRectangularKeyboardReader {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonRectangularKeyboardReader.class);

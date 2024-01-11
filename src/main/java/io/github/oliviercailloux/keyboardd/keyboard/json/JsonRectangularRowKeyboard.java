@@ -12,6 +12,7 @@ import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 
+/** A rectangular keyboard, conceived as a list of rows (top to bottom), each row being a list of keys (left to right). */
 public class JsonRectangularRowKeyboard {
   static JsonRectangularRowKeyboard fromRows(List<? extends List<JsonRectangularRowKey>> rows) {
     return new JsonRectangularRowKeyboard(rows);
@@ -30,10 +31,20 @@ public class JsonRectangularRowKeyboard {
         .collect(ImmutableList.toImmutableList());
   }
 
+  /** Returns the list of rows (from top to bottom) that compose this keyboard; each row being a non empty list of keys (from left to right).
+   * 
+   * @return a possibly empty list of rows
+   */
   public ImmutableList<ImmutableList<JsonRectangularRowKey>> rows() {
     return rows;
   }
 
+  /** Obtains a (scaled) rectangular keyboard from this json rectangular keyboard.
+   * 
+   * @param scale the scale to apply to the keys: the height is the height of each row in cm; the width is the width of a one unit width key in cm.
+   * @param spacing the width is the horizontal space between each key in a given row; the height is the vertical space between each row.
+   * @return a (scaled) rectangular keyboard
+   */
   public RectangularKeyboard toPhysicalKeyboard(PositiveSize scale, PositiveSize spacing) {
     DoublePoint currentCorner = DoublePoint.zero();
 

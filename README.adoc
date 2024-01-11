@@ -1,9 +1,41 @@
 = Keyboardd
 
-A keyboard drawer library, to be used on systems governed by XKB (including Wayland). Can be used to parse and manipulate keyboard maps (keyboard layouts) and display them as SVG.
+A keyboard drawer library, to be used on systems governed by XKB (including Wayland). Can be used to parse and manipulate keyboard maps and display them as SVG, so as to represent a given keyboard layout or keyboard shortcuts.
+
+== Preliminary
+You need to understand at least roughly (preferably, deeply) https://github.com/oliviercailloux/XKB-doc/README.adoc[how keyboards work under XKB]. Sorry for this.
+
+== Vocabulary
+
+The code uses the following terms and abbreviations.
+
+* `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
+* `canonical name` (or `canonical`, to be changed) is an X key name that is not an alias
+* `alias name` (or `alias`, to be changed) is an X key name that is an alias
+* `code` as `short` is an X keycode
+* `code` as `int` is a keysym code
+* `mnemonic` is a keysym mnemonic (when not specifying whether it’s a canonical mnemonic or an alias)
+* `canonical mnemonic` is a keysym mnemonic that is not an alias
+* `alias mnemonic`
+
+The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
+
+For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`.
+(BTW, anybody please tell me if you https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[agree with romani]; I can’t figure out the way they see this.)
 
 == This library
-* _Representation_: a String or an SVG icon
+
+Here is a quick overview of the main concepts (by class name) that this library permits to manipulate.
+The terms are defined https://github.com/oliviercailloux/XKB-doc/README.adoc#Concepts[here].
+
+* `XKeys`: can be obtained using `EvdevReader`
+* `Mnemonics`: can be obtained using `KeySymsReader`; can be used to obtain a `UcpByCode`
+* `KeyboardMap`: can be obtained using `SimpleSymbolsReader`
+* `RectangularKeyboard`: can be parsed from json using `JsonRectangularKeyboardReader`
+* `Representation`: a String or an SVG icon
+* `VisibleKeyboardMap`: combines a keyboard map and a mapping from keysym entry to representation
+* `SvgKeyboard`: read from and produce svg keyboard files; a rectangular svg keyboard can be produced by combining a `RectangularKeyboard` and a `VisibleKeyboardMap`.
+
 Keysym UCPs
 
 * Map (non bijective, incomplete) from keysym code to UCP
@@ -81,22 +113,6 @@ https://www.w3.org/TR/SVG11/java.html
 https://www.javadoc.io/doc/org.apache.xmlgraphics/xmlgraphics-commons/latest/index.html
 https://www.javadoc.io/doc/org.apache.xmlgraphics/batik-all/latest/index.html
 https://xmlgraphics.apache.org/batik/using/scripting/java.html (might include batik-all or some similar stuff, to get SVG 1.0, to get the BBox; though this is incompatible with the SVG 1.1 interface as it uses the same class names): https://stackoverflow.com/questions/34078251/getbbox-for-embedded-svg-element-with-batik
-
-== Implementation
-The code uses these abbreviations.
-
-* `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
-* `canonical name` (or `canonical`, to be changed) is an X key name that is not an alias
-* `alias name` (or `alias`, to be changed) is an X key name that is an alias
-* `code` as `short` is an X keycode
-* `code` as `int` is a keysym code
-* `mnemonic` is a keysym mnemonic (when not specifying whether it’s a canonical mnemonic or an alias)
-* `canonical mnemonic` is a keysym mnemonic that is not an alias
-* `alias mnemonic`
-
-The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
-
-The non-abbreviated name of a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`. The word `aliasXKeyName` refers to an X key name that is an alias, it has no abbreviation.
 
 == Usage
 Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.

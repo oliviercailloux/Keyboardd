@@ -44,7 +44,7 @@ public class VisibleKeyboardMap {
 
   private final ImmutableListMultimap<String, Representation> representations;
 
-  public VisibleKeyboardMap(ListMultimap<String, Representation> representations) {
+  private VisibleKeyboardMap(ListMultimap<String, Representation> representations) {
     this.representations = ImmutableListMultimap.copyOf(representations);
   }
 
