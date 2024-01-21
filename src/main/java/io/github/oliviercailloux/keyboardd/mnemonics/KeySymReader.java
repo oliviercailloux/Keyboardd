@@ -32,10 +32,12 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * properties.
  * </p>
  * <ul>
- * <li>Among all mnemonics corresponding to a given keysym code in the returned set, exactly one is
- * canonical, and all others are aliases of that one.
- * <li>All mnemonics corresponding to a given keysym code in the returned set correspond to the same
- * UCP, or all correspond to no UCP.
+ * <li>Among all mnemonics corresponding to a given keysym code, exactly one is
+ * canonical. NOPE: squareroot stuff.</li>
+ * <li>All mnemonics corresponding to a given keysym code correspond to the same
+ * UCP, or all correspond to no UCP.</li>
+ * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one is canonical.</li>
+ * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the same keysym code, or one of them corresponds to a keysym code in the range UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
  * </ul>
  * TODO check those.
  * 
@@ -171,26 +173,21 @@ class KeySymReader {
    * @return the latest version of the mnemonics.
    */
   public static ImmutableSet<ParsedMnemonic> latest() {
-    ImmutableSet<ParsedMnemonic> latestRaw = latestRaw();
-    ImmutableSet<ParsedMnemonic> patched = patch(latestRaw);
-    check(patched);
-    return patched;
-  }
-
-  static ImmutableSet<ParsedMnemonic> latestRaw() {
     CharSource keysyms = Resources.asCharSource(
         KeySymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
+    ImmutableSet<ParsedMnemonic> latest;
     try {
-      return parse(keysyms);
+      latest = parse(keysyms);
     } catch (IOException e) {
       throw new VerifyException(e);
     }
+    return latest;
   }
 
   public static ImmutableSet<ParsedMnemonic> parse(CharSource keysyms) throws IOException {
     ImmutableList<String> lines = keysyms.readLines();
 
-    final ImmutableSet.Builder<ParsedMnemonic> keySymBuilder = new ImmutableSet.Builder<>();
+    final ImmutableSet.Builder<ParsedMnemonic> keysymBuilder = new ImmutableSet.Builder<>();
 
     for (String line : lines) {
       Optional<Matcher> matcherStartOpt = ParseUtils.matcherOpt(line, PATTERNS_START);
@@ -198,10 +195,12 @@ class KeySymReader {
         continue;
       Matcher matcherStart = matcherStartOpt.orElseThrow(VerifyException::new);
       ParsedMnemonic parsed = parseLine(matcherStart);
-      keySymBuilder.add(parsed);
-
+      keysymBuilder.add(parsed);
     }
-    return keySymBuilder.build();
+
+    ImmutableSet<ParsedMnemonic> keysymsSet = keysymBuilder.build();
+    check(keysymsSet);
+    return keysymsSet;
   }
 
   private static ParsedMnemonic parseLine(Matcher matcherStart) {
@@ -259,41 +258,12 @@ class KeySymReader {
     return parsed;
   }
 
-  static ImmutableSet<ParsedMnemonic> patch(Set<ParsedMnemonic> mns) {
-    final ImmutableMap.Builder<ParsedMnemonic, ParsedMnemonic> transformerBuilder =
-        new ImmutableMap.Builder<>();
-    transformerBuilder.put(ParsedMnemonic.commented("Kanji_Bangou", 65335, "Codeinput"),
-        ParsedMnemonic.alias("Kanji_Bangou", 65335, "Alias for Codeinput", "Codeinput"));
-    transformerBuilder.put(
-        ParsedMnemonic.commented("Hangul_Codeinput", 65335, "Hangul code input mode"),
-        ParsedMnemonic.alias("Hangul_Codeinput", 65335, "Alias for Codeinput", "Codeinput"));
-    transformerBuilder.put(
-        ParsedMnemonic.commented("Hangul_SingleCandidate", 65340, "Single candidate"),
-        ParsedMnemonic.alias("Hangul_SingleCandidate", 65340, "Alias for SingleCandidate",
-            "SingleCandidate"));
-    transformerBuilder.put(ParsedMnemonic.commented("Zen_Koho", 65341, "Multiple/All Candidate(s)"),
-        ParsedMnemonic.alias("Zen_Koho", 65341, "Alias for MultipleCandidate",
-            "MultipleCandidate"));
-    transformerBuilder.put(
-        ParsedMnemonic.commented("Hangul_MultipleCandidate", 65341, "Multiple candidate"),
-        ParsedMnemonic.alias("Hangul_MultipleCandidate", 65341, "Alias for MultipleCandidate",
-            "MultipleCandidate"));
-    transformerBuilder.put(ParsedMnemonic.commented("Mae_Koho", 65342, "Previous Candidate"),
-        ParsedMnemonic.alias("Mae_Koho", 65342, "Alias for PreviousCandidate",
-            "PreviousCandidate"));
-    transformerBuilder.put(
-        ParsedMnemonic.commented("Hangul_PreviousCandidate", 65342, "Previous candidate"),
-        ParsedMnemonic.alias("Hangul_PreviousCandidate", 65342, "Alias for PreviousCandidate",
-            "PreviousCandidate"));
-    ImmutableMap<ParsedMnemonic, ParsedMnemonic> transformer = transformerBuilder.build();
-
-    ImmutableSet<ParsedMnemonic> transformed = mns.stream().map(m -> transformer.getOrDefault(m, m))
-        .collect(ImmutableSet.toImmutableSet());
-    return transformed;
-  }
-
   static void check(Set<ParsedMnemonic> mns) {
-    ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
+    // * <li>All mnemonics corresponding to a given keysym code correspond to the same
+    // * UCP, or all correspond to no UCP.</li>
+    // * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one is canonical.</li>
+    // * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the same keysym code, or one of them corresponds to a keysym code in the range UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+       ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
         mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code, m -> m));
     for (int code : mnsByCode.keySet()) {
       ImmutableSet<ParsedMnemonic> mnsForCode = mnsByCode.get(code);

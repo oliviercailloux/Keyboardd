@@ -12,9 +12,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Sets;
-
+import com.google.common.collect.UnmodifiableIterator;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeySymReader.ParsedMnemonic;
 
 /**
@@ -61,7 +63,10 @@ public class Mnemonics {
 
   public static Mnemonics latest() {
     ImmutableSet<ParsedMnemonic> parsedMns = KeySymReader.latest();
-    ImmutableSet<ParsedMnemonic> patchedMns = KeySymReader.patch(parsedMns);
+    ImmutableMap<ParsedMnemonic, Integer> mnToCode = parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
+    ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
+    ImmutableSet<Integer> codes = codeToMns.keySet();
+    ImmutableSet<CanonicalMnemonic> canonicals = codes.stream().map(c -> toCanonical(codeToMns.get(c))).collect(ImmutableSet.toImmutableSet());
     ImmutableBiMap<String, ParsedMnemonic> canonicalMns =
         patchedMns.stream().filter(m -> !m.alias())
             .collect(ImmutableBiMap.toImmutableBiMap(ParsedMnemonic::mnemonic, m -> m));
@@ -86,6 +91,24 @@ public class Mnemonics {
       canonicalMnemonicsBuilder.add(canonicalMnemonic);
     }
     return new Mnemonics(canonicalMnemonicsBuilder.build());
+  }
+
+  private static CanonicalMnemonic toCanonical(ImmutableSet<ParsedMnemonic> mnemonics) {
+    UnmodifiableIterator<ParsedMnemonic> iterator = mnemonics.iterator();
+    checkArgument(iterator.hasNext());
+    ParsedMnemonic first = iterator.next();
+    ImmutableSet<ParsedMnemonic> remaining = ImmutableSet.<ParsedMnemonic>builder().addAll(iterator).build();
+    boolean deprecated = first.deprecated();
+    if(deprecated) {
+      checkArgument(mnemonics.stream().allMatch(ParsedMnemonic::deprecated));
+    }
+    int code = mnemonics.stream().map(ParsedMnemonic::code).distinct().collect(MoreCollectors.onlyElement());
+    Optional<Integer> ucp = mnemonics.stream().map(ParsedMnemonic::unicode).distinct().collect(MoreCollectors.onlyElement());
+    ImmutableSet<ParsedMnemonic> deprecateds = remaining.stream().filter(ParsedMnemonic::deprecated).collect(ImmutableSet.toImmutableSet());
+    ImmutableSet<ParsedMnemonic> nonDeprecateds = remaining.stream().filter(p -> !p.deprecated()).collect(ImmutableSet.toImmutableSet());
+    return new CanonicalMnemonic(first.mnemonic(), code, null, nonDeprecateds.stream().map(ParsedMnemonic::mnemonic).collect(ImmutableSet.toImmutableSet()), ucp, deprecated);
+    return new CanonicalMnemonic(first.mnemonic(), code, null, deprecateds.stream().map(ParsedMnemonic::mnemonic).collect(ImmutableSet.toImmutableSet()), ucp, deprecated);
+
   }
 
   public static Mnemonics from(Set<CanonicalMnemonic> canonicalMnemonics) {
