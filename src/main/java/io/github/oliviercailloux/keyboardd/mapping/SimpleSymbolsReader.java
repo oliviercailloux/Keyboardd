@@ -19,6 +19,9 @@ import io.github.oliviercailloux.keyboardd.draft.LineKind;
 import io.github.oliviercailloux.keyboardd.draft.MnKeySym;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 
+/** A reader of XKB symbols files, which produces a {@link KeyboardMap}. 
+ * The reader is quite crude; it will read correctly only the simplest files.
+*/
 public class SimpleSymbolsReader {
   private static final Pattern P_COMMENT = Pattern.compile("^( *//.*)| *$");
   private static final Pattern P_OTHER = Pattern
@@ -29,6 +32,12 @@ public class SimpleSymbolsReader {
   private static final ImmutableSet<Pattern> PATTERNS =
       ImmutableSet.of(P_COMMENT, P_OTHER, P_KEY);
 
+      /**
+       * Reads a keyboard map from the given source.
+       * @param source the XKB symbols file to read from
+       * @return a (possibly empty) keyboard map
+       * @throws IOException if an I/O error occurs
+       */
   public static KeyboardMap read(CharSource source) throws IOException {
     ImmutableList<String> lines = source.readLines();
 

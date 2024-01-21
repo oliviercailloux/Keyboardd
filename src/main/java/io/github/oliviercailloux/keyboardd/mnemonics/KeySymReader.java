@@ -27,10 +27,17 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 /**
  * Reads data as found in a xkbcommon-keysyms.h file and returns a set of mnemonics.
  * 
- * old
- * 
- * Among non-deprecated values, we have that two entries with the same code map to the same unicode
- * point (present or absent)?
+       * <p>Each set of {@link ParsedMnemonic} instances returned by this class satisfy the following properties.</p>
+       * <ul>
+       * <li>Among all mnemonics corresponding to a given keysym code in the returned set, exactly one is canonical, and all others are aliases of that one.
+       * <li>All mnemonics corresponding to a given keysym code in the returned set correspond to the same UCP, or all correspond to no UCP.
+       * </ul>
+       * TODO check those.
+       * 
+       * old
+       * 
+       * <p>This method patches the mnemonics to fix issue <a href="https://github.com/xkbcommon/libxkbcommon/issues/433">#433</a>.
+ * <p>Multiple codes may may to a given ucp (eg mnemonic exclam, code 0x21, ucp U+0021 EXCLAMATION MARK, and mnemonic absent, code 0x1000021, ucp U+0021).
  * 
  * Two pairs of mnemonics share a unicode point but different codes: radical, 0x08d6, U+221A SQUARE
  * ROOT (in Technical) and squareroot, 0x100221A, U+221A SQUARE ROOT; as well as partialderivative,
@@ -42,7 +49,11 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * With these two modifications, among non-deprecated values, we have that two entries with the same
  * present unicode point map to the same code.
  * 
- * Check: when mn1, mn2 to same code, then non first ones are either deprecated or comment equals
+    /*
+     * Among all non-deprecated mns assigned to a given sym, if not empty [such as #define XKB_KEY_topleftradical                0x08a2  /*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)], exactly one is not an
+     * alias, and all others are aliases of that one.
+
+     * Check: when mn1, mn2 to same code, then non first ones are either deprecated or comment equals
  * “alias for …”.
  */
 class KeySymReader {
@@ -145,11 +156,8 @@ class KeySymReader {
       ImmutableSet.of(P_XKB_COMMENT_ALIAS, P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
 
       /**
-       * Returns the latest version of the mnemonics.
-       * <p>Among all non-deprecated mns assigned to a given sym, if not empty, exactly one is not an
-     * alias, and all others are aliases of that one.
-     * <p>Each sym has all (possibly 0) the same ucps.
-     * <p>Multiple codes may may to a given ucp (eg mnemonic exclam, code 0x21, ucp U+0021 EXCLAMATION MARK, and mnemonic absent, code 0x1000021, ucp U+0021).
+       * Returns the latest version of the mnemonics, as included in this library.
+       * This will evolve with the library.
        * @return the latest version of the mnemonics.
        */
   public static ImmutableSet<ParsedMnemonic> latest() {
@@ -275,10 +283,6 @@ class KeySymReader {
   }
 
   static void check(Set<ParsedMnemonic> mns) {
-    /*
-     * Among all non-deprecated mns assigned to a given sym, if not empty [such as #define XKB_KEY_topleftradical                0x08a2  /*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)], exactly one is not an
-     * alias, and all others are aliases of that one.
-     */
     ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
         mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code, m -> m));
     for (int code : mnsByCode.keySet()) {

@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 
+/** A keysym mnemonic (in the form of a `String`), a Unicode Code Point (an integer), or a keysym code (an integer), representing an entry in an XKB symbols file.  */
 public class KeysymEntry {
   public enum Kind {
     MNEMONIC, UCP, CODE

@@ -20,38 +20,38 @@ public class UcpByCode {
         ContiguousSet.create(Range.closed(0x100, 0x10F_FFF), DiscreteDomain.integers()));
   }
 
-  public static UcpByCode withExplicit(Map<Integer, Integer> ucpByCodeExplicit) {
+  public static UcpByCode implicitAndExplicit(Map<Integer, Integer> ucpByCodeExplicit) {
     ContiguousSet<Integer> domain = ContiguousSet.create(Range.closed(0x01_000_100, 0x01_10F_FFF), DiscreteDomain.integers());
     ImmutableSet.Builder<Integer> domainBuilder = ImmutableSet.builder();
     
-    ContiguousSet<Integer> range = ContiguousSet.create(Range.closed(0x100, 0x10F_FFF), 
+    ContiguousSet<Integer> coDomain = ContiguousSet.create(Range.closed(0x100, 0x10F_FFF), 
     DiscreteDomain.integers());
-    ImmutableSet.Builder<Integer> rangeBuilder = ImmutableSet.builder();
+    ImmutableSet.Builder<Integer> coDomainBuilder = ImmutableSet.builder();
 
     return new UcpByCode(ucpByCodeExplicit, c -> c - 0x01_000_000,
         domainBuilder.addAll(domain).addAll(ucpByCodeExplicit.keySet()).build(),
-        rangeBuilder.addAll(range).addAll(ucpByCodeExplicit.values()).build());
+        coDomainBuilder.addAll(coDomain).addAll(ucpByCodeExplicit.values()).build());
   }
 
-  public static UcpByCode withExplicit(Mnemonics mnemonics) {
-    return withExplicit(mnemonics.ucpByCode());
+  public static UcpByCode implicitAndExplicit(Mnemonics mnemonics) {
+    return implicitAndExplicit(mnemonics.ucpByCode());
   }
 
   private final ImmutableMap<Integer, Integer> ucpByCodeExplicit;
   private final Function<Integer, Integer> ucpByCodeImplicit;
   private final ImmutableSet<Integer> domainOfCodes;
-  private final ImmutableSet<Integer> rangeOfUcps;
+  private final ImmutableSet<Integer> coDomainOfUcps;
 
   private UcpByCode(Map<Integer, Integer> ucpByCodeExplicit,
-      Function<Integer, Integer> ucpByCodeImplicit, Set<Integer> domain, Set<Integer> range) {
-    checkArgument(domain.size() >= range.size());
+      Function<Integer, Integer> ucpByCodeImplicit, Set<Integer> domain, Set<Integer> coDomain) {
+    checkArgument(domain.size() >= coDomain.size());
 
     this.ucpByCodeExplicit = ImmutableMap.copyOf(ucpByCodeExplicit);
     this.ucpByCodeImplicit = ucpByCodeImplicit;
     checkArgument(domain.containsAll(ucpByCodeExplicit.keySet()));
     this.domainOfCodes = ImmutableSet.copyOf(domain);
-    checkArgument(range.containsAll(ucpByCodeExplicit.values()));
-    this.rangeOfUcps = ImmutableSet.copyOf(range);
+    checkArgument(coDomain.containsAll(ucpByCodeExplicit.values()));
+    this.coDomainOfUcps = ImmutableSet.copyOf(coDomain);
   }
 
   public boolean hasUcp(int code) {
@@ -64,7 +64,7 @@ public class UcpByCode {
       return ucpByCodeExplicit.get(code);
     }
     int ucp = ucpByCodeImplicit.apply(code);
-    verify(rangeOfUcps.contains(ucp));
+    verify(coDomainOfUcps.contains(ucp));
     return ucp;
   }
 }

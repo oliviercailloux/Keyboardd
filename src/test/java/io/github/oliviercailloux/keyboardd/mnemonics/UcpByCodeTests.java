@@ -15,7 +15,7 @@ public class UcpByCodeTests {
   @Test
   public void testLatest() {
     Mnemonics mns = Mnemonics.latest();
-    UcpByCode ucpByCode = UcpByCode.withExplicit(mns);
+    UcpByCode ucpByCode = UcpByCode.implicitAndExplicit(mns);
     assertEquals(0x100, ucpByCode.ucp(0x01_000_100));
     assertEquals(0x200, ucpByCode.ucp(0x01_000_200));
     assertEquals(0x10F_FFF, ucpByCode.ucp(0x01_10F_FFF));
