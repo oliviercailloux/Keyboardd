@@ -32,12 +32,15 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * properties.
  * </p>
  * <ul>
- * <li>Among all mnemonics corresponding to a given keysym code, exactly one is
- * canonical. NOPE: squareroot stuff.</li>
- * <li>All mnemonics corresponding to a given keysym code correspond to the same
- * UCP, or all correspond to no UCP.</li>
- * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one is canonical.</li>
- * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the same keysym code, or one of them corresponds to a keysym code in the range UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+ * <li>Among all mnemonics corresponding to a given keysym code, exactly one is canonical. NOPE:
+ * squareroot stuff.</li>
+ * <li>All mnemonics corresponding to a given keysym code correspond to the same UCP, or all
+ * correspond to no UCP.</li>
+ * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one
+ * is canonical.</li>
+ * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the
+ * same keysym code, or one of them corresponds to a keysym code in the range
+ * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
  * </ul>
  * TODO check those.
  * 
@@ -77,70 +80,43 @@ class KeySymReader {
    * corresponding UCP.
    */
   public static record ParsedMnemonic (String mnemonic, int code, Optional<Integer> unicode,
-      String comment, boolean deprecated, boolean alias, boolean specific,
-      String remainingComment) {
+      boolean deprecated, boolean specific, String comment) {
     public static ParsedMnemonic noComment(String mnemonic, int code) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), "", false, false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, "");
     }
 
     public static ParsedMnemonic unicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), "", false, false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, false, "");
     }
 
     public static ParsedMnemonic deprecatedUnicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), "", true, false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), true, false, "");
     }
 
     public static ParsedMnemonic specificUnicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), "", false, false, true, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, true, "");
     }
 
     public static ParsedMnemonic deprecated(String mnemonic, int code) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), "deprecated", true, false, false,
-          "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, "");
     }
 
     public static ParsedMnemonic commented(String mnemonic, int code, String comment) {
-      checkArgument(!comment.toLowerCase().contains("alias "));
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), comment, false, false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, comment);
     }
 
-    public static ParsedMnemonic alias(String mnemonic, int code, String comment, String aliasRef) {
-      checkArgument(comment.toLowerCase().startsWith("alias for ")
-          || comment.toLowerCase().startsWith("same as xkb_key_"));
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), comment, false, true, false,
-          aliasRef);
-    }
-
-    public static ParsedMnemonic deprecatedAlias(String mnemonic, int code, String comment,
-        String aliasRef) {
-      checkArgument(comment.toLowerCase().startsWith("deprecated alias for "));
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), comment, true, true, false,
-          aliasRef);
-    }
-
-    public static ParsedMnemonic deprecatedComment(String mnemonic, int code, String comment,
-        String remainingComment) {
+    public static ParsedMnemonic deprecatedComment(String mnemonic, int code, String comment) {
       checkArgument(comment.toLowerCase().startsWith("deprecated"));
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), comment, true, false, false,
-          remainingComment);
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, comment);
     }
 
     public ParsedMnemonic {
       checkArgument(!mnemonic.isEmpty());
-      checkArgument(unicode.isEmpty() || comment.equals(""));
       if (specific) {
         checkArgument(unicode.isPresent());
       }
-      checkArgument(comment.contains(remainingComment));
-      if (alias) {
-        checkArgument(!remainingComment.isEmpty());
-      }
       if (!comment.isEmpty()) {
         checkArgument(!comment.isBlank());
-      }
-      if (!remainingComment.isEmpty()) {
-        checkArgument(!remainingComment.isBlank());
       }
     }
   }
@@ -237,23 +213,14 @@ class KeySymReader {
       Matcher matcherComments) {
     ParsedMnemonic parsed;
     if (matcherComments.pattern().equals(P_XKB_COMMENT_ALIAS)) {
-      String aliasRef = matcherComments.group("alias");
-      parsed = (ParsedMnemonic.alias(name, code, comment, aliasRef));
+      parsed = (ParsedMnemonic.commented(name, code, comment));
     } else if (matcherComments.pattern().equals(P_XKB_COMMENT_UNICODE)) {
       String unicodeStr = matcherComments.group("unicode");
       int unicode = Integer.parseInt(unicodeStr, 16);
       parsed = ParsedMnemonic.unicode(name, code, unicode);
     } else {
       verify(matcherComments.pattern().equals(P_XKB_COMMENT_DEPRECATED));
-      String remaining = matcherComments.group("commentRemaining");
-      Matcher matcherCommentsDeprecated =
-          P_XKB_COMMENT_DEPRECATED_ALIAS.matcher(matcherComments.group());
-      if (matcherCommentsDeprecated.matches()) {
-        String aliasRef = matcherCommentsDeprecated.group("aliasDeprecated");
-        parsed = (ParsedMnemonic.deprecatedAlias(name, code, comment, aliasRef));
-      } else {
-        parsed = (ParsedMnemonic.deprecatedComment(name, code, comment, remaining));
-      }
+      parsed = (ParsedMnemonic.deprecatedComment(name, code, comment));
     }
     return parsed;
   }
@@ -261,9 +228,12 @@ class KeySymReader {
   static void check(Set<ParsedMnemonic> mns) {
     // * <li>All mnemonics corresponding to a given keysym code correspond to the same
     // * UCP, or all correspond to no UCP.</li>
-    // * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one is canonical.</li>
-    // * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the same keysym code, or one of them corresponds to a keysym code in the range UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
-       ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
+    // * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP,
+    // exactly one is canonical.</li>
+    // * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond
+    // to the same keysym code, or one of them corresponds to a keysym code in the range
+    // UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+    ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
         mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code, m -> m));
     for (int code : mnsByCode.keySet()) {
       ImmutableSet<ParsedMnemonic> mnsForCode = mnsByCode.get(code);
