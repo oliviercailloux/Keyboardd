@@ -35,7 +35,7 @@ public class Fusionner {
   private static final Logger LOGGER = LoggerFactory.getLogger(Fusionner.class);
 
   public static Fusionner parse() {
-    ImmutableBiMap<String, MnKeySym> keySyms = KeySymReader.parseAndPatch();
+    ImmutableBiMap<String, MnKeySym> keySyms = KeysymReader.parseAndPatch();
     ImmutableMap<String, Integer> mnToCode =
         Maps.toMap(keySyms.keySet(), m -> keySyms.get(m).code());
     ImmutableBiMap<Integer, String> codeToDisplay = buildDisplayTable(keySyms.values());

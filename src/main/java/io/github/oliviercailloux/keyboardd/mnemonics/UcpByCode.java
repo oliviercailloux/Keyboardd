@@ -14,21 +14,20 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 
 public class UcpByCode {
-  public static final Range<Integer> IMPLICIT_UCPS = Range.closed(0x100, 0x10F_FFF);
-  public static final Range<Integer> IMPLICIT_UCP_KEYSYM_CODES = Range.closed(0x01_000_100, 0x01_10F_FFF);
+  public static final ContiguousSet<Integer> IMPLICIT_UCPS = ContiguousSet.closed(0x100, 0x10F_FFF);
+  public static final ContiguousSet<Integer> IMPLICIT_UCP_KEYSYM_CODES = ContiguousSet.closed(0x01_000_100, 0x01_10F_FFF);
 
   public static UcpByCode implicit() {
     return new UcpByCode(ImmutableMap.of(), c -> c - 0x01_000_000,
-        ContiguousSet.create(IMPLICIT_UCP_KEYSYM_CODES, DiscreteDomain.integers()),
-        ContiguousSet.create(IMPLICIT_UCPS, DiscreteDomain.integers()));
+    IMPLICIT_UCP_KEYSYM_CODES,
+    IMPLICIT_UCPS);
   }
 
   public static UcpByCode implicitAndExplicit(Map<Integer, Integer> ucpByCodeExplicit) {
-    ContiguousSet<Integer> domain = ContiguousSet.create(IMPLICIT_UCP_KEYSYM_CODES, DiscreteDomain.integers());
+    ContiguousSet<Integer> domain = IMPLICIT_UCP_KEYSYM_CODES;
     ImmutableSet.Builder<Integer> domainBuilder = ImmutableSet.builder();
     
-    ContiguousSet<Integer> coDomain = ContiguousSet.create(IMPLICIT_UCPS, 
-    DiscreteDomain.integers());
+    ContiguousSet<Integer> coDomain = IMPLICIT_UCPS;
     ImmutableSet.Builder<Integer> coDomainBuilder = ImmutableSet.builder();
 
     return new UcpByCode(ucpByCodeExplicit, c -> c - 0x01_000_000,

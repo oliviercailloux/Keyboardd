@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.MoreCollectors;
+import com.google.common.collect.Sets;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 
@@ -32,52 +33,24 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * properties.
  * </p>
  * <ul>
- * <li>Among all mnemonics corresponding to a given keysym code, exactly one is canonical. NOPE:
- * squareroot stuff.</li>
- * <li>All mnemonics corresponding to a given keysym code correspond to the same UCP, or all
- * correspond to no UCP.</li>
- * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP, exactly one
- * is canonical.</li>
+ * <li>The mnemonics that correspond to a given keysym code correspond to at most one UCP.</li>
  * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the
- * same keysym code, or one of them corresponds to a keysym code in the range
+ * same keysym code, or exactly one of them corresponds to a keysym code in the range
  * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+ * <li>Each entry in the set represents one entry in the source. There is no lookup logic, thus, for
+ * example, an entry in the source that has as comment “deprecated alias for oslash” will be parsed
+ * as a deprecated mnemonic with no associated UCP: it does not lookup the relevant UCP from the
+ * entry corresponding to the oslash mnemonic.</li>
+ * <li>The canonical mnemonic associated to a given keysym code is the first one in iteration order
+ * of the returned set that is not deprecated and not specific.</li>
  * </ul>
- * TODO check those.
- * 
- * old
- * 
- * <p>
- * This method patches the mnemonics to fix issue
- * <a href="https://github.com/xkbcommon/libxkbcommon/issues/433">#433</a>.
- * <p>
- * Multiple codes may may to a given ucp (eg mnemonic exclam, code 0x21, ucp U+0021 EXCLAMATION
- * MARK, and mnemonic absent, code 0x1000021, ucp U+0021).
- * 
- * Two pairs of mnemonics share a unicode point but different codes: radical, 0x08d6, U+221A SQUARE
- * ROOT (in Technical) and squareroot, 0x100221A, U+221A SQUARE ROOT; as well as partialderivative,
- * 0x08ef, U+2202 PARTIAL DIFFERENTIAL (in Technical) and partdifferential, 0x1002202, U+2202
- * PARTIAL DIFFERENTIAL (in XK_MATHEMATICAL). This class patches those by assigning squareroot,
- * 0x100221A, to no unicode and comment “2√”; and partdifferential, 0x1002202, to U+1D6DB
- * MATHEMATICAL BOLD PARTIAL DIFFERENTIAL.
- * 
- * With these two modifications, among non-deprecated values, we have that two entries with the same
- * present unicode point map to the same code.
- * 
- * /* Among all non-deprecated mns assigned to a given sym, if not empty [such as #define
- * XKB_KEY_topleftradical 0x08a2 /*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)], exactly one is not
- * an alias, and all others are aliases of that one.
- * 
- * Check: when mn1, mn2 to same code, then non first ones are either deprecated or comment equals
- * “alias for …”.
  */
-class KeySymReader {
+class KeysymReader {
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = LoggerFactory.getLogger(KeySymReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KeysymReader.class);
 
   /**
-   * Just a single line entry, thus, with no lookup logic, thus, “deprecated alias for oslash” does
-   * not lookup for the oslash mnemonic (mapped to U+00F8), thus, does not retrieve the
-   * corresponding UCP.
+   * Reflects a single entry in the source.
    */
   public static record ParsedMnemonic (String mnemonic, int code, Optional<Integer> unicode,
       boolean deprecated, boolean specific, String comment) {
@@ -150,7 +123,7 @@ class KeySymReader {
    */
   public static ImmutableSet<ParsedMnemonic> latest() {
     CharSource keysyms = Resources.asCharSource(
-        KeySymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
+        KeysymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
     ImmutableSet<ParsedMnemonic> latest;
     try {
       latest = parse(keysyms);
@@ -225,60 +198,23 @@ class KeySymReader {
     return parsed;
   }
 
-  static void check(Set<ParsedMnemonic> mns) {
-    // * <li>All mnemonics corresponding to a given keysym code correspond to the same
-    // * UCP, or all correspond to no UCP.</li>
-    // * <li>Among all non deprecated and non specific mnemonics corresponding to a given UCP,
-    // exactly one is canonical.</li>
-    // * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond
-    // to the same keysym code, or one of them corresponds to a keysym code in the range
-    // UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+  private static void check(Set<ParsedMnemonic> mns) {
+    /* The mnemonics that correspond to a given keysym code correspond to at most one UCP. */
     ImmutableSetMultimap<Integer, ParsedMnemonic> mnsByCode =
-        mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code, m -> m));
+        mns.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(m -> m.code(), m -> m));
     for (int code : mnsByCode.keySet()) {
       ImmutableSet<ParsedMnemonic> mnsForCode = mnsByCode.get(code);
-      ImmutableSet<ParsedMnemonic> nonDeprs =
-          mnsForCode.stream().filter(m -> !m.deprecated).collect(ImmutableSet.toImmutableSet());
-      if (nonDeprs.isEmpty()) {
-        // LOGGER.info("No non deprecated for code {}.", code);
-        continue;
-      }
-      ImmutableSet<ParsedMnemonic> nonAliases =
-          nonDeprs.stream().filter(m -> !m.alias).collect(ImmutableSet.toImmutableSet());
-      // if (nonAliases.size() != 1) {
-      // LOGGER.info("Non aliases: {}.", nonAliases);
-      // continue;
-      // }
-      verify(nonAliases.size() == 1, nonAliases.toString());
-      ParsedMnemonic nonAlias = nonAliases.stream().collect(MoreCollectors.onlyElement());
-      ImmutableSet<ParsedMnemonic> aliases =
-          nonDeprs.stream().filter(m -> m.alias).collect(ImmutableSet.toImmutableSet());
-      verify(aliases.size() == nonDeprs.size() - 1);
-      for (ParsedMnemonic alias : aliases) {
-        verify(alias.remainingComment.equals(nonAlias.mnemonic),
-            "Alias %s for %s.".formatted(alias, nonAlias.mnemonic));
-      }
+      ImmutableSet<Integer> ucpsAll = mnsForCode.stream().map(m -> m.unicode())
+          .flatMap(Optional::stream).collect(ImmutableSet.toImmutableSet());
 
-      /* Each sym has only ucps or none, and all the same. */
-      ImmutableSet<Optional<Integer>> ucpsAll = mnsForCode.stream().filter(m -> !m.deprecated())
-          .filter(m -> !m.alias()).map(m -> m.unicode()).collect(ImmutableSet.toImmutableSet());
-
-      verify(ucpsAll.size() <= 1,
-          "Code 0x%s, unics %s.".formatted(Integer.toHexString(code), ucpsAll.toString()));
+      checkArgument(ucpsAll.size() <= 1,
+          "Code 0x%s, UCPs %s.".formatted(Integer.toHexString(code), ucpsAll.toString()));
     }
 
     /*
-     * Each unicode …? The test fails for the KP mnemonics if including specific ones: KP_Add to
-     * KP_Divide, KP_0 to KP_9, KP_Return, KP_Tab, KP_Space, KP_Equal, KP_Separator, KP_Decimal. The
-     * test fails for many mnemonics if including deprecated ones: period and decimalpoint, less and
-     * leftcaret, underscore and underbar, macron and overbar, topleftradical and upleftcorner,
-     * horizconnector and horizlinescan5, includedin and leftshoe, … Anyway, this is hopeless, I
-     * suppose, as any ucp is automatically mapped to a code, which, I suppose, differs very often
-     * from the mnemonic one. I’d better assume (reasonably, I suppose) that any X system will do
-     * the same thing when facing two keysym codes that are standardly mapped to the same unicode
-     * (such as the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code
-     * 0x1000021 corresponding to U+0021 EXCLAMATION MARK), and thus not try to make ucps
-     * distinguish these keysym codes.
+     * All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the
+     * same keysym code, or exactly one of them corresponds to a keysym code in the range
+     * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.
      */
     ImmutableSetMultimap<Integer,
         ParsedMnemonic> mnsByUcp = mns.stream().filter(m -> !m.deprecated())
@@ -287,10 +223,15 @@ class KeySymReader {
                 m -> m.unicode().orElseThrow(VerifyException::new), m -> m));
     for (int ucp : mnsByUcp.keySet()) {
       ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
-      if (mnsForUcp.size() != 1) {
-        LOGGER.info("Ucp {} mns {}.", ucp, mnsForUcp);
+      ImmutableSet<Integer> codesForUcp =
+          mnsForUcp.stream().map(m -> m.code()).collect(ImmutableSet.toImmutableSet());
+      verify(codesForUcp.size() >= 1);
+      if (codesForUcp.size() >= 2) {
+        ImmutableSet<Integer> implicitCodes =
+            Sets.intersection(codesForUcp, UcpByCode.IMPLICIT_UCP_KEYSYM_CODES).immutableCopy();
+        checkArgument(implicitCodes.size() == 1,
+            "Ucp %s, mns %s.".formatted(ucp, mnsForUcp.toString()));
       }
-      // verify(mnsForUcp.size() == 1, "Ucp %s, mns %s.".formatted(ucp, mnsForUcp.toString()));
     }
   }
 }

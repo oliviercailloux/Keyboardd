@@ -17,10 +17,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
-import io.github.oliviercailloux.keyboardd.mnemonics.KeySymReader.ParsedMnemonic;
+import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
 
 /**
- * Mnemonics to their code and possibly UCP and whether they are deprecated.
+ * Association of the mnemonics to their code and aliases and possibly UCP and whether they are deprecated.
  * <ul>
  * <li>Map (non bijective, complete) from keysym mnemonic to keysym code</li>
  * <li>Map (non bijective, complete) from keysym mnemonic to whether it is deprecated</li>
@@ -32,7 +32,38 @@ import io.github.oliviercailloux.keyboardd.mnemonics.KeySymReader.ParsedMnemonic
  * <li>Can be obtained from parsing a keysyms file?</li>
  * <li>Can be obtained from lib?</li>
  * </ul>
- */
+    /*
+     * Anyway, this is hopeless, I
+     * suppose, as any ucp is automatically mapped to a code, which, I suppose, differs very often
+     * from the mnemonic one. I’d better assume (reasonably, I suppose) that any X system will do
+     * the same thing when facing two keysym codes that are standardly mapped to the same unicode
+     * (such as the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code
+     * 0x1000021 corresponding to U+0021 EXCLAMATION MARK), and thus not try to make ucps
+     * distinguish these keysym codes.
+ * <p>
+ * This method patches the mnemonics to fix issue
+ * <a href="https://github.com/xkbcommon/libxkbcommon/issues/433">#433</a>.
+ * <p>
+ * Multiple codes may may to a given ucp (eg mnemonic exclam, code 0x21, ucp U+0021 EXCLAMATION
+ * MARK, and mnemonic absent, code 0x1000021, ucp U+0021).
+ * 
+ * Two pairs of mnemonics share a unicode point but different codes: radical, 0x08d6, U+221A SQUARE
+ * ROOT (in Technical) and squareroot, 0x100221A, U+221A SQUARE ROOT; as well as partialderivative,
+ * 0x08ef, U+2202 PARTIAL DIFFERENTIAL (in Technical) and partdifferential, 0x1002202, U+2202
+ * PARTIAL DIFFERENTIAL (in XK_MATHEMATICAL). This class patches those by assigning squareroot,
+ * 0x100221A, to no unicode and comment “2√”; and partdifferential, 0x1002202, to U+1D6DB
+ * MATHEMATICAL BOLD PARTIAL DIFFERENTIAL.
+ * 
+ * With these two modifications, among non-deprecated values, we have that two entries with the same
+ * present unicode point map to the same code.
+ * 
+ * /* Among all non-deprecated mns assigned to a given sym, if not empty [such as #define
+ * XKB_KEY_topleftradical 0x08a2 /*(U+250C BOX DRAWINGS LIGHT DOWN AND RIGHT)], exactly one is not
+ * an alias, and all others are aliases of that one.
+ * 
+ * Check: when mn1, mn2 to same code, then non first ones are either deprecated or comment equals
+ * “alias for …”.
+     */
 public class Mnemonics {
   public static record CanonicalMnemonic (String mnemonic, int code,
       ImmutableSet<String> nonDeprecatedAliases, ImmutableSet<String> deprecatedAliases,
@@ -61,8 +92,11 @@ public class Mnemonics {
   private final ImmutableBiMap<String, CanonicalMnemonic> canonicals;
   private final ImmutableMap<String, CanonicalMnemonic> canonicalsByAlias;
 
+  public static Mnemonics latestTODOOtherSource() {
+  }
+  
   public static Mnemonics latest() {
-    ImmutableSet<ParsedMnemonic> parsedMns = KeySymReader.latest();
+    ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.latest();
     ImmutableMap<ParsedMnemonic, Integer> mnToCode = parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
     ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
     ImmutableSet<Integer> codes = codeToMns.keySet();
