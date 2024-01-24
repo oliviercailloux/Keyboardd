@@ -119,6 +119,10 @@ Define manually a json physical row keyboard: that’s easy. Set special widths 
 Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
 Modify the SVG manually.
 
+== Notes
+This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
+It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
+
 == TODO
 Ask https://github.com/xkbcommon/libxkbcommon/issues/433[] about the squareroot stuff (which I confirmed again on 14 janv), probable oversight as all other such cases are deprecated: period and decimalpoint, less and leftcaret, underscore and underbar, macron and overbar, topleftradical and upleftcorner, horizconnector and horizlinescan5, includedin and leftshoe, …. Then a given mnemonic maps to one UCP that maps to no other mnemonic than this one (though it generally maps to two codes!). But, anyway, let’s assume that this does not matter: any X system should act the same whatever the code mapping to a given (non-specific) UCP? (Though if specific ones are distinct, then maybe also non specific ones!)
 Maybe rather at https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/issues[].

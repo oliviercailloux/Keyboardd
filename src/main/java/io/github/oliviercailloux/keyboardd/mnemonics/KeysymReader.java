@@ -42,7 +42,7 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * as a deprecated mnemonic with no associated UCP: it does not lookup the relevant UCP from the
  * entry corresponding to the oslash mnemonic.</li>
  * <li>The canonical mnemonic associated to a given keysym code is the first one in iteration order
- * of the returned set that is not deprecated and not specific.</li>
+ * of the returned set that is not specific (and not deprecated, unless that makes the set of candidates empty).</li>
  * </ul>
  */
 class KeysymReader {

@@ -1,7 +1,5 @@
 package io.github.oliviercailloux.keyboardd.mnemonics;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Verify.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -10,12 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.MoreCollectors;
-import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.io.CharSource;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,10 +309,28 @@ public class KeysymReaderTests {
             .filter(m -> !m.specific()).filter(m -> m.unicode().isPresent())
             .collect(ImmutableSetMultimap.toImmutableSetMultimap(
                 m -> m.unicode().orElseThrow(VerifyException::new), m -> m));
-    ImmutableSet<Integer> ambiguous = mnsByUcp.keys().stream().filter(c -> mnsByUcp.get(c).size() >= 2).collect(ImmutableSet
-        .toImmutableSet());
-        int ucpRoot = "√".codePoints().boxed().collect(MoreCollectors.onlyElement());
-        int ucpPartialDifferential = "∂".codePoints().boxed().collect(MoreCollectors.onlyElement());
-        assertEquals(ImmutableSet.of(ucpRoot, ucpPartialDifferential), ambiguous);
+    ImmutableSet<Integer> ambiguous = mnsByUcp.keys().stream()
+        .filter(c -> mnsByUcp.get(c).size() >= 2).collect(ImmutableSet.toImmutableSet());
+    int ucpRoot = "√".codePoints().boxed().collect(MoreCollectors.onlyElement());
+    int ucpPartialDifferential = "∂".codePoints().boxed().collect(MoreCollectors.onlyElement());
+    assertEquals(ImmutableSet.of(ucpRoot, ucpPartialDifferential), ambiguous);
+  }
+
+  @Test
+  public void testDeprecatedFirst() throws Exception {
+    int ucpBoxDrawingsLightDownAndRight =
+        "┌".codePoints().boxed().collect(MoreCollectors.onlyElement());
+    ImmutableSet<ParsedMnemonic> mns = KeysymReader.latest();
+    ImmutableSet<ParsedMnemonic> mnsForUcp = mns.stream().filter(m -> m.unicode().isPresent())
+        .filter(m -> m.unicode().get() == ucpBoxDrawingsLightDownAndRight)
+        .collect(ImmutableSet.toImmutableSet());
+    assertEquals(2, mnsForUcp.size());
+    UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
+    ParsedMnemonic mn1 = iterator.next();
+    assertEquals("topleftradical", mn1.mnemonic());
+    assertTrue(mn1.deprecated());
+    ParsedMnemonic mn2 = iterator.next();
+    assertEquals("upleftcorner", mn2.mnemonic());
+    assertFalse(mn2.deprecated());
   }
 }
