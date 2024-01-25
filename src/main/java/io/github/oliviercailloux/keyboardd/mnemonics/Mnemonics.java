@@ -3,21 +3,18 @@ package io.github.oliviercailloux.keyboardd.mnemonics;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Sets;
-import com.google.common.collect.UnmodifiableIterator;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Association of the mnemonics to their code and aliases and possibly UCP and whether they are
@@ -48,7 +45,9 @@ public class Mnemonics {
 
     /**
      * Retrieves the mnemonics associated to the same code as this one.
-     * @return the relative mnemonics, starting with this one, followed by the non deprecated aliases and finally by the deprecated aliases.
+     * 
+     * @return the relative mnemonics, starting with this one, followed by the non deprecated
+     *         aliases and finally by the deprecated aliases.
      */
     public ImmutableSet<String> mnemonics() {
       return ImmutableSet.<String>builder().add(mnemonic).addAll(nonDeprecatedAliases)
@@ -57,6 +56,7 @@ public class Mnemonics {
 
     /**
      * Retrieves the mnemonics associated to the same code as this one, except for this one.
+     * 
      * @return the non deprecated aliases followed by the deprecated aliases.
      */
     public ImmutableSet<String> aliases() {
@@ -65,10 +65,9 @@ public class Mnemonics {
     }
   }
 
-  private final ImmutableMap<String, Integer> code;
-  private final ImmutableMap<String, Integer> ucp;
-  private final ImmutableBiMap<String, CanonicalMnemonic> canonicals;
-  private final ImmutableMap<String, CanonicalMnemonic> canonicalsByAlias;
+  private final ImmutableMap<String, CanonicalMnemonic> byMnemonic;
+  private final ImmutableBiMap<Integer, CanonicalMnemonic> byCode;
+  private final ImmutableBiMap<Integer, CanonicalMnemonic> byUcp;
 
   /**
    * If the given source maps several codes (through different mnemonics) to a given UCP, it must
@@ -80,40 +79,78 @@ public class Mnemonics {
 
   public static Mnemonics latest() {
     ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.latest();
+    /*
+     * We want to define equivalence classes: p equiv p' iff they have the same code (implying the
+     * same ucp or all absent ucp) OR the same ucp (NOT implying the same code). Each such class is
+     * then mapped to one canonical mnemonic per code in the class. This mapping depends on the
+     * whole equivalence class (it is not separable).
+     */
+    final ImmutableSet.Builder<ImmutableSet<ParsedMnemonic>> equivalenceClassesBuilder =
+        new ImmutableSet.Builder<>();
+    for (ParsedMnemonic parsedMn : parsedMns) {
+      equivalenceClassesBuilder.add(parsedMns.stream()
+          .filter(p -> parsedMn.code() == p.code()
+              || (parsedMn.unicode().isPresent() && parsedMn.unicode().equals(p.unicode())))
+          .collect(ImmutableSet.toImmutableSet()));
+    }
+    ImmutableSet<ImmutableSet<ParsedMnemonic>> equivalenceClasses =
+        equivalenceClassesBuilder.build();
+    ImmutableSet<CanonicalMnemonic> canonicals = equivalenceClasses.stream()
+        .flatMap(s -> toCanonicals(s).stream()).collect(ImmutableSet.toImmutableSet());
+    // ImmutableMap<ParsedMnemonic, Integer> mnToCode =
+    // parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
+    // ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
+    // ImmutableSet<Integer> codes = codeToMns.keySet();
+    // ImmutableSet<CanonicalMnemonic> canonicals = codes.stream()
+    // .map(c -> toCanonical(codeToMns.get(c))).collect(ImmutableSet.toImmutableSet());
+    // ImmutableSetMultimap<Integer, CanonicalMnemonic> ucpToCan = canonicals.stream()
+    // .filter(c -> c.ucp().isPresent())
+    // .collect(ImmutableSetMultimap.toImmutableSetMultimap(c -> c.ucp().orElseThrow(), c -> c));
+
+    return new Mnemonics(canonicals);
+  }
+
+  private static ImmutableSet<CanonicalMnemonic> toCanonicals(Set<ParsedMnemonic> parsedMns) {
+    ImmutableSet<Optional<Integer>> ucps = parsedMns.stream().map(ParsedMnemonic::unicode)
+        .distinct().collect(ImmutableSet.toImmutableSet());
+    checkArgument(ucps.size() == 1);
+    Optional<Integer> ucp = Iterables.getOnlyElement(ucps);
     ImmutableMap<ParsedMnemonic, Integer> mnToCode =
         parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
     ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
-    ImmutableSet<Integer> codes = codeToMns.keySet();
-    ImmutableSet<CanonicalMnemonic> canonicals = codes.stream()
-        .map(c -> toCanonical(codeToMns.get(c))).collect(ImmutableSet.toImmutableSet());
-    ImmutableBiMap<String, ParsedMnemonic> canonicalMns =
-        patchedMns.stream().filter(m -> !m.alias())
-            .collect(ImmutableBiMap.toImmutableBiMap(ParsedMnemonic::mnemonic, m -> m));
-    ImmutableSetMultimap<String, ParsedMnemonic> aliasesByCanonical =
-        patchedMns.stream().filter(m -> m.alias()).collect(
-            ImmutableSetMultimap.toImmutableSetMultimap(ParsedMnemonic::remainingComment, m -> m));
-    // ImmutableSetMultimap<ParsedMnemonic, ParsedMnemonic> aliasesByCanonical =
-    // patchedMns.stream().filter(m ->
-    // m.alias()).collect(ImmutableSetMultimap.toImmutableSetMultimap(m ->
-    // canonicalMns.get(m.remainingComment()), m -> m));
-    ImmutableSet.Builder<CanonicalMnemonic> canonicalMnemonicsBuilder = ImmutableSet.builder();
-    for (ParsedMnemonic mn : canonicalMns.values()) {
-      String canonical = mn.mnemonic();
-      ImmutableSet<ParsedMnemonic> allAliases = aliasesByCanonical.get(canonical);
-      ImmutableSet<String> nonDeprecatedaliases = allAliases.stream().filter(m -> !m.deprecated())
-          .map(ParsedMnemonic::mnemonic).collect(ImmutableSet.toImmutableSet());
-      ImmutableSet<String> deprecatedAliases =
-          allAliases.stream().filter(ParsedMnemonic::deprecated).map(ParsedMnemonic::mnemonic)
-              .collect(ImmutableSet.toImmutableSet());
-      CanonicalMnemonic canonicalMnemonic = new CanonicalMnemonic(canonical, mn.code(),
-          nonDeprecatedaliases, deprecatedAliases, mn.unicode(), mn.deprecated());
-      canonicalMnemonicsBuilder.add(canonicalMnemonic);
+    verify(codeToMns.size() >= 1);
+    if (codeToMns.size() >= 2) {
+      verify(ucp.isPresent());
     }
-    return new Mnemonics(canonicalMnemonicsBuilder.build());
+    int codeThatKeepsUcp = getCodeThatKeepsUcp(parsedMns);
+    final ImmutableSet.Builder<CanonicalMnemonic> mnsBuilder = new ImmutableSet.Builder<>();
+    for (int code : codeToMns.keySet()) {
+      mnsBuilder.add(toCanonical(codeToMns.get(code), code == codeThatKeepsUcp));
+    }
+    return mnsBuilder.build();
   }
 
-  private static CanonicalMnemonic toCanonical(ImmutableSet<ParsedMnemonic> mnemonics) {
-    UnmodifiableIterator<ParsedMnemonic> iterator = mnemonics.iterator();
+  private static int getCodeThatKeepsUcp(Set<ParsedMnemonic> parsedMns) {
+    verify(parsedMns.stream().map(ParsedMnemonic::unicode).distinct().count() == 1);
+    int masterCode;
+    ImmutableSet<Integer> codes =
+        parsedMns.stream().map(p -> p.code()).distinct().collect(ImmutableSet.toImmutableSet());
+    if (codes.size() == 1)
+      return Iterables.getOnlyElement(codes);
+    ImmutableSet<Integer> nonSpecifics = parsedMns.stream().filter(p -> !p.specific())
+        .map(ParsedMnemonic::code).collect(ImmutableSet.toImmutableSet());
+    if (nonSpecifics.size() == 1) {
+      masterCode = Iterables.getOnlyElement(nonSpecifics);
+    } else {
+      masterCode =
+          nonSpecifics.stream().filter(c -> UcpByCode.IMPLICIT_UCP_KEYSYM_CODES.contains(c))
+              .collect(MoreCollectors.onlyElement());
+    }
+    return masterCode;
+  }
+
+  private static CanonicalMnemonic toCanonical(Set<ParsedMnemonic> mnemonics, boolean keepUcp) {
+    Iterator<ParsedMnemonic> iterator = mnemonics.iterator();
     checkArgument(iterator.hasNext());
     ParsedMnemonic first = iterator.next();
     ImmutableSet<ParsedMnemonic> remaining =
@@ -124,151 +161,80 @@ public class Mnemonics {
     }
     int code = mnemonics.stream().map(ParsedMnemonic::code).distinct()
         .collect(MoreCollectors.onlyElement());
-    Optional<Integer> ucp = mnemonics.stream().map(ParsedMnemonic::unicode).distinct()
-        .collect(MoreCollectors.onlyElement());
+    Optional<Integer> ucp;
+    if (keepUcp) {
+      ucp = mnemonics.stream().map(ParsedMnemonic::unicode).distinct()
+          .collect(MoreCollectors.onlyElement());
+    } else {
+      ucp = Optional.empty();
+    }
     ImmutableSet<ParsedMnemonic> deprecateds = remaining.stream().filter(ParsedMnemonic::deprecated)
         .collect(ImmutableSet.toImmutableSet());
     ImmutableSet<ParsedMnemonic> nonDeprecateds =
         remaining.stream().filter(p -> !p.deprecated()).collect(ImmutableSet.toImmutableSet());
-    return new CanonicalMnemonic(first.mnemonic(), code, null, nonDeprecateds.stream()
-        .map(ParsedMnemonic::mnemonic).collect(ImmutableSet.toImmutableSet()), ucp, deprecated);
-    return new CanonicalMnemonic(first.mnemonic(), code, null,
+    return new CanonicalMnemonic(first.mnemonic(), code,
+        nonDeprecateds.stream().map(ParsedMnemonic::mnemonic)
+            .collect(ImmutableSet.toImmutableSet()),
         deprecateds.stream().map(ParsedMnemonic::mnemonic).collect(ImmutableSet.toImmutableSet()),
         ucp, deprecated);
-
   }
 
   public static Mnemonics from(Set<CanonicalMnemonic> canonicalMnemonics) {
     return new Mnemonics(canonicalMnemonics);
   }
 
-  private Mnemonics(Set<CanonicalMnemonic> canonicalKeysymMnemonics) {
-    canonicals = canonicalKeysymMnemonics.stream()
-        .collect(ImmutableBiMap.toImmutableBiMap(CanonicalMnemonic::mnemonic, c -> c));
-
-    final ImmutableMap.Builder<String, Integer> keysymCodeByKeysymMnemonicBuilder =
-        ImmutableMap.builder();
-    for (CanonicalMnemonic canonical : canonicalKeysymMnemonics) {
-      int curCode = canonical.code();
-      for (String mnemonic : canonical.mnemonics()) {
-        keysymCodeByKeysymMnemonicBuilder.put(mnemonic, curCode);
-      }
+  private Mnemonics(Set<CanonicalMnemonic> canonicalMnemonics) {
+    final ImmutableMap.Builder<String, CanonicalMnemonic> byMnemonicBuilder =
+        new ImmutableMap.Builder<>();
+    for (CanonicalMnemonic canonicalMnemonic : canonicalMnemonics) {
+      byMnemonicBuilder.putAll(Maps.asMap(canonicalMnemonic.mnemonics(), m -> canonicalMnemonic));
     }
-    code = keysymCodeByKeysymMnemonicBuilder.build();
+    byMnemonic = byMnemonicBuilder.build();
 
-    final ImmutableMap.Builder<String, Integer> ucpByKeysymMnemonicBuilder = ImmutableMap.builder();
-    for (CanonicalMnemonic canonical : canonicalKeysymMnemonics) {
-      Optional<Integer> optUcp = canonical.ucp();
-      if (optUcp.isEmpty()) {
-        continue;
-      }
-      int curUcp = optUcp.orElseThrow();
-      for (String mnemonic : canonical.mnemonics()) {
-        ucpByKeysymMnemonicBuilder.put(mnemonic, curUcp);
-      }
-    }
+    byCode = canonicalMnemonics.stream()
+        .collect(ImmutableBiMap.toImmutableBiMap(CanonicalMnemonic::code, c -> c));
 
-    ucp = ucpByKeysymMnemonicBuilder.build();
+    byUcp = canonicalMnemonics.stream().filter(c -> c.ucp().isPresent())
+        .collect(ImmutableBiMap.toImmutableBiMap(c -> c.ucp().orElseThrow(), c -> c));
+  }
 
-    final ImmutableMap.Builder<String, CanonicalMnemonic> canonicalsByAliasBuilder =
-        ImmutableMap.builder();
-    for (CanonicalMnemonic canonical : canonicalKeysymMnemonics) {
-      for (String alias : canonical.aliases()) {
-        canonicalsByAliasBuilder.put(alias, canonical);
-      }
-    }
-    canonicalsByAlias = canonicalsByAliasBuilder.build();
-
-    /* Checks that each code has zero or one ucp. */
-    ucpByCode();
+  public CanonicalMnemonic canonical(String keysymMnemonic) {
+    checkArgument(byMnemonic.containsKey(keysymMnemonic));
+    return byMnemonic.get(keysymMnemonic);
   }
 
   /**
    * 
-   * @return all known keysym mnemonics.
+   * @return keyset: all keysym mnemonics; values: all canonical keysym mnemonics, including any
+   *         deprecated ones
    */
-  public ImmutableSet<String> mnemonics() {
-    return code.keySet();
+  public ImmutableMap<String, CanonicalMnemonic> byMnemonic() {
+    return byMnemonic;
   }
 
   /**
    * 
-   * @return a subset of keysym mnemonics that might include deprecated ones.
+   * @return keyset: all keysym codes; values: all canonical keysym mnemonics, including any
+   *         deprecated ones
    */
-  public ImmutableSet<String> canonicals() {
-    return canonicals.keySet();
-  }
-
-  public boolean isDeprecated(String keysymMnemonic) {
-    checkArgument(mnemonics().contains(keysymMnemonic));
-    boolean isCanonical = canonicals.containsKey(keysymMnemonic);
-    boolean isAlias = canonicalsByAlias.containsKey(keysymMnemonic);
-    verify(isCanonical != isAlias);
-
-    if (isCanonical) {
-      CanonicalMnemonic canonical;
-      canonical = canonicals.get(keysymMnemonic);
-      return canonical.deprecated();
-    }
-    CanonicalMnemonic canonical;
-    canonical = canonicalsByAlias.get(keysymMnemonic);
-    verify(canonical.aliases().contains(keysymMnemonic));
-    boolean isNonDepr = canonical.nonDeprecatedAliases().contains(keysymMnemonic);
-    boolean isDepr = canonical.deprecatedAliases().contains(keysymMnemonic);
-    verify(isNonDepr != isDepr);
-    return isDepr;
-  }
-
-  public ImmutableSet<String> aliases(String canonicalKeysymMnemonic) {
-    checkArgument(canonicals.containsKey(canonicalKeysymMnemonic));
-    return canonicals.get(canonicalKeysymMnemonic).aliases();
-  }
-
-  public ImmutableSet<String> nonDeprecatedAliases(String canonicalKeysymMnemonic) {
-    checkArgument(canonicals.containsKey(canonicalKeysymMnemonic));
-    return canonicals.get(canonicalKeysymMnemonic).nonDeprecatedAliases();
+  public ImmutableBiMap<Integer, CanonicalMnemonic> byCode() {
+    return byCode;
   }
 
   /**
    * 
-   * @return keyset contains all mnemonics
+   * @return keyset: the UCP bound to a mnemonic; values: the mnemonics bound to a UCP, some of
+   *         which might be deprecated
    */
-  public ImmutableMap<String, Integer> codeByMnemonic() {
-    return code;
+  public ImmutableBiMap<Integer, CanonicalMnemonic> byUcp() {
+    return byUcp;
   }
 
   /**
-   * 
-   * @return keyset contains a subset of the mnemonics, some of which might be deprecated
-   */
-  public ImmutableMap<String, Integer> ucpByMnemonic() {
-    return ucp;
-  }
-
-  ImmutableMap<Integer, Integer> ucpByCode() {
-    ImmutableSetMultimap<Integer, String> mnemonicsByCode = code.asMultimap().inverse();
-    ImmutableMap<Integer,
-        Set<Integer>> ucpsByCode = Maps.toMap(mnemonicsByCode.keySet(),
-            c -> mnemonicsByCode.get(c).stream().filter(m -> ucp.containsKey(m))
-                .map(m -> ucp.get(m)).distinct().collect(ImmutableSet.toImmutableSet()));
-    Map<Integer, Set<Integer>> ucpsByCodeWithUcp = Maps.filterValues(ucpsByCode, s -> !s.isEmpty());
-    return Maps.toMap(ucpsByCodeWithUcp.keySet(),
-        c -> Iterables.getOnlyElement(ucpsByCodeWithUcp.get(c)));
-  }
-
-  public ImmutableSet<CanonicalMnemonic> asSet() {
-    return canonicals.values();
-  }
-
-  public ImmutableBiMap<String, CanonicalMnemonic> asCanonicalMap() {
-    return canonicals;
-  }
-
-  /**
-   * This loses codes that are mapped only to deprecated mnemonics.
+   * This loses entries that are mapped only to deprecated mnemonics.
    */
   public Mnemonics withoutDeprecated() {
-    Set<CanonicalMnemonic> nonDCan = canonicals.values().stream().filter(c -> !c.deprecated())
+    Set<CanonicalMnemonic> nonDCan = byMnemonic.values().stream().filter(c -> !c.deprecated())
         .collect(ImmutableSet.toImmutableSet());
     ImmutableSet<CanonicalMnemonic> nonD = nonDCan.stream().map(Mnemonics::withoutDeprecatedAliases)
         .collect(ImmutableSet.toImmutableSet());
