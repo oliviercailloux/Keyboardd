@@ -1,23 +1,15 @@
 package io.github.oliviercailloux.keyboardd.mapping;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
-
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.io.CharSource;
-
-import io.github.oliviercailloux.keyboardd.draft.KeyMapping;
-import io.github.oliviercailloux.keyboardd.draft.LineKind;
-import io.github.oliviercailloux.keyboardd.draft.MnKeySym;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** A reader of XKB symbols files, which produces a {@link KeyboardMap}. 
  * The reader is quite crude; it will read correctly only the simplest files.

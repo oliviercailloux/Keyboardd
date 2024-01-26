@@ -108,8 +108,6 @@ class KeysymReader {
       "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
   private static final Pattern P_XKB_COMMENT_DEPRECATED = Pattern.compile(
       "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated((, )| )?(?<commentRemaining>[^\\*]*) \\*/$");
-  private static final Pattern P_XKB_COMMENT_DEPRECATED_ALIAS = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated alias for (?<aliasDeprecated>[^\\*]+) \\*/$");
   private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
       P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
   private static final ImmutableSet<Pattern> PATTERNS_COMMENTS =
