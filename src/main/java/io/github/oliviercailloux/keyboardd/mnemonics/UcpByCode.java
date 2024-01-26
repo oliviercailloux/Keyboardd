@@ -9,9 +9,11 @@ import java.util.function.Function;
 
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
+import io.github.oliviercailloux.keyboardd.mnemonics.Mnemonics.CanonicalMnemonic;
 
 public class UcpByCode {
   public static final ContiguousSet<Integer> IMPLICIT_UCPS = ContiguousSet.closed(0x100, 0x10F_FFF);
@@ -36,7 +38,9 @@ public class UcpByCode {
   }
 
   public static UcpByCode implicitAndExplicit(Mnemonics mnemonics) {
-    return implicitAndExplicit(mnemonics.ucpByCode());
+    ImmutableBiMap<Integer, CanonicalMnemonic> byUcp = mnemonics.byUcp();
+    ImmutableBiMap<Integer, Integer> codeByUcp = byUcp.keySet().stream().collect(ImmutableBiMap.toImmutableBiMap(u -> u, u -> byUcp.get(u).code()));
+    return implicitAndExplicit(codeByUcp.inverse());
   }
 
   private final ImmutableMap<Integer, Integer> ucpByCodeExplicit;

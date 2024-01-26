@@ -3,15 +3,21 @@ package io.github.oliviercailloux.keyboardd.mnemonics;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Sets;
+import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.io.CharSource;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -65,20 +71,23 @@ public class Mnemonics {
     }
   }
 
-  private final ImmutableMap<String, CanonicalMnemonic> byMnemonic;
-  private final ImmutableBiMap<Integer, CanonicalMnemonic> byCode;
-  private final ImmutableBiMap<Integer, CanonicalMnemonic> byUcp;
-
-  /**
-   * If the given source maps several codes (through different mnemonics) to a given UCP, it must
-   * have exactly one of these codes in the range UcpByCode#IMPLICIT_UCP_KEYSYM_CODES. Only the
-   * mnemonics associated to that code will be considered associated to that UCP, not the mnemonics
-   * associated to other codes.
-   */
-  public static Mnemonics latestTODOOtherSource() {}
-
   public static Mnemonics latest() {
     ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.latest();
+    return toMnemonics(parsedMns);
+  }
+
+  /**
+   * If the given source maps several non deprecated and non specific codes (through different
+   * mnemonics) to a given UCP, it must have exactly one of these codes in the range
+   * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES. Only the mnemonics associated to that code will be
+   * considered associated to that UCP, not the mnemonics associated to other codes.
+   */
+  public static Mnemonics parse(CharSource keysyms) throws IOException {
+    ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.parse(keysyms);
+    return toMnemonics(parsedMns);
+  }
+
+  private static Mnemonics toMnemonics(ImmutableSet<ParsedMnemonic> parsedMns) {
     /*
      * We want to define equivalence classes: p equiv p' iff they have the same code (implying the
      * same ucp or all absent ucp) OR the same ucp (NOT implying the same code). Each such class is
@@ -96,31 +105,20 @@ public class Mnemonics {
     ImmutableSet<ImmutableSet<ParsedMnemonic>> equivalenceClasses =
         equivalenceClassesBuilder.build();
     ImmutableSet<CanonicalMnemonic> canonicals = equivalenceClasses.stream()
-        .flatMap(s -> toCanonicals(s).stream()).collect(ImmutableSet.toImmutableSet());
-    // ImmutableMap<ParsedMnemonic, Integer> mnToCode =
-    // parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
-    // ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
-    // ImmutableSet<Integer> codes = codeToMns.keySet();
-    // ImmutableSet<CanonicalMnemonic> canonicals = codes.stream()
-    // .map(c -> toCanonical(codeToMns.get(c))).collect(ImmutableSet.toImmutableSet());
-    // ImmutableSetMultimap<Integer, CanonicalMnemonic> ucpToCan = canonicals.stream()
-    // .filter(c -> c.ucp().isPresent())
-    // .collect(ImmutableSetMultimap.toImmutableSetMultimap(c -> c.ucp().orElseThrow(), c -> c));
+        .flatMap(s -> toCanonicalsSoleUcp(s).stream()).collect(ImmutableSet.toImmutableSet());
 
     return new Mnemonics(canonicals);
   }
 
-  private static ImmutableSet<CanonicalMnemonic> toCanonicals(Set<ParsedMnemonic> parsedMns) {
-    ImmutableSet<Optional<Integer>> ucps = parsedMns.stream().map(ParsedMnemonic::unicode)
-        .distinct().collect(ImmutableSet.toImmutableSet());
-    checkArgument(ucps.size() == 1);
-    Optional<Integer> ucp = Iterables.getOnlyElement(ucps);
+  private static ImmutableSet<CanonicalMnemonic>
+      toCanonicalsSoleUcp(Set<ParsedMnemonic> parsedMns) {
+    Optional<Integer> ucp = soleUcp(parsedMns);
     ImmutableMap<ParsedMnemonic, Integer> mnToCode =
         parsedMns.stream().collect(ImmutableMap.toImmutableMap(m -> m, m -> m.code()));
     ImmutableSetMultimap<Integer, ParsedMnemonic> codeToMns = mnToCode.asMultimap().inverse();
-    verify(codeToMns.size() >= 1);
-    if (codeToMns.size() >= 2) {
-      verify(ucp.isPresent());
+    verify(codeToMns.keySet().size() >= 1);
+    if (codeToMns.keySet().size() >= 2) {
+      verify(ucp.isPresent(), parsedMns.toString());
     }
     int codeThatKeepsUcp = getCodeThatKeepsUcp(parsedMns);
     final ImmutableSet.Builder<CanonicalMnemonic> mnsBuilder = new ImmutableSet.Builder<>();
@@ -130,41 +128,50 @@ public class Mnemonics {
     return mnsBuilder.build();
   }
 
-  private static int getCodeThatKeepsUcp(Set<ParsedMnemonic> parsedMns) {
-    verify(parsedMns.stream().map(ParsedMnemonic::unicode).distinct().count() == 1);
-    int masterCode;
-    ImmutableSet<Integer> codes =
-        parsedMns.stream().map(p -> p.code()).distinct().collect(ImmutableSet.toImmutableSet());
-    if (codes.size() == 1)
-      return Iterables.getOnlyElement(codes);
-    ImmutableSet<Integer> nonSpecifics = parsedMns.stream().filter(p -> !p.specific())
-        .map(ParsedMnemonic::code).collect(ImmutableSet.toImmutableSet());
-    if (nonSpecifics.size() == 1) {
-      masterCode = Iterables.getOnlyElement(nonSpecifics);
-    } else {
-      masterCode =
-          nonSpecifics.stream().filter(c -> UcpByCode.IMPLICIT_UCP_KEYSYM_CODES.contains(c))
-              .collect(MoreCollectors.onlyElement());
-    }
-    return masterCode;
+  private static Optional<Integer> soleUcp(Set<ParsedMnemonic> parsedMns) {
+    ImmutableSet<Integer> ucps =
+        parsedMns.stream().map(ParsedMnemonic::unicode).filter(Optional::isPresent)
+            .flatMap(Optional::stream).distinct().collect(ImmutableSet.toImmutableSet());
+    verify(ucps.size() <= 1, parsedMns.toString());
+    Optional<Integer> ucp = ucps.stream().collect(MoreCollectors.toOptional());
+    return ucp;
   }
 
-  private static CanonicalMnemonic toCanonical(Set<ParsedMnemonic> mnemonics, boolean keepUcp) {
-    Iterator<ParsedMnemonic> iterator = mnemonics.iterator();
+  private static int getCodeThatKeepsUcp(Set<ParsedMnemonic> parsedMns) {
+    Comparator<ParsedMnemonic> mainComparator = Comparator
+        .<ParsedMnemonic, Boolean>comparing(p -> !p.deprecated()).thenComparing(p -> !p.specific())
+        .thenComparing(p -> UcpByCode.IMPLICIT_UCP_KEYSYM_CODES.contains(p.code()));
+    Comparator<ParsedMnemonic> comparatorCompatibleWithEquals =
+        mainComparator.thenComparing(ParsedMnemonic::mnemonic);
+    ImmutableSortedSet<ParsedMnemonic> sortedMns =
+        ImmutableSortedSet.copyOf(comparatorCompatibleWithEquals, parsedMns);
+    ParsedMnemonic best = sortedMns.last();
+    int bestCode = best.code();
+    Optional<ParsedMnemonic> secondBestOpt =
+        sortedMns.stream().filter(p -> p.code() != bestCode).findFirst();
+    if (secondBestOpt.isPresent()) {
+      ParsedMnemonic secondBest = secondBestOpt.orElseThrow();
+      checkArgument(mainComparator.compare(best, secondBest) != 0,
+          "Cannot decide which code to keep among %s.", sortedMns);
+    }
+    return bestCode;
+  }
+
+  private static CanonicalMnemonic toCanonical(Set<ParsedMnemonic> parsedMns, boolean keepUcp) {
+    Iterator<ParsedMnemonic> iterator = parsedMns.iterator();
     checkArgument(iterator.hasNext());
     ParsedMnemonic first = iterator.next();
     ImmutableSet<ParsedMnemonic> remaining =
         ImmutableSet.<ParsedMnemonic>builder().addAll(iterator).build();
     boolean deprecated = first.deprecated();
     if (deprecated) {
-      checkArgument(mnemonics.stream().allMatch(ParsedMnemonic::deprecated));
+      checkArgument(parsedMns.stream().allMatch(ParsedMnemonic::deprecated));
     }
-    int code = mnemonics.stream().map(ParsedMnemonic::code).distinct()
+    int code = parsedMns.stream().map(ParsedMnemonic::code).distinct()
         .collect(MoreCollectors.onlyElement());
     Optional<Integer> ucp;
     if (keepUcp) {
-      ucp = mnemonics.stream().map(ParsedMnemonic::unicode).distinct()
-          .collect(MoreCollectors.onlyElement());
+      ucp = soleUcp(parsedMns);
     } else {
       ucp = Optional.empty();
     }
@@ -182,6 +189,10 @@ public class Mnemonics {
   public static Mnemonics from(Set<CanonicalMnemonic> canonicalMnemonics) {
     return new Mnemonics(canonicalMnemonics);
   }
+
+  private final ImmutableMap<String, CanonicalMnemonic> byMnemonic;
+  private final ImmutableBiMap<Integer, CanonicalMnemonic> byCode;
+  private final ImmutableBiMap<Integer, CanonicalMnemonic> byUcp;
 
   private Mnemonics(Set<CanonicalMnemonic> canonicalMnemonics) {
     final ImmutableMap.Builder<String, CanonicalMnemonic> byMnemonicBuilder =
