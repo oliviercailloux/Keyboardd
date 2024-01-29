@@ -223,7 +223,7 @@ public class SvgKeyboard {
         .map(RectangleElement::using).collect(ImmutableList.toImmutableList());
     ImmutableSet.Builder<Element> covereds = ImmutableSet.builder();
     SvgDocumentHelper h = SvgDocumentHelper.using(docCopy);
-    for (String xKeyName : visibleKeyboardMap.canonicalNames()) {
+    for (String xKeyName : visibleKeyboardMap.names()) {
       ImmutableList<RectangleElement> zones = allZones.stream()
           .filter(e -> e.getElement().getAttributeNS(KEYBOARDD_NS, "x-key-name").equals(xKeyName))
           .collect(ImmutableList.toImmutableList());
@@ -255,7 +255,7 @@ public class SvgKeyboard {
     if (r.isString()) {
       return h.text().setContent(r.string()).getElement();
     }
-    return r.svg();
+    return (Element)h.document().importNode(r.svg().getDocumentElement(), true);
   }
 
   private ImmutableSet<Element> correspondingElements(Document docCopy,

@@ -26,11 +26,6 @@ import io.github.oliviercailloux.jaris.collections.CollectionUtils;
  * Two such keyboard maps are considered equal iff they have the same X key names, and for each X key name, the corresponding lists of keysym entries are equal.
  */
 public class KeyboardMap {
-  private final ImmutableListMultimap<String, KeysymEntry> xKeyNameToEntries;
-  private ImmutableSetMultimap<String, String> mnemonicToXKeyNames;
-  private ImmutableSetMultimap<Integer, String> ucpToXKeyNames;
-  private ImmutableSetMultimap<Integer, String> codeToXKeyNames;
-
   /**
    * Creates a keyboard map from the given association of lists of keysym entries to each X key name.
    * @param xKeyNameToKeysymEntries the X key names and corresponding keysym entries to be used in the keyboard map; may be empty; may not contain empty lists
@@ -39,6 +34,11 @@ public class KeyboardMap {
   public static KeyboardMap from(ListMultimap<String, KeysymEntry> xKeyNameToKeysymEntries) {
     return new KeyboardMap(xKeyNameToKeysymEntries);
   }
+
+  private final ImmutableListMultimap<String, KeysymEntry> xKeyNameToEntries;
+  private ImmutableSetMultimap<String, String> mnemonicToXKeyNames;
+  private ImmutableSetMultimap<Integer, String> ucpToXKeyNames;
+  private ImmutableSetMultimap<Integer, String> codeToXKeyNames;
 
   private KeyboardMap(ListMultimap<String, KeysymEntry> xKeyNameToKeysymEntries) {
     checkArgument(!xKeyNameToKeysymEntries.asMap().values().contains(ImmutableList.<KeysymEntry>of()));

@@ -48,12 +48,12 @@ public class VisibleKeyboardMap {
     this.representations = ImmutableListMultimap.copyOf(representations);
   }
 
-  public ImmutableSet<String> canonicalNames() {
+  public ImmutableSet<String> names() {
     return representations.keySet();
   }
 
-  public ImmutableList<Representation> representations(String xCanonicalKeyName) {
-    return representations.get(xCanonicalKeyName);
+  public ImmutableList<Representation> representations(String name) {
+    return representations.get(name);
   }
 
   public ImmutableListMultimap<String, Representation> representations() {

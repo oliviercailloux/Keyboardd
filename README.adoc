@@ -58,20 +58,22 @@ Functional keyboard
 * A functional key is a position and a list of representations
 * Can be obtained from a Physical keyboard and a Visible keyboard map
 
-SVG keyboardd: includes a “key representation zone” for each key (and other elements as desired). A key representation zone is an SVG rectangle with an attribute that indicates the (canonical?) X key name. (Do not need to be unique; the only limitation is that if they are duplicated, they will also always have the same representation, which I think is reasonable, though it is permitted to add attributes to distinguish them.) The SVG may draw complex shapes for each key; may use the key representation zone to draw the key or make it invisible… When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
+SVG keyboardd: includes a “key representation zone” for each key (and other elements as desired). A key representation zone is an SVG rectangle with an attribute that indicates the canonical X key name. (Do not need to be unique; the only limitation is that if they are duplicated, they will also always have the same representation, which I think is reasonable, though it is permitted to add attributes to distinguish them.) The SVG may draw complex shapes for each key; may use the key representation zone to draw the key or make it invisible… When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
 
 SVG physical keyboardd: an SVG keyboardd where the key representation zone is an element that draws the x key name.
 
 SVG functional keyboardd: an SVG keyboardd where the key representation zone contains one or more representations that illustrate the behavior of the key (in a large sense, so representing what is displayed on the keyboard is allowed, including if all keys are black as for a blind keyboard). As a file format, this is therefore equivalent to an SVG keyboardd, but as a class concept it differs as its purpose is to use the mappings defined in the OS.
 
 We also need a standard attribute "key-id" to identify keys that do not send anything, such as the Fn key (and to distinguish keys with identical x-key-name if this exists).
+No, let’s not use such a standard attribute, as it is beyond the scope of this library.
+This library does not consider such keys: manually represent whatever you want in the SVG for that key; it will not change according to the keyboard mapping (and it should not, as it does not send anything).
 
 == Vocabulary
 
 The code uses the following terms and abbreviations.
 
 * `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
-* `canonical name` (or `canonical`, to be changed) is an X key name that is not an alias
+* `canonical name` (previously `canonical`, to be changed) is an X key name that is not an alias
 * `alias name` (or `alias`, to be changed) is an X key name that is an alias
 * `code` as `short` is an X keycode
 * `code` as `int` is a keysym code
@@ -81,8 +83,7 @@ The code uses the following terms and abbreviations.
 
 The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
 
-For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG]) `canonicalXKeyName`.
-(BTW, anybody please tell me if you https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[agree with romani]; I can’t figure out the way they see this.)
+For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG] — though apparently https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[some disagree]) `canonicalXKeyName`.
 
 == SVG
 svg global : a une taille en cm. Pour l’affichage à l’écran ; l’impression.

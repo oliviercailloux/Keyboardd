@@ -3,6 +3,7 @@ package io.github.oliviercailloux.keyboardd.representable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class Representation {
@@ -10,20 +11,20 @@ public class Representation {
     return new Representation(string, null);
   }
 
-  public static Representation fromSvg(Element svg) {
+  public static Representation fromSvg(Document svg) {
     return new Representation(null, svg);
   }
 
   /** null iff svg is not */
   private final String string;
 
-  private final Element svg;
+  private final Document svg;
 
-  private Representation(String string, Element svg) {
+  private Representation(String string, Document svg) {
     checkArgument((string == null) != (svg == null));
     this.string = string;
     if (svg != null)
-      this.svg = (Element) svg.cloneNode(true);
+      this.svg = (Document) svg.cloneNode(true);
     else
       this.svg = null;
   }
@@ -41,7 +42,7 @@ public class Representation {
     return string;
   }
 
-  public Element svg() {
+  public Document svg() {
     checkState(svg != null);
     return svg;
   }
