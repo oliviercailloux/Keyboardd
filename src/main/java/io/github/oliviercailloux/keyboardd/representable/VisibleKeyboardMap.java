@@ -11,6 +11,10 @@ import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry;
 
 public class VisibleKeyboardMap {
+  public static VisibleKeyboardMap from(ListMultimap<String, Representation> representations) {
+    return new VisibleKeyboardMap(representations);
+  }
+  
   public static VisibleKeyboardMap from(KeyboardMap keyboardMap,
       Map<KeysymEntry, Representation> representations) {
     ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();

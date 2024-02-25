@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
-import io.github.oliviercailloux.jaris.xml.XmlTransformer;
 import io.github.oliviercailloux.keyboardd.keyboard.RectangularKey;
 import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
@@ -17,10 +17,9 @@ import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
 import io.github.oliviercailloux.svgb.StyleElement;
 import io.github.oliviercailloux.svgb.SvgDocumentHelper;
-import io.github.oliviercailloux.svgb.TextElement;
 import java.net.URI;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.dom.DOMSource;
+import java.util.List;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -33,8 +32,6 @@ public class SvgKeyboard {
 
   private static final XmlName SVG_RECT_NAME =
       XmlName.expandedName(SvgDocumentHelper.SVG_NS_URI, "rect");
-  private static final XmlName SVG_TEXT_NAME =
-      XmlName.expandedName(SvgDocumentHelper.SVG_NS_URI, "text");
 
   public static final URI KEYBOARDD_NS = URI.create("https://io.github.oliviercailloux.keyboardd");
   private static final String KEYBOARDD_X_KEY_NAME_LOCAL_NAME = "x-key-name";
@@ -65,6 +62,15 @@ public class SvgKeyboard {
     checkArgument(hasAttribute(element, name));
     return element.getAttributeNS(name.namespace().map(URI::toString).orElse(null),
         name.localName());
+  }
+
+  /**
+   * @deprecated Move to JARiS.
+   */
+  @Deprecated()
+  private static void setAttribute(Element element, XmlName name, String value) {
+    element.setAttributeNS(name.namespace().map(URI::toString).orElse(null),
+        name.localName(), value);
   }
 
   private static record LineColDivision (int n, int nbCols, int nbLines) {
@@ -112,18 +118,18 @@ public class SvgKeyboard {
     if (r.isString()) {
       return h.text().setContent(r.string()).getElement();
     }
-    return (Element)h.document().importNode(r.svg().getDocumentElement(), true);
+    return (Element) h.document().importNode(r.svg().getDocumentElement(), true);
   }
 
   /**
    * 1 unit in the given physical keyboard is rendered as 1 cm at 96 DPI (thus as 96/2.54 ≅ 38 dots)
    */
-  public static SvgKeyboard from(RectangularKeyboard physicalKeyboard) {
+  public static SvgKeyboard zonedFrom(RectangularKeyboard physicalKeyboard) {
     final DomHelper d = DomHelper.domHelper();
     final SvgDocumentHelper h = SvgDocumentHelper.using(d);
     final Document doc = h.document();
     doc.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kdd",
-        KEYBOARDD_NS);
+        KEYBOARDD_NS.toString());
     /*
      * Not sure the dominant baseline trick is appropriate when the baselines are not uniform (p VS
      * t), but that’ll do for now as we write capital letters.
@@ -146,27 +152,17 @@ public class SvgKeyboard {
     double dotsPerCm = dpi / 2.54d;
 
     DoublePoint start = DoublePoint.zero();
-    ImmutableMap.Builder<Element, String> reprsBuilder = ImmutableMap.builder();
-    ImmutableSet.Builder<Element> coveredsBuilder = ImmutableSet.builder();
     for (RectangularKey key : physicalKeyboard.keys()) {
       DoublePoint posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
       PositiveSize sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
-          h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
-      rect.getElement().setAttributeNS(KEYBOARDD_NS, "kdd:x-key-name", key.xKeyName());
+      h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
+      setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, key.xKeyName());
       doc.getDocumentElement().appendChild(rect.getElement());
-      /*
-       * TODO should not include the text elements here: should produce an SVG with only the
-       * representation zones, then use the standard algorithm to add the texts.
-       */
-      reprsBuilder.put(rect.getElement(), key.xKeyName());
-      TextElement text = h.text().setBaselineStart(posScaled.plus(sizeScaled.mult(0.5d)))
-          .setContent(key.xKeyName());
-      doc.getDocumentElement().appendChild(text.getElement());
-      coveredsBuilder.add(text.getElement());
     }
-
-    return new SvgKeyboard(doc, reprsBuilder.build(), coveredsBuilder.build());
+    
+    // return new SvgKeyboard(doc).withRepresentations(k -> ImmutableList.of(Representation.fromString(k)));
+    return new SvgKeyboard(doc);
   }
 
   public static SvgKeyboard using(Document doc) {
@@ -194,32 +190,36 @@ public class SvgKeyboard {
     return reprsBuilder.build();
   }
 
-  public SvgKeyboard withRepresentations(VisibleKeyboardMap visibleKeyboardMap) {
-    // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object .
-    DOMResult result = new DOMResult();
-    XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
-    Document d = (Document) result.getNode();
-    SvgKeyboard s = new SvgKeyboard(d);
-    SvgDocumentHelper h = SvgDocumentHelper.using(d);
-    ImmutableMap<RectangleElement, String> keyNameByZone = s.keyNameByZone();
+  /**
+   * Adds representations to the zones found in this document, according to the given function.
+   * @param representationsByXKeyName the respective representations to add to the zones.
+   * @return this object
+   */
+  public SvgKeyboard withRepresentations(Function<String, ? extends List<Representation>> representationsByXKeyName) {
+    // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO document in Jaris?
+    // DOMResult result = new DOMResult();
+    // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
+    // Document d = (Document) result.getNode();
+    SvgDocumentHelper h = SvgDocumentHelper.using(doc);
+    ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
     for (RectangleElement zone : keyNameByZone.keySet()) {
       String xKeyName = keyNameByZone.get(zone);
-      ImmutableList<Representation> reprs = visibleKeyboardMap.representations(xKeyName);
-        DoublePoint start = zone.getStart();
-        PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
-        LineColDivision div = LineColDivision.forNb(reprs.size());
-        ImmutableSet<PositiveSize> offsets = div.offsets(zone.getSize());
-        UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
-        for (Representation r : reprs) {
-          PositiveSize offset = offsetsIt.next();
-          Element svgRepr = toSvg(h, r);
-          Element g = h.g().translate(startOffset.plus(offset)).getElement();
-          g.appendChild(svgRepr);
-          Node prev = zone.getElement().getNextSibling();
-          zone.getElement().getParentNode().insertBefore(g, prev);
-        }
-        verify(!offsetsIt.hasNext());
+      List<Representation> reprs = representationsByXKeyName.apply(xKeyName);
+      DoublePoint start = zone.getStart();
+      PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
+      LineColDivision div = LineColDivision.forNb(reprs.size());
+      ImmutableSet<PositiveSize> offsets = div.offsets(zone.getSize());
+      UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
+      for (Representation r : reprs) {
+        PositiveSize offset = offsetsIt.next();
+        Element svgRepr = toSvg(h, r);
+        Element g = h.g().translate(startOffset.plus(offset)).getElement();
+        g.appendChild(svgRepr);
+        Node prev = zone.getElement().getNextSibling();
+        zone.getElement().getParentNode().insertBefore(g, prev);
+      }
+      verify(!offsetsIt.hasNext());
     }
-    return s;
+    return this;
   }
 }
