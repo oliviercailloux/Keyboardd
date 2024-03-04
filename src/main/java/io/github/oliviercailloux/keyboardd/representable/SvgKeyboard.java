@@ -17,6 +17,7 @@ import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
 import io.github.oliviercailloux.svgb.StyleElement;
 import io.github.oliviercailloux.svgb.SvgDocumentHelper;
+import io.github.oliviercailloux.svgb.SvgHelper;
 import java.net.URI;
 import java.util.List;
 import java.util.function.Function;
@@ -223,14 +224,15 @@ public class SvgKeyboard {
       DoublePoint start = zone.getStart();
       PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
       LineColDivision div = LineColDivision.forNb(reprs.size());
-      // PositiveSize subSize = PositiveSize.given(zone.getSize().x() / div.nbCols, zone.getSize().y() / div.nbLines);
-      ImmutableSet<PositiveSize> offsets = div.offsetsToMiddle(zone.getSize());
+      PositiveSize subSize = PositiveSize.given(zone.getSize().x() / div.nbCols, zone.getSize().y() / div.nbLines);
+      ImmutableSet<PositiveSize> offsets = div.offsetsToCorners(zone.getSize());
       UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
       for (Representation r : reprs) {
         PositiveSize offset = offsetsIt.next();
         Element svgRepr = toSvg(h, r);
         Element g = h.g().translate(startOffset.plus(offset)).getElement();
         g.appendChild(svgRepr);
+        SvgHelper.setSize(svgRepr, subSize);
         Node prev = zone.getElement().getNextSibling();
         zone.getElement().getParentNode().insertBefore(g, prev);
       }
