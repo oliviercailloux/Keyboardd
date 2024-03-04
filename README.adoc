@@ -68,6 +68,8 @@ We also need a standard attribute "key-id" to identify keys that do not send any
 No, let’s not use such a standard attribute, as it is beyond the scope of this library.
 This library does not consider such keys: manually represent whatever you want in the SVG for that key; it will not change according to the keyboard mapping (and it should not, as it does not send anything).
 
+Note that two things miss when given an SVG file to describe a physical keyboard. First, the letter caps. Second, the alternative X key names, if any (those sent by the keyboard when pressing the Fn or similar key). We consider that this is not to be stored in an official SVG file (though it can be represented of course).
+
 == Vocabulary
 
 The code uses the following terms and abbreviations.
@@ -86,16 +88,34 @@ The argument names use the non-abbreviated names; the method and class names use
 For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG] — though apparently https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[some disagree]) `canonicalXKeyName`.
 
 == SVG
+== Summary
+An outer <svg> element is technically a replaced element as far as the html/css specifications are concerned. If the size of a replaced element cannot be determined then the browser should fall back to a size of 300 x 150px.
+https://stackoverflow.com/a/65626536/859604
+In particular, when the referenced resource does not have an intrinsic size (such as image types with no defined dimensions), it is assumed to have a width of 300px and a height of 150px. 
+https://svgwg.org/svg2-draft/embedded.html#Placement
+Need to set the total size to the size of the content: https://stackoverflow.com/a/50820586/859604
+No viewport because I do not want the keyboard to change size: https://www.sololearn.com/en/Discuss/2379444/why-use-viewbox-attribute-in-symbol-if-you-can-just-change-its-size-with-height-and-width-attributes-once-you-use-it-in-an-svg
+
+== Vrac
 svg global : a une taille en cm. Pour l’affichage à l’écran ; l’impression.
 Ceci détermine la taille d’une touche en cm.
 Ceci détermine la taille d’une zone.
-Si on me donne un SVG sans taille, je l’étend sur la zone.
+
+Le SVG à imprimer sur la touche pourrait avoir une taille en cm, éq, en pixels. 1) 10 pix font. 2) graph with native size 3) the exact letter cap at physical size.
+Cas 1. On imagine une fonte sur un graphique (sinon autant le représenter en texte). Donc alors c’est le cas 2.
+Cas 2. En fait la zone est si petite que stretcher n’est pas bien grave? Sauf si on veut une uniformité des tailles d’une touche à l’autre !
+Je dois centrer le dessin sur la zone et respecter sa taille !
+Ceci donne les deux règles ci-dessous.
+
+Si on me donne un SVG sans taille, je l’étend ou le réduit sur la zone.
 Si le SVG a une taille, je la respecte et met le SVG au centre de la zone si ça rentre. Si le SVG est trop grand, je le rétréci à la taille de la zone.
 
 SVG doc
 	<?xml version="1.0" standalone="yes"?>
 	https://svgwg.org/svg2-draft/struct.html#NewDocument
-	
+	If an SVG document is likely to be referenced as a component of another document, the author will often want to include a ‘viewBox’ attribute on the outermost svg element of the referenced document. This attribute provides a convenient way to design SVG documents to scale-to-fit into an arbitrary SVG viewport.
+
+
 SVG taille ?
 	https://www.w3.org/Graphics/SVG/IG/resources/svgprimer.html
 	https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Getting_Started
@@ -125,13 +145,11 @@ This library represents in the same way a key mapping using UCP written as U+xxx
 It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
 
 == TODO
-Ask https://github.com/xkbcommon/libxkbcommon/issues/433[] about the squareroot stuff (which I confirmed again on 14 janv), probable oversight as all other such cases are deprecated: period and decimalpoint, less and leftcaret, underscore and underbar, macron and overbar, topleftradical and upleftcorner, horizconnector and horizlinescan5, includedin and leftshoe, …. Then a given mnemonic maps to one UCP that maps to no other mnemonic than this one (though it generally maps to two codes!). But, anyway, let’s assume that this does not matter: any X system should act the same whatever the code mapping to a given (non-specific) UCP? (Though if specific ones are distinct, then maybe also non specific ones!)
-Maybe rather at https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/issues[].
-
+Print with a pohysical size.
 Finish test, using a clean fr mapping. Why is it not displaying the unicode equivalent?
-Embed an SVG document as representation (not just an element!). How to do this cleanly?
+Embed an SVG document as representation (not just an element!).
+Print with both X key names (normal and with Fn).
 Allow mapping from multiple fr-like files?
-Checkstyle and XKeyName?
 
 == From notes in drawer
     /*

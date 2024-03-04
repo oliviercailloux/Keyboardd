@@ -2,14 +2,13 @@ package io.github.oliviercailloux.keyboardd.keyboard;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.Objects;
-import java.util.Set;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
-
 import io.github.oliviercailloux.svgb.DoublePoint;
+import io.github.oliviercailloux.svgb.PositiveSize;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A keyboard, conceived as a set of keys that each have a position, a rectangular shape, a size,
@@ -60,6 +59,13 @@ public class RectangularKeyboard {
     return keys;
   }
 
+  public PositiveSize size() {
+    ImmutableSet<DoublePoint> bottomRights = keys.stream().map(k -> k.topLeftCorner().plus(k.size())).collect(ImmutableSet.toImmutableSet());
+    double rightest = bottomRights.stream().mapToDouble(p -> p.x()).max().orElse(0d);
+    double bottomest = bottomRights.stream().mapToDouble(p -> p.y()).max().orElse(0d);
+    return PositiveSize.given(rightest, bottomest);
+  }
+  
   @Override
   public boolean equals(Object o2) {
     if (!(o2 instanceof RectangularKeyboard)) {

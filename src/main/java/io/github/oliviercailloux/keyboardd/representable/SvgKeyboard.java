@@ -69,8 +69,8 @@ public class SvgKeyboard {
    */
   @Deprecated()
   private static void setAttribute(Element element, XmlName name, String value) {
-    element.setAttributeNS(name.namespace().map(URI::toString).orElse(null),
-        name.localName(), value);
+    element.setAttributeNS(name.namespace().map(URI::toString).orElse(null), name.localName(),
+        value);
   }
 
   private static record LineColDivision (int n, int nbCols, int nbLines) {
@@ -130,6 +130,7 @@ public class SvgKeyboard {
     final Document doc = h.document();
     doc.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kdd",
         KEYBOARDD_NS.toString());
+
     /*
      * Not sure the dominant baseline trick is appropriate when the baselines are not uniform (p VS
      * t), but that’ll do for now as we write capital letters.
@@ -150,18 +151,20 @@ public class SvgKeyboard {
 
     double dpi = 96d;
     double dotsPerCm = dpi / 2.54d;
+    h.setSize(physicalKeyboard.size().mult(dotsPerCm));
 
     DoublePoint start = DoublePoint.zero();
     for (RectangularKey key : physicalKeyboard.keys()) {
       DoublePoint posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
       PositiveSize sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
-      h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
+          h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
       setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, key.xKeyName());
       doc.getDocumentElement().appendChild(rect.getElement());
     }
-    
-    // return new SvgKeyboard(doc).withRepresentations(k -> ImmutableList.of(Representation.fromString(k)));
+
+    // return new SvgKeyboard(doc).withRepresentations(k ->
+    // ImmutableList.of(Representation.fromString(k)));
     return new SvgKeyboard(doc);
   }
 
@@ -192,13 +195,17 @@ public class SvgKeyboard {
 
   /**
    * Adds representations to the zones found in this document, according to the given function.
+   * 
    * @param representationsByXKeyName the respective representations to add to the zones.
    * @return this object
    */
-  public SvgKeyboard withRepresentations(Function<String, ? extends List<Representation>> representationsByXKeyName) {
-    // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO document in Jaris?
+  public SvgKeyboard withRepresentations(
+      Function<String, ? extends List<Representation>> representationsByXKeyName) {
+    // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO
+    // document in Jaris?
     // DOMResult result = new DOMResult();
-    // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc), result);
+    // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc),
+    // result);
     // Document d = (Document) result.getNode();
     SvgDocumentHelper h = SvgDocumentHelper.using(doc);
     ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
