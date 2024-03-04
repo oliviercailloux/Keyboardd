@@ -93,7 +93,15 @@ public class SvgKeyboard {
       return new LineColDivision(n, x, y);
     }
 
-    public ImmutableSet<PositiveSize> offsets(PositiveSize size) {
+    public ImmutableSet<PositiveSize> offsetsToCorners(PositiveSize size) {
+      return offsets(size, 0d);
+    }
+
+    public ImmutableSet<PositiveSize> offsetsToMiddle(PositiveSize size) {
+      return offsets(size, 0.5d);
+    }
+
+    private ImmutableSet<PositiveSize> offsets(PositiveSize size, double additionalColFrac) {
       int nbShorterLines = nbCols * nbLines - n;
       int nbFullLines = nbLines - nbShorterLines;
       double xStep = size.x() / nbCols;
@@ -101,12 +109,12 @@ public class SvgKeyboard {
       ImmutableSet.Builder<PositiveSize> builder = ImmutableSet.builder();
       for (int col = 0; col < nbCols - 1; ++col) {
         for (int line = nbLines - 1; line >= 0; --line) {
-          builder.add(new PositiveSize((col + 0.5) * xStep, (line + 0.5) * yStep));
+          builder.add(new PositiveSize((col + additionalColFrac) * xStep, (line + additionalColFrac) * yStep));
         }
       }
       int col = nbCols - 1;
       for (int line = nbLines - 1; line > nbLines - 1 - nbFullLines; --line) {
-        builder.add(new PositiveSize((col + 0.5) * xStep, (line + 0.5) * yStep));
+        builder.add(new PositiveSize((col + additionalColFrac) * xStep, (line + additionalColFrac) * yStep));
       }
       ImmutableSet<PositiveSize> offsets = builder.build();
       verify(offsets.size() == n);
@@ -215,7 +223,8 @@ public class SvgKeyboard {
       DoublePoint start = zone.getStart();
       PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
       LineColDivision div = LineColDivision.forNb(reprs.size());
-      ImmutableSet<PositiveSize> offsets = div.offsets(zone.getSize());
+      // PositiveSize subSize = PositiveSize.given(zone.getSize().x() / div.nbCols, zone.getSize().y() / div.nbLines);
+      ImmutableSet<PositiveSize> offsets = div.offsetsToMiddle(zone.getSize());
       UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
       for (Representation r : reprs) {
         PositiveSize offset = offsetsIt.next();
