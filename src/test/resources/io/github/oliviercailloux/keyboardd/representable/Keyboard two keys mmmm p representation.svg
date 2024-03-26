@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" height="75.59055118110236" width="226.77165354330708" xmlns:kdd="https://io.github.oliviercailloux.keyboardd">
+    <style>text {
+text-anchor: middle;
+dominant-baseline: middle;
+font-size: 28.346456692913385px;
+}</style>
     <style>rect {
-  fill-opacity: 0;
-  stroke: black;
-  stroke-width: 1px;
-}
-text{
-  text-anchor: middle;
-  dominant-baseline: middle;
-  font-size: small;
-}
-</style>
+fill-opacity: 0;
+stroke: black;
+stroke-width: 1px;
+}</style>
     <rect height="75.59055118110236" kdd:x-key-name="TAB" rx="10.0" width="113.38582677165354"/>
-    <g transform="translate(56.69291338582677, 37.79527559055118)">
-        <text>TAB</text>
+    <g transform="translate(0.0, 0.0)">
+        <text x="56.69291338582677" y="37.79527559055118">mmmm</text>
     </g>
     <rect height="75.59055118110236" kdd:x-key-name="AD01" rx="10.0" width="75.59055118110236" x="151.1811023622047" y="0.0"/>
-    <g transform="translate(188.97637795275588, 37.79527559055118)">
-        <text>AD01</text>
+    <g transform="translate(151.1811023622047, 0.0)">
+        <text x="37.79527559055118" y="37.79527559055118">p</text>
     </g>
 </svg>

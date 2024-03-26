@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
@@ -18,8 +17,11 @@ import io.github.oliviercailloux.svgb.RectangleElement;
 import io.github.oliviercailloux.svgb.StyleElement;
 import io.github.oliviercailloux.svgb.SvgDocumentHelper;
 import io.github.oliviercailloux.svgb.SvgHelper;
+import io.github.oliviercailloux.svgb.TextElement;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +125,83 @@ public class SvgKeyboard {
     }
   }
 
+  private static record RepresentableSubZone(PositiveSize absoluteOffset, Representation repr, RepresentableZone parent) {
+    public PositiveSize size() {
+      return parent.subSize();
+    }
+    
+    /** A positive finite double if non-empty string; otherwise positive infinity. */
+    public double maxWidthPerCp() {
+      if(!repr.isString()) return Double.POSITIVE_INFINITY;
+      return size().x()/repr.string().codePoints().count();
+    }
+
+    public PositiveSize absoluteOffsetToMiddle() {
+      return absoluteOffset.plus(size().mult(0.5d));
+    }
+  }
+  
+  private static record RepresentableZone(RectangleElement zone, ImmutableList<Representation> reprs) {
+        public DoublePoint zoneStart() {
+          return zone.getStart();
+        }
+        public PositiveSize zoneSize() {
+          return zone.getSize();
+        }
+        public PositiveSize startOffset() {
+          return PositiveSize.between(DoublePoint.zero(), zoneStart());
+        }
+        public LineColDivision div() {
+          return LineColDivision.forNb(reprs.size());
+        }
+        public PositiveSize subSize() {
+          return PositiveSize.given(zoneSize().x() / div().nbCols, zoneSize().y() / div().nbLines);
+        }
+        public ImmutableSet<PositiveSize> relativeOffsets() {
+          return div().offsetsToCorners(zoneSize());
+        }
+        public ImmutableSet<PositiveSize> absoluteOffsets() {
+          return relativeOffsets().stream().map(offset -> startOffset().plus(offset)).collect(ImmutableSet.toImmutableSet());
+        }
+        public ImmutableSet<RepresentableSubZone> subZones() {
+          ImmutableSet<PositiveSize> offsets = absoluteOffsets();
+          UnmodifiableIterator<Representation> rIt = reprs.iterator();
+          final ImmutableSet.Builder<RepresentableSubZone> subs = new ImmutableSet.Builder<>();
+          for (PositiveSize offset : offsets) {
+            Representation r = rIt.next();
+            subs.add(new RepresentableSubZone(offset, r, this));
+          }
+          verify(!rIt.hasNext());
+          return subs.build();
+        }
+        public double maxWidthPerCp() {
+          return subZones().stream().mapToDouble(RepresentableSubZone::maxWidthPerCp).min().orElse(Double.POSITIVE_INFINITY);
+        }
+      }
+
+      /** TODO move to SVGHelper */
+   public static Optional<PositiveSize> size(Element svgElement) {
+    if (svgElement.hasAttribute("width") && svgElement.hasAttribute("height")) {
+      PositiveSize size = PositiveSize.given(Double.parseDouble(svgElement.getAttribute("width")),
+          Double.parseDouble(svgElement.getAttribute("height")));
+      return Optional.of(size);
+    }
+    return Optional.empty();
+   }
+
+  private static Element toSvg(SvgDocumentHelper h, RepresentableSubZone subZone) {
+    final Representation r = subZone.repr;
+    if (r.isString()) {
+      PositiveSize halfSize = subZone.size().mult(0.5d);
+      return h.text().setBaselineStart(DoublePoint.given(halfSize.x(), halfSize.y())).setContent(r.string()).getElement();
+    }
+    Element svgRepr = (Element) h.document().importNode(r.svg().getDocumentElement(), true);
+    if(size(svgRepr).isEmpty()) {
+      SvgHelper.setSize(svgRepr, subZone.size());
+    }
+    return svgRepr;
+  }
+
   private static Element toSvg(SvgDocumentHelper h, Representation r) {
     if (r.isString()) {
       return h.text().setContent(r.string()).getElement();
@@ -140,24 +219,6 @@ public class SvgKeyboard {
     doc.getDocumentElement().setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:kdd",
         KEYBOARDD_NS.toString());
 
-    /*
-     * Not sure the dominant baseline trick is appropriate when the baselines are not uniform (p VS
-     * t), but that’ll do for now as we write capital letters.
-     */
-    StyleElement style = h.style().setContent("""
-        rect {
-          fill-opacity: 0;
-          stroke: black;
-          stroke-width: 1px;
-        }
-        text{
-          text-anchor: middle;
-          dominant-baseline: middle;
-          font-size: small;
-        }
-        """);
-    doc.getDocumentElement().appendChild(style.getElement());
-
     double dpi = 96d;
     double dotsPerCm = dpi / 2.54d;
     h.setSize(physicalKeyboard.size().mult(dotsPerCm));
@@ -174,26 +235,41 @@ public class SvgKeyboard {
 
     // return new SvgKeyboard(doc).withRepresentations(k ->
     // ImmutableList.of(Representation.fromString(k)));
-    return new SvgKeyboard(doc);
+    SvgKeyboard kb = new SvgKeyboard(h);
+
+    String inner = """
+          fill-opacity: 0;
+          stroke: black;
+          stroke-width: 1px;""";
+    kb.appendStyle(RectangleElement.NODE_NAME, inner);
+    return kb;
   }
 
   public static SvgKeyboard using(Document doc) {
-    return new SvgKeyboard(doc);
+    return new SvgKeyboard(SvgDocumentHelper.using(doc));
   }
 
-  private final Document doc;
+  private final SvgDocumentHelper h;
+  private double fontSize = Double.NaN;
 
-  private SvgKeyboard(Document doc) {
-    this.doc = doc;
+  private SvgKeyboard(SvgDocumentHelper h) {
+    this.h = h;
   }
 
   public Document document() {
-    return doc;
+    return h.document();
+  }
+
+  private void appendStyle(String element,
+      String inner) {
+    String content = element + " {\n" + inner + "\n}";
+    StyleElement style = h.style().setContent(content);
+    h.document().getDocumentElement().insertBefore(style.getElement(), h.document().getDocumentElement().getFirstChild());
   }
 
   public ImmutableMap<RectangleElement, String> keyNameByZone() {
     ImmutableMap.Builder<RectangleElement, String> reprsBuilder = ImmutableMap.builder();
-    for (Element rect : getElements(doc.getDocumentElement(), SVG_RECT_NAME)) {
+    for (Element rect : getElements(h.document().getDocumentElement(), SVG_RECT_NAME)) {
       if (!hasAttribute(rect, KEYBOARDD_X_KEY_NAME))
         continue;
       String xKeyName = getAttribute(rect, KEYBOARDD_X_KEY_NAME);
@@ -202,13 +278,35 @@ public class SvgKeyboard {
     return reprsBuilder.build();
   }
 
+  public double maxWidthPerCp(Function<String, ? extends List<String>> descriptionsByXKeyName) {
+    Function<String, ImmutableList<Representation>> representationsByXKeyName = s -> descriptionsByXKeyName.apply(s).stream().map(Representation::fromString).collect(ImmutableList.toImmutableList());
+    ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
+    return maxWidthPerCp(zones);
+  }
+
+  private double maxWidthPerCp(Set<RepresentableZone> zones) {
+    return zones.stream().mapToDouble(t -> t.maxWidthPerCp()).min().orElse(Double.POSITIVE_INFINITY);
+  }
+
+  /** NaN for maxWidthPerCp (default) */
+  public SvgKeyboard setFontSize(double fontSize) {
+    this.fontSize = fontSize;
+    return this;
+  }
+
+  private double fontSize(Set<RepresentableZone> zones) {
+    if (!Double.isNaN(fontSize)) {
+      return fontSize;
+    }
+    return maxWidthPerCp(zones);
+  }
   /**
    * Adds representations to the zones found in this document, according to the given function.
    * 
    * @param representationsByXKeyName the respective representations to add to the zones.
-   * @return this object
+   * @return the document with the added representations.
    */
-  public SvgKeyboard withRepresentations(
+  public Document withRepresentations(
       Function<String, ? extends List<Representation>> representationsByXKeyName) {
     // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO
     // document in Jaris?
@@ -216,28 +314,39 @@ public class SvgKeyboard {
     // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc),
     // result);
     // Document d = (Document) result.getNode();
-    SvgDocumentHelper h = SvgDocumentHelper.using(doc);
-    ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
-    for (RectangleElement zone : keyNameByZone.keySet()) {
+
+    ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
+    // it’s very unlikely that the font size will be constrained in height, so let’s just consider the available width. We consider that 1px font size (which determines the height of am em box) is about a 1px car wide. A very rough approximation, to be sure.
+    double effectiveFontSize = fontSize(zones);
+    if (Double.isFinite(effectiveFontSize)) {
+        String inner = """
+          text-anchor: middle;
+          dominant-baseline: middle;
+          font-size: %spx;""".formatted(effectiveFontSize);
+      appendStyle(TextElement.NODE_NAME, inner);
+    }
+
+    for (RepresentableZone zone : zones) {
+      for (RepresentableSubZone r : zone.subZones()) {
+        Element g = h.g().translate(r.absoluteOffset).getElement();
+        Element svgRepr = toSvg(h, r);
+        g.appendChild(svgRepr);
+        Node prev = zone.zone.getElement().getNextSibling();
+        zone.zone.getElement().getParentNode().insertBefore(g, prev);
+      }
+    }
+    return h.document();
+  }
+
+  private ImmutableSet<RepresentableZone> getZones(
+      Function<String, ? extends List<Representation>> representationsByXKeyName
+      ) {
+        ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
+    ImmutableSet<RepresentableZone> zones = keyNameByZone.keySet().stream().map(zone -> {
       String xKeyName = keyNameByZone.get(zone);
       List<Representation> reprs = representationsByXKeyName.apply(xKeyName);
-      DoublePoint start = zone.getStart();
-      PositiveSize startOffset = PositiveSize.between(DoublePoint.zero(), start);
-      LineColDivision div = LineColDivision.forNb(reprs.size());
-      PositiveSize subSize = PositiveSize.given(zone.getSize().x() / div.nbCols, zone.getSize().y() / div.nbLines);
-      ImmutableSet<PositiveSize> offsets = div.offsetsToCorners(zone.getSize());
-      UnmodifiableIterator<PositiveSize> offsetsIt = offsets.iterator();
-      for (Representation r : reprs) {
-        PositiveSize offset = offsetsIt.next();
-        Element svgRepr = toSvg(h, r);
-        Element g = h.g().translate(startOffset.plus(offset)).getElement();
-        g.appendChild(svgRepr);
-        SvgHelper.setSize(svgRepr, subSize);
-        Node prev = zone.getElement().getNextSibling();
-        zone.getElement().getParentNode().insertBefore(g, prev);
-      }
-      verify(!offsetsIt.hasNext());
-    }
-    return this;
+      return new RepresentableZone(zone, ImmutableList.copyOf(reprs));
+    }).collect(ImmutableSet.toImmutableSet());
+    return zones;
   }
 }

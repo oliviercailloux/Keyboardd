@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" height="75.59055118110236" width="226.77165354330708" xmlns:kdd="https://io.github.oliviercailloux.keyboardd">
     <style>rect {
-  fill-opacity: 0;
-  stroke: black;
-  stroke-width: 1px;
-}
-text{
-  text-anchor: middle;
-  dominant-baseline: middle;
-  font-size: small;
-}
-</style>
+fill-opacity: 0;
+stroke: black;
+stroke-width: 1px;
+}</style>
     <rect height="75.59055118110236" rx="10.0" width="113.38582677165354" kdd:x-key-name="TAB"/>
     <rect height="75.59055118110236" rx="10.0" width="75.59055118110236" x="151.1811023622047" kdd:x-key-name="AD01" y="0.0"/>
 </svg>

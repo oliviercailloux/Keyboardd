@@ -66,16 +66,17 @@ public class SvgKeyboardTests {
     }
 
     @Test
-    public void testTrivialRepresentation() throws Exception {
+    public void testMmmmPRepresentation() throws Exception {
         Document zoned = domHelper.asDocument(new StreamSource(
                 SvgKeyboardTests.class.getResource("Keyboard two keys.svg").toString()));
         String expected = Files.readString(Path.of(SvgKeyboard.class
-                .getResource("Keyboard two keys trivial representation.svg").toURI()));
+                .getResource("Keyboard two keys mmmm p representation.svg").toURI()));
 
-        SvgKeyboard svgK = SvgKeyboard.using(zoned)
-                .withRepresentations(k -> ImmutableList.of(Representation.fromString(k)));
-        String svg = domHelper.toString(svgK.document());
-        // Files.writeString(Path.of("out.svg"), svg);
+                ImmutableMap<String, String> reprs = ImmutableMap.of("TAB", "mmmm", "AD01", "p");
+        Document svgK = SvgKeyboard.using(zoned)
+                .withRepresentations(k -> ImmutableList.of(Representation.fromString(reprs.get(k))));
+        String svg = domHelper.toString(svgK);
+        Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
@@ -86,9 +87,9 @@ public class SvgKeyboardTests {
         String expected = Files.readString(Path.of(SvgKeyboard.class
                 .getResource("Keyboard two rows trivial representation.svg").toURI()));
 
-        SvgKeyboard svgK = SvgKeyboard.using(zoned)
+                Document svgK = SvgKeyboard.using(zoned)
                 .withRepresentations(k -> ImmutableList.of(Representation.fromString(k)));
-        String svg = domHelper.toString(svgK.document());
+        String svg = domHelper.toString(svgK);
         Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
@@ -107,16 +108,16 @@ public class SvgKeyboardTests {
         // https://www.svgrepo.com/svg/445840/keyboard-tab too bold?
         // https://www.svgrepo.com/svg/111811/transfer-arrows too bold.
         // https://www.svgrepo.com/svg/164104/transfer Thanks.
-        SvgKeyboard svgK = SvgKeyboard.using(zoned)
+        Document svgK = SvgKeyboard.using(zoned)
                 .withRepresentations(ImmutableListMultimap.of("TAB", Representation.fromSvg(icon),
                         "AD01", Representation.fromString("A"))::get);
-        String svg = domHelper.toString(svgK.document());
+        String svg = domHelper.toString(svgK);
         Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
     @Test
-    public void testRepresentationTODO() throws Exception {
+    public void testRepresentationMany() throws Exception {
         Document zoned = domHelper.asDocument(new StreamSource(
                 SvgKeyboardTests.class.getResource("Keyboard two keys.svg").toString()));
         String expected = Files.readString(Path.of(SvgKeyboardTests.class
@@ -124,11 +125,11 @@ public class SvgKeyboardTests {
 
         SvgKeyboard svgK = SvgKeyboard.using(zoned);
         CharSource kbMapSource = Resources.asCharSource(
-                KeyboardMapTests.class.getResource("Two keys"), StandardCharsets.UTF_8);
+                KeyboardMapTests.class.getResource("Two keys short"), StandardCharsets.UTF_8);
         KeyboardMap kbMap = SimpleSymbolsReader.read(kbMapSource);
-        SvgKeyboard svgR = svgK.withRepresentations(
+        Document svgR = svgK.withRepresentations(
                 VisibleKeyboardMap.from(kbMap, ImmutableMap.of()).representations()::get);
-        String svg = domHelper.toString(svgR.document());
+        String svg = domHelper.toString(svgR);
         Files.writeString(Path.of("out.svg"), svg);
         // TODO reduce text size, not possible directly apparently
         // (https://stackoverflow.com/questions/15430189/pure-svg-way-to-fit-text-to-a-box) so let’s

@@ -109,6 +109,7 @@ Ceci donne les deux règles ci-dessous.
 
 Si on me donne un SVG sans taille, je l’étend ou le réduit sur la zone.
 Si le SVG a une taille, je la respecte et met le SVG au centre de la zone si ça rentre. Si le SVG est trop grand, je le rétréci à la taille de la zone.
+compute max font size so that all text fits in all zones. Must be done approximately, in absence of a way of computing bounding boxes, I think. (Compute nb pixels in zone / nb letters).
 
 SVG doc
 	<?xml version="1.0" standalone="yes"?>
