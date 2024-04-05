@@ -61,7 +61,6 @@ public class SvgKeyboardTests {
                 layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
         SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
         String svg = domHelper.toString(svgK.document());
-        // Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
@@ -76,7 +75,6 @@ public class SvgKeyboardTests {
         Document svgK = SvgKeyboard.using(zoned)
                 .withRepresentations(k -> ImmutableList.of(Representation.fromString(reprs.get(k))));
         String svg = domHelper.toString(svgK);
-        Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
@@ -90,7 +88,6 @@ public class SvgKeyboardTests {
                 Document svgK = SvgKeyboard.using(zoned)
                 .withRepresentations(k -> ImmutableList.of(Representation.fromString(k)));
         String svg = domHelper.toString(svgK);
-        Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
@@ -112,7 +109,6 @@ public class SvgKeyboardTests {
                 .withRepresentations(ImmutableListMultimap.of("TAB", Representation.fromSvg(icon),
                         "AD01", Representation.fromString("A"))::get);
         String svg = domHelper.toString(svgK);
-        Files.writeString(Path.of("out.svg"), svg);
         assertEquals(expected, svg);
     }
 
@@ -130,10 +126,6 @@ public class SvgKeyboardTests {
         Document svgR = svgK.withRepresentations(
                 VisibleKeyboardMap.from(kbMap, ImmutableMap.of()).representations()::get);
         String svg = domHelper.toString(svgR);
-        Files.writeString(Path.of("out.svg"), svg);
-        // TODO reduce text size, not possible directly apparently
-        // (https://stackoverflow.com/questions/15430189/pure-svg-way-to-fit-text-to-a-box) so let’s
-        // try first to fit an SVG, then to fit the text.
         assertEquals(expected, svg);
     }
 }
