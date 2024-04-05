@@ -3,12 +3,11 @@
 A keyboard drawer library, to be used on systems governed by XKB (including Wayland). Can be used to parse and manipulate keyboard maps and display them as SVG, so as to represent a given keyboard layout or keyboard shortcuts.
 
 == Preliminary
-You need to understand at least roughly (preferably, deeply) https://github.com/oliviercailloux/XKB-doc/README.adoc[how keyboards work under XKB]. Sorry for this.
+You need to understand at least roughly (preferably, deeply) https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
 
 == This library
-
 Here is a quick overview of the main concepts (by class name) that this library permits to manipulate.
-The terms are defined https://github.com/oliviercailloux/XKB-doc/README.adoc#Concepts[here].
+The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc#Concepts[here].
 
 * `XKeys`: can be obtained using `EvdevReader`
 * `Mnemonics`: can be obtained using `KeySymsReader`; can be used to obtain a `UcpByCode`
@@ -16,59 +15,7 @@ The terms are defined https://github.com/oliviercailloux/XKB-doc/README.adoc#Con
 * `RectangularKeyboard`: can be parsed from json using `JsonRectangularKeyboardReader`
 * `Representation`: a String or an SVG icon
 * `VisibleKeyboardMap`: combines a keyboard map and a mapping from keysym entry to representation
-* `SvgKeyboard`: read from and produce svg keyboard files; a rectangular svg keyboard can be produced by combining a `RectangularKeyboard` and a `VisibleKeyboardMap`; a more complex svg keyboard can be produced by combining an SVG keyboard and a `VisibleKeyboardMap`.
-
-Keysym UCPs
-
-* Map (non bijective, incomplete) from keysym code to UCP
-* Implicit: Map UCP to keysym code (bijective, complete), when inverted is a bijective, incomplete
-* Can be obtained from Implicit
-* Explicit: can be obtained from Keysym mnemonics (combining keysym code to canonical keysym mnemonic then keysym mnemonic to UCP)
-* Both: implicit and explicit combined (resulting map still incomplete as some keysym code that explicitly corresponds to some canonical keysym mnemonic may have no associated UCP)
-* Can be obtained from lib? TODO
-
-A map from X to Y is complete iff its set of keys equals the set of legal values for X. When a map is specified to be non bijective or incomplete, it means: not necessarily bijective, not necessarily complete.
-A map is a function that knows its set of keys and values.
-
-// Keysym representations
-
-// * Map (non bijective, complete) from keysym code to representation
-// * Can be obtained from Keysym UCPs (typically through keysym UCPs both; keeps only printable UCPs)
-// * Can be obtained from Keysym UCPs together with Keysym mnemonics (fall backs on the mnemonics if no printable UCP; the resulting map is complete)
-// * Provide “falling back to” method? TODO
-// * Note that these maps must compute. TODO
-
-// Encoded keyboard map
-
-// * Map (non bijective, incomplete) from X key name to a list of encoded keysym entries
-// * An encoded keysym entry is a keysym mnemonic and keysym code, a UCP and keysym code or a keysym code
-// * Can be obtained from a Keyboard map and a Keysym mnemonics and a Keysym UCPs?
-
-Visible keyboard map
-
-* Map (non bijective, incomplete) from X key name to a list of representations
-* Does _not_ contain a Keyboard map (so that can be used for any display of keyboard shortcuts such as for VSCode)
-* Can be obtained from a Keyboard map and a mapping from keysym entry to representation
-* Direct: a mapping from keysym entry to representation (as close as possible to the raw source) from a Keysym mnemonics and a Keysym UCPs and a map (non bijective, incomplete) from UCP to representation: transform a keysym code to its UCP or canonical mnemonic if no printable UCP, a keysym mnemonic to its natural string representation, and UCP to representation.
-* Canonic: a mapping from keysym entry to representation (canonicalizing as much as possible then using the provided transformations) from a Keysym mnemonics and a Keysym UCPs and a map (non bijective, incomplete) from keysym canonical mnemonic to representation and a map (non bijective, incomplete) from UCP to representation: transform a keysym code to its canonical mnemonic or UCP if no mnemonic, a keysym mnemonic to its canonical mnemonic, a canonical mnemonic to UCP (using the Keysym mnemonics) or to representation if no UCP, and UCP to representation.
-
-Functional keyboard
-
-* A set of functional keys
-* A functional key is a position and a list of representations
-* Can be obtained from a Physical keyboard and a Visible keyboard map
-
-SVG keyboardd: includes a “key representation zone” for each key (and other elements as desired). A key representation zone is an SVG rectangle with an attribute that indicates the canonical X key name. (Do not need to be unique; the only limitation is that if they are duplicated, they will also always have the same representation, which I think is reasonable, though it is permitted to add attributes to distinguish them.) The SVG may draw complex shapes for each key; may use the key representation zone to draw the key or make it invisible… When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
-
-SVG physical keyboardd: an SVG keyboardd where the key representation zone is an element that draws the x key name.
-
-SVG functional keyboardd: an SVG keyboardd where the key representation zone contains one or more representations that illustrate the behavior of the key (in a large sense, so representing what is displayed on the keyboard is allowed, including if all keys are black as for a blind keyboard). As a file format, this is therefore equivalent to an SVG keyboardd, but as a class concept it differs as its purpose is to use the mappings defined in the OS.
-
-We also need a standard attribute "key-id" to identify keys that do not send anything, such as the Fn key (and to distinguish keys with identical x-key-name if this exists).
-No, let’s not use such a standard attribute, as it is beyond the scope of this library.
-This library does not consider such keys: manually represent whatever you want in the SVG for that key; it will not change according to the keyboard mapping (and it should not, as it does not send anything).
-
-Note that two things miss when given an SVG file to describe a physical keyboard. First, the letter caps. Second, the alternative X key names, if any (those sent by the keyboard when pressing the Fn or similar key). We consider that this is not to be stored in an official SVG file (though it can be represented of course).
+* `SvgKeyboard`: read from and produce https://github.com/oliviercailloux/SVG-keyboard[svg keyboard files]; a rectangular svg keyboard can be produced by combining a `RectangularKeyboard` and a `VisibleKeyboardMap`; a more complex svg keyboard can be produced by combining an SVG keyboard and a `VisibleKeyboardMap`.
 
 == Vocabulary
 
@@ -85,9 +32,8 @@ The code uses the following terms and abbreviations.
 
 The argument names use the non-abbreviated names; the method and class names use the abbreviated names (unless an abbreviated name would raise some ambiguity). For example: `nameFromMnemonic(keysymMnemonic: String)`
 
-For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG] — though apparently https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[some disagree]) `canonicalXKeyName`.
+For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG], despite https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[disagreement]) `canonicalXKeyName`.
 
-== SVG
 == Summary
 An outer <svg> element is technically a replaced element as far as the html/css specifications are concerned. If the size of a replaced element cannot be determined then the browser should fall back to a size of 300 x 150px.
 https://stackoverflow.com/a/65626536/859604
@@ -151,6 +97,8 @@ Finish test, using a clean fr mapping. Why is it not displaying the unicode equi
 Embed an SVG document as representation (not just an element!).
 Print with both X key names (normal and with Fn).
 Allow mapping from multiple fr-like files?
+
+When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
 
 == From notes in drawer
     /*
