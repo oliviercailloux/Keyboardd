@@ -24,11 +24,11 @@ public class MnemonicsTests {
     LOGGER.debug("Keys: {}.", latest.byMnemonic());
 
     assertThrows(IllegalArgumentException.class, () -> latest.canonical("NOT THERE"));
-    CanonicalMnemonic voidSymbolCan = latest.canonical("VoidSymbol");
-    CanonicalMnemonic aCan = latest.canonical("A");
-    CanonicalMnemonic priorCan = latest.canonical("Prior");
-    CanonicalMnemonic extCan = latest.canonical("Ext16bit_L");
-    CanonicalMnemonic modeSwitchCan = latest.canonical("Mode_switch");
+    final CanonicalMnemonic voidSymbolCan = latest.canonical("VoidSymbol");
+    final CanonicalMnemonic aCan = latest.canonical("A");
+    final CanonicalMnemonic priorCan = latest.canonical("Prior");
+    final CanonicalMnemonic extCan = latest.canonical("Ext16bit_L");
+    final CanonicalMnemonic modeSwitchCan = latest.canonical("Mode_switch");
 
     assertEquals("VoidSymbol", voidSymbolCan.mnemonic());
     assertEquals("A", aCan.mnemonic());
@@ -101,10 +101,10 @@ public class MnemonicsTests {
 
     assertThrows(IllegalArgumentException.class, () -> latest.canonical("NOT THERE"));
     assertThrows(IllegalArgumentException.class, () -> latest.canonical("Ext16bit_L"));
-    CanonicalMnemonic voidSymbolCan = latest.canonical("VoidSymbol");
-    CanonicalMnemonic aCan = latest.canonical("A");
-    CanonicalMnemonic priorCan = latest.canonical("Prior");
-    CanonicalMnemonic modeSwitchCan = latest.canonical("Mode_switch");
+    final CanonicalMnemonic voidSymbolCan = latest.canonical("VoidSymbol");
+    final CanonicalMnemonic aCan = latest.canonical("A");
+    final CanonicalMnemonic priorCan = latest.canonical("Prior");
+    final CanonicalMnemonic modeSwitchCan = latest.canonical("Mode_switch");
 
     assertEquals("VoidSymbol", voidSymbolCan.mnemonic());
     assertEquals("A", aCan.mnemonic());

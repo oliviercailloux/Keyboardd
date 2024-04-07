@@ -2,23 +2,20 @@ package io.github.oliviercailloux.keyboardd.keyboard.json;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
-
 import io.github.oliviercailloux.keyboardd.keyboard.RectangularKey;
 import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class KeyboardReaderTests {
   @Test
@@ -67,8 +64,9 @@ public class KeyboardReaderTests {
         mapper.getTypeFactory().constructCollectionType(List.class, JsonRectangularRowKey.class);
     try (Reader r = source.openStream()) {
       List<JsonRectangularRowKey> ks = mapper.readValue(r, type);
-      ImmutableList<JsonRectangularRowKey> row = ImmutableList.of(new JsonRectangularRowKey("Name1", 1.5d),
-          new JsonRectangularRowKey("Name2", 1d), new JsonRectangularRowKey("", 1.5d));
+      ImmutableList<JsonRectangularRowKey> row =
+          ImmutableList.of(new JsonRectangularRowKey("Name1", 1.5d),
+              new JsonRectangularRowKey("Name2", 1d), new JsonRectangularRowKey("", 1.5d));
       assertEquals(row, ks);
     }
   }
@@ -84,10 +82,12 @@ public class KeyboardReaderTests {
     JavaType type2 = mapper.getTypeFactory().constructCollectionType(List.class, type);
     try (Reader r = source.openStream()) {
       List<List<JsonRectangularRowKey>> ks = mapper.readValue(r, type2);
-      ImmutableList<JsonRectangularRowKey> row1 = ImmutableList.of(new JsonRectangularRowKey("Name1", 1.5d),
-          new JsonRectangularRowKey("Name2", 1d), new JsonRectangularRowKey("", 1.5d));
-      ImmutableList<JsonRectangularRowKey> row2 = ImmutableList.of(new JsonRectangularRowKey("Name3", 1.5d),
-          new JsonRectangularRowKey("Name4", 1d), new JsonRectangularRowKey("", 1.5d));
+      ImmutableList<JsonRectangularRowKey> row1 =
+          ImmutableList.of(new JsonRectangularRowKey("Name1", 1.5d),
+              new JsonRectangularRowKey("Name2", 1d), new JsonRectangularRowKey("", 1.5d));
+      ImmutableList<JsonRectangularRowKey> row2 =
+          ImmutableList.of(new JsonRectangularRowKey("Name3", 1.5d),
+              new JsonRectangularRowKey("Name4", 1d), new JsonRectangularRowKey("", 1.5d));
       assertEquals(ImmutableList.of(row1, row2), ks);
     }
   }
@@ -98,8 +98,8 @@ public class KeyboardReaderTests {
         getClass().getResource("Keyboard layout simple.json"), StandardCharsets.UTF_8);
 
     JsonRectangularRowKeyboard parsed = JsonRectangularKeyboardReader.rowKeyboard(source);
-    ImmutableList<JsonRectangularRowKey> row =
-        ImmutableList.of(new JsonRectangularRowKey("TAB", 1.5d), new JsonRectangularRowKey("AD01", 1d));
+    ImmutableList<JsonRectangularRowKey> row = ImmutableList
+        .of(new JsonRectangularRowKey("TAB", 1.5d), new JsonRectangularRowKey("AD01", 1d));
     assertEquals(ImmutableList.of(row), parsed.rows());
   }
 
@@ -120,14 +120,16 @@ public class KeyboardReaderTests {
     CharSource source = Resources.asCharSource(
         getClass().getResource("Keyboard layout two rows.json"), StandardCharsets.UTF_8);
 
-    RectangularKey r1k1 = RectangularKey.from(DoublePoint.zero(), PositiveSize.given(3d, 2d), "R1K1");
+    RectangularKey r1k1 =
+        RectangularKey.from(DoublePoint.zero(), PositiveSize.given(3d, 2d), "R1K1");
     RectangularKey r1k2 =
         RectangularKey.from(DoublePoint.given(4d, 0d), PositiveSize.given(4.5d, 2d), "R1K2");
     RectangularKey r2k1 =
         RectangularKey.from(DoublePoint.given(0d, 3.2d), PositiveSize.given(6d, 2d), "R2K1");
     RectangularKey r2k2 =
         RectangularKey.from(DoublePoint.given(7d, 3.2d), PositiveSize.given(3d, 2d), "R2K2");
-    RectangularKeyboard expected = RectangularKeyboard.from(ImmutableSet.of(r1k1, r1k2, r2k1, r2k2));
+    RectangularKeyboard expected =
+        RectangularKeyboard.from(ImmutableSet.of(r1k1, r1k2, r2k1, r2k2));
 
     RectangularKeyboard keyboard = JsonRectangularKeyboardReader.rowKeyboard(source)
         .toPhysicalKeyboard(PositiveSize.given(3d, 2d), PositiveSize.given(1d, 1.2d));

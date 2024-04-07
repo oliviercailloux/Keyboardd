@@ -182,32 +182,32 @@ public class KeysymReaderTests {
   @Test
   public void testLatest() throws Exception {
     ImmutableSet<ParsedMnemonic> mns = KeysymReader.latest();
-    /** grep -c "^#define X" "xkbcommon-keysyms - 238d13.h" */
+    /* grep -c "^#define X" "xkbcommon-keysyms - 238d13.h" */
     assertEquals(2572, mns.size());
 
-    { /** grep "^#define X" "xkbcommon-keysyms - 238d13.h" | grep -c -v "/\*" */
+    { /* grep "^#define X" "xkbcommon-keysyms - 238d13.h" | grep -c -v "/\*" */
       ImmutableSet<ParsedMnemonic> noComment =
           mns.stream().filter(s -> s.comment().isEmpty() && s.unicode().isEmpty())
               .collect(ImmutableSet.toImmutableSet());
       assertEquals(353, noComment.size());
     }
-    { /** grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\*<" */
+    { /* grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\*<" */
       ImmutableSet<ParsedMnemonic> unicodeS =
           mns.stream().filter(s -> s.specific()).collect(ImmutableSet.toImmutableSet());
       assertEquals(20, unicodeS.size());
     }
-    { /** grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\*(" */
+    { /* grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\*(" */
       ImmutableSet<ParsedMnemonic> unicodeD =
           mns.stream().filter(s -> s.unicode().isPresent() && s.deprecated())
               .collect(ImmutableSet.toImmutableSet());
       assertEquals(43, unicodeD.size());
     }
-    { /** grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep "/\*" | grep -c -v "U+" */
+    { /* grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep "/\*" | grep -c -v "U+" */
       ImmutableSet<ParsedMnemonic> matching =
           mns.stream().filter(s -> !s.comment().isEmpty()).collect(ImmutableSet.toImmutableSet());
       assertEquals(524, matching.size());
     }
-    { /**
+    { /*
        * grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep "/\*" | grep -v "/\* deprecated" |
        * grep -c -v "U+"
        */
@@ -216,7 +216,7 @@ public class KeysymReaderTests {
               .collect(ImmutableSet.toImmutableSet());
       assertEquals(421, matching.size());
     }
-    { /** grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\* U+" */
+    { /* grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\* U+" */
       ImmutableSet<ParsedMnemonic> matching =
           mns.stream().filter(s -> s.unicode().isPresent() && !s.deprecated() && !s.specific())
               .collect(ImmutableSet.toImmutableSet());
@@ -235,8 +235,8 @@ public class KeysymReaderTests {
       ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
       assertEquals(2, mnsForUcp.size());
       UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
-      ParsedMnemonic mn1 = iterator.next();
-      ParsedMnemonic mn2 = iterator.next();
+      final ParsedMnemonic mn1 = iterator.next();
+      final ParsedMnemonic mn2 = iterator.next();
       assertFalse(iterator.hasNext());
       assertEquals("KP_Add", mn1.mnemonic());
       assertTrue(mn1.specific());
@@ -250,9 +250,9 @@ public class KeysymReaderTests {
       ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
       assertEquals(3, mnsForUcp.size());
       UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
-      ParsedMnemonic mn1 = iterator.next();
-      ParsedMnemonic mn2 = iterator.next();
-      ParsedMnemonic mn3 = iterator.next();
+      final ParsedMnemonic mn1 = iterator.next();
+      final ParsedMnemonic mn2 = iterator.next();
+      final ParsedMnemonic mn3 = iterator.next();
       assertFalse(iterator.hasNext());
       assertEquals("KP_Decimal", mn1.mnemonic());
       assertTrue(mn1.specific());
@@ -268,8 +268,8 @@ public class KeysymReaderTests {
       ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
       assertEquals(2, mnsForUcp.size());
       UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
-      ParsedMnemonic mn1 = iterator.next();
-      ParsedMnemonic mn2 = iterator.next();
+      final ParsedMnemonic mn1 = iterator.next();
+      final ParsedMnemonic mn2 = iterator.next();
       assertFalse(iterator.hasNext());
       assertEquals("less", mn1.mnemonic());
       assertFalse(mn1.specific());
@@ -283,8 +283,8 @@ public class KeysymReaderTests {
       ImmutableSet<ParsedMnemonic> mnsForUcp = mnsByUcp.get(ucp);
       assertEquals(2, mnsForUcp.size());
       UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
-      ParsedMnemonic mn1 = iterator.next();
-      ParsedMnemonic mn2 = iterator.next();
+      final ParsedMnemonic mn1 = iterator.next();
+      final ParsedMnemonic mn2 = iterator.next();
       assertFalse(iterator.hasNext());
       assertEquals("underscore", mn1.mnemonic());
       assertFalse(mn1.specific());
@@ -326,10 +326,10 @@ public class KeysymReaderTests {
         .collect(ImmutableSet.toImmutableSet());
     assertEquals(2, mnsForUcp.size());
     UnmodifiableIterator<ParsedMnemonic> iterator = mnsForUcp.iterator();
-    ParsedMnemonic mn1 = iterator.next();
+    final ParsedMnemonic mn1 = iterator.next();
     assertEquals("topleftradical", mn1.mnemonic());
     assertTrue(mn1.deprecated());
-    ParsedMnemonic mn2 = iterator.next();
+    final ParsedMnemonic mn2 = iterator.next();
     assertEquals("upleftcorner", mn2.mnemonic());
     assertFalse(mn2.deprecated());
   }

@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Comparator;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Test;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.Comparator;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 
 public class XkeysTests {
   @Test
@@ -25,7 +23,7 @@ public class XkeysTests {
             rangeClosed(696, 701), rangeClosed(704, 708))
         .flatMap(s -> s.boxed()).map(i -> i.shortValue())
         .collect(ImmutableSortedSet.toImmutableSortedSet(Comparator.naturalOrder()));
-    int expectedAliasesSize = 47;
+    final int expectedAliasesSize = 47;
 
     Xkeys keys = Xkeys.latest();
 
@@ -139,7 +137,8 @@ public class XkeysTests {
     assertThrows(IllegalArgumentException.class, () -> withoutAliases.names((short) 7));
 
     assertEquals(latest.canonicals(), withoutAliases.codeByName().keySet());
-    assertEquals(ImmutableSortedSet.copyOf(latest.codeByName().values()), ImmutableSortedSet.copyOf(withoutAliases.codeByName().values()));
+    assertEquals(ImmutableSortedSet.copyOf(latest.codeByName().values()),
+        ImmutableSortedSet.copyOf(withoutAliases.codeByName().values()));
 
     assertEquals(withoutAliases, withoutAliases.withoutAliases());
   }
