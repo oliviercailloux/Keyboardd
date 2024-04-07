@@ -45,6 +45,7 @@
       <artifactId>logback-classic</artifactId>
       <version>1.4.7</version>
       <scope>runtime</scope>
+			<optional>true</optional>
     </dependency>
   </dependencies>
 </project>
