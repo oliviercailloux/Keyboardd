@@ -5,6 +5,13 @@ A keyboard drawer library, to be used on systems governed by XKB (including Wayl
 == Preliminary
 You need to understand at least roughly (preferably, deeply) https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
 
+== Usage (short)
+Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.
+Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
+Modify the SVG manually.
+
+I have some impression that FF (Firefox uses GTK3 on my system) prints at 96 DPI. Eog seems to print at 72 DPI (configurable). Let’s go for 96 DPI for the standard.
+
 == This library
 Here is a quick overview of the main concepts (by class name) that this library permits to manipulate.
 The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc#Concepts[here].
@@ -34,89 +41,22 @@ The argument names use the non-abbreviated names; the method and class names use
 
 For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG], despite https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[disagreement]) `canonicalXKeyName`.
 
-== Summary
-An outer <svg> element is technically a replaced element as far as the html/css specifications are concerned. If the size of a replaced element cannot be determined then the browser should fall back to a size of 300 x 150px.
-https://stackoverflow.com/a/65626536/859604
-In particular, when the referenced resource does not have an intrinsic size (such as image types with no defined dimensions), it is assumed to have a width of 300px and a height of 150px. 
-https://svgwg.org/svg2-draft/embedded.html#Placement
-Need to set the total size to the size of the content: https://stackoverflow.com/a/50820586/859604
-No viewport because I do not want the keyboard to change size: https://www.sololearn.com/en/Discuss/2379444/why-use-viewbox-attribute-in-symbol-if-you-can-just-change-its-size-with-height-and-width-attributes-once-you-use-it-in-an-svg
+== SVG keyboards
+This library produces https://github.com/oliviercailloux/SVG-keyboard/blob/main/README.adoc[SVG keyboards] that target a given physical size so as to represent the keys and the keyboard with a scale of 1:1. To do this, the library assumes that the viewer (or printer) uses 96 DPI. SVG keyboards that this library produces therefore have a size in pixels, equivalently (given the DPI value), a size in cm.
+(If no size is set, “the browser should fall back to a size of [300px × 150px as an] outer <svg> element is technically a replaced element as far as the html/css specifications are concerned” -- https://stackoverflow.com/questions/65625935/how-does-chrome-determines-svg-size/65626536#65626536[SO]; as “when the referenced resource does not have an intrinsic size” -- https://svgwg.org/svg2-draft/embedded.html#Placement[SVG2 spec]; and there seems to be no way to implicitly set the size to the size of the content -- https://stackoverflow.com/questions/50813950/how-do-i-make-an-svg-size-to-fit-its-content/50820586#50820586[SO]; also no viewBox is used (“This attribute provides a convenient way to design SVG documents to scale-to-fit into an arbitrary SVG viewport” -- https://svgwg.org/svg2-draft/struct.html#SVGElement[SVG2 spec]) so that the keyboard does not change size (TODO check).)
 
-== Vrac
-svg global : a une taille en cm. Pour l’affichage à l’écran ; l’impression.
-Ceci détermine la taille d’une touche en cm.
-Ceci détermine la taille d’une zone.
+Key bindings may be represented by embedded SVG documents. Such documents may themselves have a native size in pixels (thus, still assuming 96 DPI, a native size in cm). This is useful if the embedded SVG document contains letters in a font that should be represented exactly at 10px, for example. Which in turn is useful for uniformity accross keys. This also permits to use a drawing that represents the key cap and whose size represents the physical size of the keyboard key cap.
+Thus, if the given SVG documents (to be embedded) have a size, the library will respect this size and center the document in the key binding zone. If the document is too large, it will be resized to fit the zone (TODO check).
 
-Le SVG à imprimer sur la touche pourrait avoir une taille en cm, éq, en pixels. 1) 10 pix font. 2) graph with native size 3) the exact letter cap at physical size.
-Cas 1. On imagine une fonte sur un graphique (sinon autant le représenter en texte). Donc alors c’est le cas 2.
-Cas 2. En fait la zone est si petite que stretcher n’est pas bien grave? Sauf si on veut une uniformité des tailles d’une touche à l’autre !
-Je dois centrer le dessin sur la zone et respecter sa taille !
-Ceci donne les deux règles ci-dessous.
+Headers follow the https://svgwg.org/svg2-draft/struct.html#NewDocument[SVG2 spec].
 
-Si on me donne un SVG sans taille, je l’étend ou le réduit sur la zone.
-Si le SVG a une taille, je la respecte et met le SVG au centre de la zone si ça rentre. Si le SVG est trop grand, je le rétréci à la taille de la zone.
-compute max font size so that all text fits in all zones. Must be done approximately, in absence of a way of computing bounding boxes, I think. (Compute nb pixels in zone / nb letters).
-
-SVG doc
-	<?xml version="1.0" standalone="yes"?>
-	https://svgwg.org/svg2-draft/struct.html#NewDocument
-	If an SVG document is likely to be referenced as a component of another document, the author will often want to include a ‘viewBox’ attribute on the outermost svg element of the referenced document. This attribute provides a convenient way to design SVG documents to scale-to-fit into an arbitrary SVG viewport.
-
-
-SVG taille ?
-	https://www.w3.org/Graphics/SVG/IG/resources/svgprimer.html
-	https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Getting_Started
-	https://svgwg.org/svg2-draft/struct.html
-	
-Apache ?
-	https://svgwg.org/svg2-draft/types.html#InterfaceSVGElement
-	The SVGGraphicsElement interface represents SVG elements whose primary purpose is to directly render graphics into a group.
-	The getBBox method is used to compute the bounding box of the current element.
-
-https://sourceforge.net/p/axsl/code/HEAD/tree/trunk/svg-dom/src/main/resources/
-https://central.sonatype.com/artifact/org.axsl.org.w3c.dom.svg/svg-dom-java
-https://www.javadoc.io/doc/org.axsl.org.w3c.dom.svg/svg-dom-java/latest/index.html
-https://xmlgraphics.apache.org/batik/javadoc/ (should give up on batik which relies on SVG 1.0, says sourceforge, https://stackoverflow.com/questions/13676937/how-to-find-package-org-w3c-dom-svg)
-https://www.w3.org/TR/SVG11/java.html
-https://www.javadoc.io/doc/org.apache.xmlgraphics/xmlgraphics-commons/latest/index.html
-https://www.javadoc.io/doc/org.apache.xmlgraphics/batik-all/latest/index.html
-https://xmlgraphics.apache.org/batik/using/scripting/java.html (might include batik-all or some similar stuff, to get SVG 1.0, to get the BBox; though this is incompatible with the SVG 1.1 interface as it uses the same class names): https://stackoverflow.com/questions/34078251/getbbox-for-embedded-svg-element-with-batik
-
-== Usage
-Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.
-Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
-Modify the SVG manually.
-
-== Notes
-This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
-It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
-
-== TODO
-Print with a pohysical size.
-Finish test, using a clean fr mapping. Why is it not displaying the unicode equivalent?
-Embed an SVG document as representation (not just an element!).
-Print with both X key names (normal and with Fn).
-Allow mapping from multiple fr-like files?
-
-When rewriting the file using representations, our classes will delete every SVG element that is entirely (weakly) inside a key representation zone.
-
-== From notes in drawer
+== Mine
     /*
      * Also, key F1 sends keycode 67, F2 sends keycode 68, Fn+F1 sends keycode 179, sym XF86Tools
      * (269025153), Fn+F2 sends keycode 122, sym XF86AudioLowerVolume (269025041). evdev maps
      * keycode 179 to I179 and keycode 122 to VOL-.
      * 
      */
-
-    /*
-     * We want to render at chosen font size, so no scaling. Thus, we have to choose the key size
-     * accordingly. It is hopeless to display the real key size (in real cm), however (requires
-     * knowing the number of dpi). But we can print it. I have some impression that FF prints at 96
-     * DPI. Eog seems to print at 72 DPI (configurable). Let’s go for 96 DPI for the standard.
-     * 
-     * Firefox uses GTK3 on my system.
-     */
-    /* Requires Batik for BBox (on SVGSVGElement or SVGLocatable or such). */
 
 This should be used after parsing the simple layout json file, to scale the physical keyboard, then output another json file.
 
@@ -128,21 +68,6 @@ This should be used after parsing the simple layout json file, to scale the phys
     double interV = 0.52d;
     /* Total height is 11 cm (measured), that is 6*height + 5*interV. */
 
-== Libraries
-
-https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/xkb/XKBBind.c[impl] of XkbKeycodeToKeysym, XKeycodeToKeysym, XKeysymToKeycode and more complicated functions (https://gitlab.freedesktop.org/xorg/lib/libx11/-/blob/master/src/KeyBind.c[older one]; some related https://github.com/mirror/libX11/blob/master/src/xkb/XKBlibint.h[headers]). https://gitlab.freedesktop.org/xorg/lib/libx11/blob/master/src/StrKeysym.c[Impl] of XStringToKeysym only.
-
-** See mainly: https://github.com/xkbcommon/libxkbcommon/blob/238d132406d8dc1123cbcaf68ab12d34c505e7e4/include/xkbcommon/xkbcommon.h#L168-L204[impl] of libxkbcommon xkb_keysym_get_name, xkb_keysym_from_name, xkb_keysym_to_utf8, xkb_keymap_num_layouts_for_key and so on.
-
-On my Debian system:
-
-* libxkbcommon-x11-0 (mandatory) https://packages.debian.org/bookworm/libxkbcommon-x11-0 “This package provides an add-on library called xkbcommon-x11, to support creating keymaps with the XKB X11 protocol, by querying the X server directly.”
-* libxkbcommon0 (mandatory) https://packages.debian.org/bookworm/libxkbcommon0
-* libx11-6
-* libx11-data
-* libx11-dev, requiring https://packages.debian.org/bookworm/all/x11proto-dev/filelist, containing /usr/include/X11/keysymdef.h, but non mandatory
-* I can load the "X11" library and call XStringToKeysym("KP_Space"). “XKeycodeToKeysym predates the XKB extension. If you want to lookup a KeySym while using XKB you have to use XkbKeycodeToKeysym.” -- https://linux.die.net/man/3/xstringtokeysym 
-* xkbkeycodetokeysym https://linux.die.net/man/3/xkbkeycodetokeysym 
-
-TODO integrate https://who-t.blogspot.com/2021/01/auto-updating-xkb-for-new-kernel.html
-Also integrate https://github.com/xkbcommon/libxkbcommon/blob/6073565903488cb5b9a8d37fdc4a7c2f9d7ad04d/include/xkbcommon/xkbcommon.h#L204
+== Limitations
+This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
+It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
