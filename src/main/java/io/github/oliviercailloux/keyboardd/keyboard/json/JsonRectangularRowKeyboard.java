@@ -63,7 +63,7 @@ public class JsonRectangularRowKeyboard {
         keys.add(targetKey);
         currentCorner = currentCorner.plus(PositiveSize.horizontal(targetWidth + spacing.x()));
       }
-      currentCorner = DoublePoint.given(0d, scale.y() + spacing.y());
+      currentCorner = DoublePoint.given(0d, currentCorner.y() + scale.y() + spacing.y());
     }
 
     return RectangularKeyboard.from(keys.build());

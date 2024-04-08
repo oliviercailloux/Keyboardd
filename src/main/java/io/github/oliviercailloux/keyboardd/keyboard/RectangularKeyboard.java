@@ -44,7 +44,7 @@ public class RectangularKeyboard {
     this.keys = ImmutableSet.copyOf(physicalKeys);
     ImmutableMultiset<DoublePoint> corners = physicalKeys.stream().map(k -> k.topLeftCorner())
         .collect(ImmutableMultiset.toImmutableMultiset());
-    checkArgument(corners.size() == corners.entrySet().size());
+    checkArgument(corners.size() == corners.entrySet().size(), corners);
     if (!physicalKeys.isEmpty()) {
       checkArgument(corners.stream().anyMatch(c -> c.equals(DoublePoint.zero())));
     }
