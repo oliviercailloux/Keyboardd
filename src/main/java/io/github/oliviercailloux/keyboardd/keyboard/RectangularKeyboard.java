@@ -45,8 +45,9 @@ public class RectangularKeyboard {
     ImmutableMultiset<DoublePoint> corners = physicalKeys.stream().map(k -> k.topLeftCorner())
         .collect(ImmutableMultiset.toImmutableMultiset());
     checkArgument(corners.size() == corners.entrySet().size());
-    if (!physicalKeys.isEmpty())
+    if (!physicalKeys.isEmpty()) {
       checkArgument(corners.stream().anyMatch(c -> c.equals(DoublePoint.zero())));
+    }
   }
 
   /**
@@ -60,12 +61,13 @@ public class RectangularKeyboard {
   }
 
   public PositiveSize size() {
-    ImmutableSet<DoublePoint> bottomRights = keys.stream().map(k -> k.topLeftCorner().plus(k.size())).collect(ImmutableSet.toImmutableSet());
+    ImmutableSet<DoublePoint> bottomRights = keys.stream()
+        .map(k -> k.topLeftCorner().plus(k.size())).collect(ImmutableSet.toImmutableSet());
     double rightest = bottomRights.stream().mapToDouble(p -> p.x()).max().orElse(0d);
     double bottomest = bottomRights.stream().mapToDouble(p -> p.y()).max().orElse(0d);
     return PositiveSize.given(rightest, bottomest);
   }
-  
+
   @Override
   public boolean equals(Object o2) {
     if (!(o2 instanceof RectangularKeyboard)) {
