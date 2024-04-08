@@ -3,32 +3,29 @@ package io.github.oliviercailloux.keyboardd.mnemonics;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import io.github.oliviercailloux.keyboardd.mnemonics.Mnemonics.CanonicalMnemonic;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Range;
-import io.github.oliviercailloux.keyboardd.mnemonics.Mnemonics.CanonicalMnemonic;
-
 public class UcpByCode {
   public static final ContiguousSet<Integer> IMPLICIT_UCPS = ContiguousSet.closed(0x100, 0x10F_FFF);
-  public static final ContiguousSet<Integer> IMPLICIT_UCP_KEYSYM_CODES = ContiguousSet.closed(0x01_000_100, 0x01_10F_FFF);
+  public static final ContiguousSet<Integer> IMPLICIT_UCP_KEYSYM_CODES =
+      ContiguousSet.closed(0x01_000_100, 0x01_10F_FFF);
 
   public static UcpByCode implicit() {
-    return new UcpByCode(ImmutableMap.of(), c -> c - 0x01_000_000,
-    IMPLICIT_UCP_KEYSYM_CODES,
-    IMPLICIT_UCPS);
+    return new UcpByCode(ImmutableMap.of(), c -> c - 0x01_000_000, IMPLICIT_UCP_KEYSYM_CODES,
+        IMPLICIT_UCPS);
   }
 
   public static UcpByCode implicitAndExplicit(Map<Integer, Integer> ucpByCodeExplicit) {
     ContiguousSet<Integer> domain = IMPLICIT_UCP_KEYSYM_CODES;
     ImmutableSet.Builder<Integer> domainBuilder = ImmutableSet.builder();
-    
+
     ContiguousSet<Integer> coDomain = IMPLICIT_UCPS;
     ImmutableSet.Builder<Integer> coDomainBuilder = ImmutableSet.builder();
 
@@ -39,7 +36,8 @@ public class UcpByCode {
 
   public static UcpByCode implicitAndExplicit(Mnemonics mnemonics) {
     ImmutableBiMap<Integer, CanonicalMnemonic> byUcp = mnemonics.byUcp();
-    ImmutableBiMap<Integer, Integer> codeByUcp = byUcp.keySet().stream().collect(ImmutableBiMap.toImmutableBiMap(u -> u, u -> byUcp.get(u).code()));
+    ImmutableBiMap<Integer, Integer> codeByUcp = byUcp.keySet().stream()
+        .collect(ImmutableBiMap.toImmutableBiMap(u -> u, u -> byUcp.get(u).code()));
     return implicitAndExplicit(codeByUcp.inverse());
   }
 

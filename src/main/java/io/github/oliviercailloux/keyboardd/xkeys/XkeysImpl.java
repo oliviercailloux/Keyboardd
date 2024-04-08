@@ -2,18 +2,16 @@ package io.github.oliviercailloux.keyboardd.xkeys;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.Map;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class XkeysImpl implements Xkeys {
   @SuppressWarnings("unused")
@@ -23,7 +21,7 @@ class XkeysImpl implements Xkeys {
   private final ImmutableMap<String, String> canonicalByAlias;
 
   /**
-   * 
+   *
    * @param codes
    * @param canonicalByAlias keys are all aliases, values are only canonicals
    * @return
@@ -47,6 +45,15 @@ class XkeysImpl implements Xkeys {
   @Override
   public ImmutableSet<String> canonicals() {
     return codeByCanonical.keySet();
+  }
+
+  @Override
+  public String canonical(String keyName) {
+    if (canonicals().contains(keyName)) {
+      return keyName;
+    }
+    checkArgument(aliases().contains(keyName));
+    return canonicalByAlias.get(keyName);
   }
 
   @Override
@@ -87,25 +94,6 @@ class XkeysImpl implements Xkeys {
   }
 
   @Override
-  public boolean isAlias(String keyName) {
-    checkArgument(aliases().contains(keyName) || canonicals().contains(keyName));
-    return aliases().contains(keyName);
-  }
-
-  @Override
-  public String canonical(String keyName) {
-    if (canonicals().contains(keyName))
-      return keyName;
-    checkArgument(aliases().contains(keyName));
-    return canonicalByAlias.get(keyName);
-  }
-
-  @Override
-  public short code(String keyName) {
-    return codeByCanonical.get(canonical(keyName));
-  }
-
-  @Override
   public ImmutableSet<String> names(short code) {
     checkArgument(codes().contains(code));
     String canonical = canonicalByCode().get(code);
@@ -113,6 +101,17 @@ class XkeysImpl implements Xkeys {
     final ImmutableSet.Builder<String> all =
         new ImmutableSet.Builder<String>().add(canonical).addAll(aliases);
     return all.build();
+  }
+
+  @Override
+  public boolean isAlias(String keyName) {
+    checkArgument(aliases().contains(keyName) || canonicals().contains(keyName));
+    return aliases().contains(keyName);
+  }
+
+  @Override
+  public short code(String keyName) {
+    return codeByCanonical.get(canonical(keyName));
   }
 
   @Override

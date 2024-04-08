@@ -1,20 +1,18 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
-import java.util.Map;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
-
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry;
+import java.util.Map;
 
 public class VisibleKeyboardMap {
   public static VisibleKeyboardMap from(ListMultimap<String, Representation> representations) {
     return new VisibleKeyboardMap(representations);
   }
-  
+
   public static VisibleKeyboardMap from(KeyboardMap keyboardMap,
       Map<KeysymEntry, Representation> representations) {
     ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();
@@ -32,7 +30,10 @@ public class VisibleKeyboardMap {
               representation = Representation.fromString(entry.mnemonic().orElseThrow());
               break;
             case UCP:
-            /* http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs for invisible characters in our case, so let’s stick to the easy representation. */
+              /*
+               * http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs
+               * for invisible characters in our case, so let’s stick to the easy representation.
+               */
               representation = Representation
                   .fromString(new String(Character.toChars(entry.ucp().orElseThrow())));
               break;

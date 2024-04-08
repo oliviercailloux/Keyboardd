@@ -3,27 +3,22 @@ package io.github.oliviercailloux.keyboardd.mnemonics;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.base.VerifyException;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Sets;
+import com.google.common.io.CharSource;
+import com.google.common.io.Resources;
+import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.VerifyException;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.MoreCollectors;
-import com.google.common.collect.Sets;
-import com.google.common.io.CharSource;
-import com.google.common.io.Resources;
-
-import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 
 /**
  * Reads data as found in a xkbcommon-keysyms.h file and returns a set of mnemonics.
@@ -42,7 +37,8 @@ import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
  * as a deprecated mnemonic with no associated UCP: it does not lookup the relevant UCP from the
  * entry corresponding to the oslash mnemonic.</li>
  * <li>The canonical mnemonic associated to a given keysym code is the first one in iteration order
- * of the returned set that is not specific (and not deprecated, unless that makes the set of candidates empty).</li>
+ * of the returned set that is not specific (and not deprecated, unless that makes the set of
+ * candidates empty).</li>
  * </ul>
  */
 class KeysymReader {
@@ -96,18 +92,24 @@ class KeysymReader {
 
   private static final Pattern P_XKB_NO_COMMENT =
       Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)$");
-  private static final Pattern P_XKB_UNICODE_MORE_SPECIFIC = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\*<U\\+(?<unicodeSpecific>[0-9a-fA-F]+) [^\\*]*>\\*/$");
-  private static final Pattern P_XKB_UNICODE_DEPRECATED = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\*\\(U\\+(?<unicodeDeprecated>[0-9a-fA-F]+) [^\\*]*\\)\\*/$");
-  private static final Pattern P_XKB_COMMENT = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
-  private static final Pattern P_XKB_COMMENT_ALIAS = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* ([aA]lias for |[sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
-  private static final Pattern P_XKB_COMMENT_UNICODE = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
-  private static final Pattern P_XKB_COMMENT_DEPRECATED = Pattern.compile(
-      "^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  /\\* deprecated((, )| )?(?<commentRemaining>[^\\*]*) \\*/$");
+  private static final Pattern P_XKB_UNICODE_MORE_SPECIFIC =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\*<U\\+(?<unicodeSpecific>[0-9a-fA-F]+) [^\\*]*>\\*/$");
+  private static final Pattern P_XKB_UNICODE_DEPRECATED =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\*\\(U\\+(?<unicodeDeprecated>[0-9a-fA-F]+) [^\\*]*\\)\\*/$");
+  private static final Pattern P_XKB_COMMENT =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +"
+          + "/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
+  private static final Pattern P_XKB_COMMENT_ALIAS =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\* ([aA]lias for |[sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
+  private static final Pattern P_XKB_COMMENT_UNICODE =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
+  private static final Pattern P_XKB_COMMENT_DEPRECATED =
+      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\* deprecated((, )| )?(?<commentRemaining>[^\\*]*) \\*/$");
   private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
       P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
   private static final ImmutableSet<Pattern> PATTERNS_COMMENTS =
@@ -116,7 +118,7 @@ class KeysymReader {
   /**
    * Returns the latest version of the mnemonics, as included in this library. This will evolve with
    * the library.
-   * 
+   *
    * @return the latest version of the mnemonics.
    */
   public static ImmutableSet<ParsedMnemonic> latest() {
@@ -138,8 +140,9 @@ class KeysymReader {
 
     for (String line : lines) {
       Optional<Matcher> matcherStartOpt = ParseUtils.matcherOpt(line, PATTERNS_START);
-      if (!matcherStartOpt.isPresent())
+      if (!matcherStartOpt.isPresent()) {
         continue;
+      }
       Matcher matcherStart = matcherStartOpt.orElseThrow(VerifyException::new);
       ParsedMnemonic parsed = parseLine(matcherStart);
       keysymBuilder.add(parsed);

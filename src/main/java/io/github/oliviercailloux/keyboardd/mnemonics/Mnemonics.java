@@ -51,7 +51,7 @@ public class Mnemonics {
 
     /**
      * Retrieves the mnemonics associated to the same code as this one.
-     * 
+     *
      * @return the relative mnemonics, starting with this one, followed by the non deprecated
      *         aliases and finally by the deprecated aliases.
      */
@@ -62,7 +62,7 @@ public class Mnemonics {
 
     /**
      * Retrieves the mnemonics associated to the same code as this one, except for this one.
-     * 
+     *
      * @return the non deprecated aliases followed by the deprecated aliases.
      */
     public ImmutableSet<String> aliases() {
@@ -215,7 +215,7 @@ public class Mnemonics {
   }
 
   /**
-   * 
+   *
    * @return keyset: all keysym mnemonics; values: all canonical keysym mnemonics, including any
    *         deprecated ones
    */
@@ -224,7 +224,7 @@ public class Mnemonics {
   }
 
   /**
-   * 
+   *
    * @return keyset: all keysym codes; values: all canonical keysym mnemonics, including any
    *         deprecated ones
    */
@@ -233,7 +233,7 @@ public class Mnemonics {
   }
 
   /**
-   * 
+   *
    * @return keyset: the UCP bound to a mnemonic; values: the mnemonics bound to a UCP, some of
    *         which might be deprecated
    */

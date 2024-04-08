@@ -1,12 +1,7 @@
 package io.github.oliviercailloux.keyboardd.mapping;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableBiMap;
@@ -17,18 +12,25 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.ImmutableListMultimap.Builder;
-
 import io.github.oliviercailloux.jaris.collections.CollectionUtils;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 
-/** An association of X key names to a list of keysym entries, representing a set of directives found typically in XKB symbol files.
+/**
+ * An association of X key names to a list of keysym entries, representing a set of directives found
+ * typically in XKB symbol files.
  * <p>
- * Two such keyboard maps are considered equal iff they have the same X key names, and for each X key name, the corresponding lists of keysym entries are equal.
+ * Two such keyboard maps are considered equal iff they have the same X key names, and for each X
+ * key name, the corresponding lists of keysym entries are equal.
  */
 public class KeyboardMap {
   /**
-   * Creates a keyboard map from the given association of lists of keysym entries to each X key name.
-   * @param xKeyNameToKeysymEntries the X key names and corresponding keysym entries to be used in the keyboard map; may be empty; may not contain empty lists
+   * Creates a keyboard map from the given association of lists of keysym entries to each X key
+   * name.
+   *
+   * @param xKeyNameToKeysymEntries the X key names and corresponding keysym entries to be used in
+   *        the keyboard map; may be empty; may not contain empty lists
    * @return a keyboard map
    */
   public static KeyboardMap from(ListMultimap<String, KeysymEntry> xKeyNameToKeysymEntries) {
@@ -41,23 +43,26 @@ public class KeyboardMap {
   private ImmutableSetMultimap<Integer, String> codeToXKeyNames;
 
   private KeyboardMap(ListMultimap<String, KeysymEntry> xKeyNameToKeysymEntries) {
-    checkArgument(!xKeyNameToKeysymEntries.asMap().values().contains(ImmutableList.<KeysymEntry>of()));
+    checkArgument(
+        !xKeyNameToKeysymEntries.asMap().values().contains(ImmutableList.<KeysymEntry>of()));
     this.xKeyNameToEntries = ImmutableListMultimap.copyOf(xKeyNameToKeysymEntries);
     mnemonicToXKeyNames = null;
     ucpToXKeyNames = null;
     codeToXKeyNames = null;
   }
 
-  /** The X key names found in this keyboard map.
-   * 
+  /**
+   * The X key names found in this keyboard map.
+   *
    * @return empty iff this keyboard map is empty
    */
   public ImmutableSet<String> names() {
     return xKeyNameToEntries.keySet();
   }
 
-  /** The keysym entries associated to the given X key name.
-   * 
+  /**
+   * The keysym entries associated to the given X key name.
+   *
    * @param xKeyName the X key name
    * @return an empty list iff the given X key name is not found in this keyboard map
    */
@@ -67,6 +72,7 @@ public class KeyboardMap {
 
   /**
    * The association of X key names to keysym entries found in this keyboard map.
+   *
    * @return a map that is empty iff this keyboard map is empty; containing no empty lists
    */
   public ImmutableListMultimap<String, KeysymEntry> nameToEntries() {
@@ -109,6 +115,7 @@ public class KeyboardMap {
 
   /**
    * The X key names that are associated to the given keysym mnemonic.
+   *
    * @param keysymMnemonic a keysym mnemonic
    * @return empty iff the given keysym mnemonic is not found in this keyboard map
    */
@@ -119,6 +126,7 @@ public class KeyboardMap {
 
   /**
    * The X key names that are associated to the given Unicode code point.
+   *
    * @param ucp a Unicode code point
    * @return empty iff the given Unicode code point is not found in this keyboard map
    */
@@ -129,6 +137,7 @@ public class KeyboardMap {
 
   /**
    * The X key names that are associated to the given keysym code.
+   *
    * @param keysymCode a keysym code
    * @return empty iff the given keysym code is not found in this keyboard map
    */
@@ -138,8 +147,9 @@ public class KeyboardMap {
   }
 
   /**
-   * Returns a keyboard map that replaces the aliases by the corresponding canonical name, as given in argument.
-   * 
+   * Returns a keyboard map that replaces the aliases by the corresponding canonical name, as given
+   * in argument.
+   *
    * @param canonicalXKeyNameByAlias a map from aliases to canonical names
    * @return a keyboard map using only the canonical X key names.
    */
@@ -170,10 +180,11 @@ public class KeyboardMap {
       }
       ImmutableSetMultimap<String, String> duplicatedMap = duplicatedMapBuilder.build();
       throw new IllegalStateException(
-          "These new names are pointed to from several original names: %s.".formatted(duplicatedMap));
+          "These new names are pointed to from several original names: %s."
+              .formatted(duplicatedMap));
     }
     // ImmutableBiMap<String, String> originalFromNewName =
-        ImmutableBiMap.copyOf(newNameFromOriginal).inverse();
+    ImmutableBiMap.copyOf(newNameFromOriginal).inverse();
 
     ImmutableListMultimap.Builder<String, KeysymEntry> withNewNames =
         ImmutableListMultimap.builder();

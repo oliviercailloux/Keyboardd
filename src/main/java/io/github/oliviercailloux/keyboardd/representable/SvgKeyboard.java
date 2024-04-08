@@ -42,9 +42,10 @@ public class SvgKeyboard {
       XmlName.expandedName(KEYBOARDD_NS, KEYBOARDD_X_KEY_NAME_LOCAL_NAME);
 
   private static ImmutableList<Element> getElements(Element root, XmlName name) {
-    if (name.namespace().isPresent())
+    if (name.namespace().isPresent()) {
       return DomHelper.toElements(
           root.getElementsByTagNameNS(name.namespace().get().toString(), name.localName()));
+    }
     return DomHelper.toElements(root.getElementsByTagName(name.localName()));
   }
 
@@ -135,8 +136,9 @@ public class SvgKeyboard {
 
     /** A positive finite double if non-empty string; otherwise positive infinity. */
     public double maxWidthPerCp() {
-      if (!repr.isString())
+      if (!repr.isString()) {
         return Double.POSITIVE_INFINITY;
+      }
       return size().x() / repr.string().codePoints().count();
     }
 
@@ -286,8 +288,9 @@ public class SvgKeyboard {
   public ImmutableMap<RectangleElement, String> keyNameByZone() {
     ImmutableMap.Builder<RectangleElement, String> reprsBuilder = ImmutableMap.builder();
     for (Element rect : getElements(h.document().getDocumentElement(), SVG_RECT_NAME)) {
-      if (!hasAttribute(rect, KEYBOARDD_X_KEY_NAME))
+      if (!hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
         continue;
+      }
       String xKeyName = getAttribute(rect, KEYBOARDD_X_KEY_NAME);
       reprsBuilder.put(RectangleElement.using(rect), xKeyName);
     }
@@ -322,7 +325,7 @@ public class SvgKeyboard {
 
   /**
    * Adds representations to the zones found in this document, according to the given function.
-   * 
+   *
    * @param representationsByXKeyName the respective representations to add to the zones.
    * @return the document with the added representations.
    */

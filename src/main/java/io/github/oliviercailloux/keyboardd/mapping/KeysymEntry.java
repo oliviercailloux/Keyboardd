@@ -2,13 +2,16 @@ package io.github.oliviercailloux.keyboardd.mapping;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.MoreObjects.ToStringHelper;
-
-/** A keysym mnemonic (in the form of a `String`), a Unicode Code Point (an integer), or a keysym code (an integer), representing an entry in an XKB symbols file.  */
+/**
+ * A keysym mnemonic (in the form of a `String`), a Unicode Code Point (an integer), or a keysym
+ * code (an integer), representing an entry in an XKB symbols file.
+ */
+@SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
 public class KeysymEntry {
   public enum Kind {
     MNEMONIC, UCP, CODE
@@ -32,12 +35,15 @@ public class KeysymEntry {
 
   private KeysymEntry(String keysymMnemonic, Integer ucp, Integer keysymCode) {
     int nbNulls = 0;
-    if (keysymMnemonic == null)
+    if (keysymMnemonic == null) {
       ++nbNulls;
-    if (ucp == null)
+    }
+    if (ucp == null) {
       ++nbNulls;
-    if (keysymCode == null)
+    }
+    if (keysymCode == null) {
       ++nbNulls;
+    }
     checkArgument(nbNulls == 2);
     mnemonic = keysymMnemonic;
     this.ucp = ucp;
@@ -45,14 +51,16 @@ public class KeysymEntry {
   }
 
   public Kind kind() {
-    if (mnemonic != null)
+    if (mnemonic != null) {
       return Kind.MNEMONIC;
-    if (ucp != null)
+    }
+    if (ucp != null) {
       return Kind.UCP;
+    }
     assert code != null;
     return Kind.CODE;
   }
-  
+
   public Optional<String> mnemonic() {
     return Optional.ofNullable(mnemonic);
   }

@@ -11,29 +11,32 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** A reader of XKB symbols files, which produces a {@link KeyboardMap}. 
- * The reader is quite crude; it will read correctly only the simplest files.
-*/
+/**
+ * A reader of XKB symbols files, which produces a {@link KeyboardMap}. The reader is quite crude;
+ * it will read correctly only the simplest files.
+ */
 public class SimpleSymbolsReader {
   private static final Pattern P_COMMENT = Pattern.compile("^( *//.*)| *$");
   private static final Pattern P_OTHER = Pattern
       .compile("^(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|(\\};)$");
   private static final Pattern P_KEY =
-      Pattern.compile("^ *key[ \\t]+<(?<name>.+)>[ \\t]*\\{[ \\t]*\\[[ \\t]*(?<entries>.*[^ \\t])[ \\t]*\\][ \\t]*\\}[ \\t]*;[ \\t]*(//.*)?$");
+      Pattern.compile("^ *key[ \\t]+<(?<name>.+)>[ \\t]*\\{[ \\t]*\\[[ \\t]*"
+          + "(?<entries>.*[^ \\t])[ \\t]*\\][ \\t]*\\}[ \\t]*;[ \\t]*(//.*)?$");
   private static final Pattern P_UNICODE = Pattern.compile("U(?<unicode>[0-9a-fA-F]+)");
-  private static final ImmutableSet<Pattern> PATTERNS =
-      ImmutableSet.of(P_COMMENT, P_OTHER, P_KEY);
+  private static final ImmutableSet<Pattern> PATTERNS = ImmutableSet.of(P_COMMENT, P_OTHER, P_KEY);
 
-      /**
-       * Reads a keyboard map from the given source.
-       * @param source the XKB symbols file to read from
-       * @return a (possibly empty) keyboard map
-       * @throws IOException if an I/O error occurs
-       */
+  /**
+   * Reads a keyboard map from the given source.
+   *
+   * @param source the XKB symbols file to read from
+   * @return a (possibly empty) keyboard map
+   * @throws IOException if an I/O error occurs
+   */
   public static KeyboardMap read(CharSource source) throws IOException {
     ImmutableList<String> lines = source.readLines();
 
-    final ImmutableListMultimap.Builder<String, KeysymEntry> keys = new ImmutableListMultimap.Builder<>();
+    final ImmutableListMultimap.Builder<String, KeysymEntry> keys =
+        new ImmutableListMultimap.Builder<>();
     for (String line : lines) {
       Matcher matcher = ParseUtils.matcher(line, PATTERNS);
       if (matcher.pattern().equals(P_COMMENT)) {
@@ -69,5 +72,4 @@ public class SimpleSymbolsReader {
     }
     return entries.build();
   }
-
 }

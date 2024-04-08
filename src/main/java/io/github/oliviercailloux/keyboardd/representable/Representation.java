@@ -23,10 +23,11 @@ public class Representation {
   private Representation(String string, Document svg) {
     checkArgument((string == null) != (svg == null));
     this.string = string;
-    if (svg != null)
+    if (svg != null) {
       this.svg = (Document) svg.cloneNode(true);
-    else
+    } else {
       this.svg = null;
+    }
   }
 
   public boolean isString() {
@@ -36,7 +37,7 @@ public class Representation {
   public boolean isSvg() {
     return svg != null;
   }
-  
+
   public String string() {
     checkState(string != null);
     return string;
