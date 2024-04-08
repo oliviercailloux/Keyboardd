@@ -24,7 +24,7 @@ public class RectangularKeyboard {
    * <p>
    * If the given set of keys overlaps (i.e., if two keys have a common point), then the behavior is
    * unspecified. Future versions of this library may throw an exception in that case.
-   * 
+   *
    * @param physicalKeys may be empty; one key must have the top left corner at the origin
    *        ({@link DoublePoint#zero()}); duplicate X key names are allowed
    * @return a rectangular keyboard
@@ -52,7 +52,7 @@ public class RectangularKeyboard {
 
   /**
    * Returns the set of keys that compose this keyboard.
-   * 
+   *
    * @return a possibly empty set of keys, one of which having the top left corner at the origin
    *         ({@link DoublePoint#zero()})
    */
