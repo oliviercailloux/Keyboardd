@@ -11,6 +11,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.keyboardd.xkeys.Xkeys;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -60,6 +61,14 @@ public class KeyboardMapTests {
   }
 
   @Test
+  void testReadOss() throws Exception {
+    CharSource source =
+        Resources.asCharSource(KeyboardMapTests.class.getResource("fr(oss)"), StandardCharsets.UTF_8);
+    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    assertEquals(KeysymEntry.mnemonic("a"), kbMap.entries("AD01").get(0));
+  }
+  
+  @Test
   void testRead() throws Exception {
     CharSource source =
         Resources.asCharSource(KeyboardMapTests.class.getResource("fr"), StandardCharsets.UTF_8);
@@ -89,6 +98,18 @@ public class KeyboardMapTests {
     assertEquals(ImmutableSet.of("AC03"), kbMap.namesFromUcp(deltaUcp));
     assertEquals(ImmutableSet.of(), kbMap.namesFromUcp(100));
     assertEquals(ImmutableSet.of(), kbMap.namesFromCode(100));
+  }
+
+  @Test
+  void testRead0x() throws Exception {
+    CharSource source =
+        Resources.asCharSource(KeyboardMapTests.class.getResource("fr(oss)"), StandardCharsets.UTF_8);
+    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+
+    Pattern P_CODE = Pattern.compile("0x(?<code>[0-9a-fA-F]+)");
+    assertTrue(P_CODE.matcher("0x1002026").matches());
+    assertEquals(ImmutableSet.of(), kbMap.namesFromCode(30));
+    assertEquals(ImmutableSet.of("AB07"), kbMap.namesFromCode(0x1002026));
   }
 
   @Test
