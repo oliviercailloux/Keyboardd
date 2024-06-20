@@ -59,24 +59,6 @@ Thus, if the given SVG documents (to be embedded) have a size, the library will 
 
 Headers follow the https://svgwg.org/svg2-draft/struct.html#NewDocument[SVG2 spec].
 
-== Mine
-    /*
-     * Also, key F1 sends keycode 67, F2 sends keycode 68, Fn+F1 sends keycode 179, sym XF86Tools
-     * (269025153), Fn+F2 sends keycode 122, sym XF86AudioLowerVolume (269025041). evdev maps
-     * keycode 179 to I179 and keycode 122 to VOL-.
-     * 
-     */
-
-This should be used after parsing the simple layout json file, to scale the physical keyboard, then output another json file.
-
-    double defaultHeight = 1.4d;
-    double defaultWidth = 1.25d;
-    /* inter h varies. Average is 29.6 cm for total length for 16 standard keys and 15 sep. */
-    double interH = (29.6d - 16d * defaultWidth) / 15d;
-    verify(DoubleMath.fuzzyEquals(interH, 0.64d, 1e-4d));
-    double interV = 0.52d;
-    /* Total height is 11 cm (measured), that is 6*height + 5*interV. */
-
 == Limitations
 This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
 It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
