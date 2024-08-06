@@ -94,7 +94,7 @@ package "representable" {
     {static} from(KeyboardMap, Map<KeysymEntry, Representation>): VisibleKeyboardMap
     names(): String [0..*]
   }
-  "VisibleKeyboardMap" <|-- "XKeyNamesRepresenter"
+  "XKeyNamesRepresenter" <|-[dashed]- "VisibleKeyboardMap"
 
   class "RectangularKey" {
     topLeftCorner
@@ -109,9 +109,8 @@ package "representable" {
   class "SvgKeyboard" {
     {static} zonedFrom(RectangularKeyboard): SvgKeyboard
     {static} using(Document): SvgKeyboard
-    document(): Document
     keyName(zone: RectangleElement): String
-    setFontSize(fontSize: double): SvgKeyboard
+    setFontSize(fontSize: double)
     withRepresentations(XKeyNamesRepresenter): Document
   }
 }
