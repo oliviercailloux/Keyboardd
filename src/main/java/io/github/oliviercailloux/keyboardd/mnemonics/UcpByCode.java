@@ -58,8 +58,12 @@ public class UcpByCode {
     this.coDomainOfUcps = ImmutableSet.copyOf(coDomain);
   }
 
-  public boolean hasUcp(int code) {
-    return domainOfCodes.contains(code);
+  public ImmutableSet<Integer> domainOfCodes() {
+    return domainOfCodes;
+  }
+
+  public ImmutableSet<Integer> coDomainOfUcps() {
+    return coDomainOfUcps;
   }
 
   public int ucp(int code) {

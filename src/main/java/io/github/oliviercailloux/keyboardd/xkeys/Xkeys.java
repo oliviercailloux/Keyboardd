@@ -8,17 +8,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * <ul>
- * <li>Map (non bijective, complete) from X key name to X keycode</li>
- * <li>Map (non bijective, complete) from new X key name to canonical X key name</li>
- * <li>Bijective map (complete) from X keycode to canonical X key name (the one that is not an
- * alias).</li>
- * <li>Can be obtained from the two maps from X key name here above</li>
- * <li>Can be obtained from the maps from X keycode here above (then has no aliases)</li>
- * <li>Can be obtained from parsing evdev</li>
- * <li>Provide “without aliases” method which returns an X keys without aliases</li>
- * <li>Can be obtained from lib?</li>
- * </ul>
+ * The set of X key names (canonical and aliases) and corresponding X keycodes available on a system.
  */
 public interface Xkeys {
   public static Xkeys latest() {

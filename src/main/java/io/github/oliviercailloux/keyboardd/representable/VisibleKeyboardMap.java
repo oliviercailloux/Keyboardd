@@ -8,7 +8,7 @@ import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry;
 import java.util.Map;
 
-public class VisibleKeyboardMap {
+public class VisibleKeyboardMap implements XKeyNamesRepresenter {
   public static VisibleKeyboardMap from(ListMultimap<String, Representation> representations) {
     return new VisibleKeyboardMap(representations);
   }
@@ -57,6 +57,7 @@ public class VisibleKeyboardMap {
     return representations.keySet();
   }
 
+  @Override
   public ImmutableList<Representation> representations(String name) {
     return representations.get(name);
   }

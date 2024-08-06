@@ -82,7 +82,7 @@ public class Mnemonics {
    * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES. Only the mnemonics associated to that code will be
    * considered associated to that UCP, not the mnemonics associated to other codes.
    */
-  public static Mnemonics parse(CharSource keysyms) throws IOException {
+  public static Mnemonics fromSource(CharSource keysyms) throws IOException {
     ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.parse(keysyms);
     return toMnemonics(parsedMns);
   }
@@ -186,7 +186,7 @@ public class Mnemonics {
         ucp, deprecated);
   }
 
-  public static Mnemonics from(Set<CanonicalMnemonic> canonicalMnemonics) {
+  public static Mnemonics fromCanonicals(Set<CanonicalMnemonic> canonicalMnemonics) {
     return new Mnemonics(canonicalMnemonics);
   }
 
