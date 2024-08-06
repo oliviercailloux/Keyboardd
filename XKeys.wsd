@@ -1,0 +1,13 @@
+@startuml XKeys
+
+interface "Xkeys" {
+  {static} latest(): Xkeys
+  {static} fromMaps(Map<String, Short>, Map<String, String>): Xkeys
+  {static} fromSource(evdev: CharSource): Xkeys
+  xKeycodeByXKeyName: Map<String, Short>
+  xKeycodeByCanonicalXKeyName: BiMap<String, Short>
+  canonicalXKeyNameByAliasXKeyName: Map<String, String>
+  withoutAliases(): XKeys
+}
+
+@enduml

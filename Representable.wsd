@@ -1,0 +1,43 @@
+@startuml Main classes
+hide empty members
+
+class "Representation" {
+}
+class "StringRepresentation" {
+  string: String
+}
+class "SvgRepresentation" {
+  svg: Document
+}
+"Representation" <|-- "StringRepresentation"
+"Representation" <|-- "SvgRepresentation"
+
+interface "XKeyNamesRepresenter" {
+  representations(name: String): Representation [0..*]
+}
+
+class "VisibleKeyboardMap" {
+  {static} from(KeyboardMap, Map<KeysymEntry, Representation>): VisibleKeyboardMap
+  names(): String [0..*]
+}
+"XKeyNamesRepresenter" <|-[dashed]- "VisibleKeyboardMap"
+
+class "RectangularKey" {
+  topLeftCorner
+  size
+  xKeyName: String
+}
+
+class "RectangularKeyboard" {
+  physicalKeys: RectangularKey [0..*]
+}
+
+class "SvgKeyboard" {
+  {static} zonedFrom(RectangularKeyboard): SvgKeyboard
+  {static} using(Document): SvgKeyboard
+  keyName(zone: RectangleElement): String
+  setFontSize(fontSize: double)
+  withRepresentations(XKeyNamesRepresenter): Document
+}
+
+@enduml

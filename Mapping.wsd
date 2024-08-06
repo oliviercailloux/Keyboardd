@@ -1,0 +1,32 @@
+@startuml Main classes
+hide empty members
+
+class "KeysymEntry" {}
+class "Mnemonic" {
+  mnemonic: String
+}
+class "Ucp" {
+  ucp: int
+}
+class "Code" {
+  code: int
+}
+
+class "KeyboardMap" {
+  {static} from(byXKeyName: ListMultimap<String, KeysymEntry>)
+  entries(xKeyName: String): List<KeysymEntry>
+  xKeyNames(mnemonic: String): Set<String>
+  xKeyNames(ucp: int): Set<String>
+  xKeyNames(code: int): Set<String>
+  canonicalize(canonicalXKeyNameByAlias: Map<String, String>): KeyboardMap
+}
+
+class "SimpleSymbolsReader" {
+  read(CharSource source): KeyboardMap
+}
+
+"KeysymEntry" <|-- "Mnemonic"
+"KeysymEntry" <|-- "Ucp"
+"KeysymEntry" <|-- "Code"
+
+@enduml

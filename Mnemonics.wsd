@@ -1,0 +1,32 @@
+@startuml Mnemonics
+hide empty members
+
+class "CanonicalMnemonic" {
+  mnemonic: String
+  code: int
+  nonDeprecatedAliases: String [0..*]
+  deprecatedAliases: String [0..*]
+  ucp: int [0..1]
+  deprecated: boolean
+}
+
+class "Mnemonics" {
+  {static} latest(): Mnemonics
+  {static} fromCanonicals(Set<CanonicalMnemonic>): Mnemonics
+  {static} fromSource(keysyms: CharSource): Mnemonics
+  byKeysymMnemonic: Map<String, CanonicalMnemonic>
+  byKeysymCode: BiMap<Integer, CanonicalMnemonic>
+  byUcp: BiMap<Integer, CanonicalMnemonic>
+  withoutDeprecated(): Mnemonics
+}
+
+class "UcpByCode" {
+  {static} implicit(): UcpByCode
+  {static} implicitAndExplicit(explicit: Map<Integer, Integer>): UcpByCode
+  {static} implicitAndExplicit(explicit: Mnemonics): UcpByCode
+  domainOfCodes: int [0..*]
+  coDomainOfUcps: int [0..*]
+  ucp(code: int): int
+}
+
+@enduml
