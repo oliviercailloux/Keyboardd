@@ -1,5 +1,6 @@
-@startuml Main classes
+@startuml Mapping
 hide empty members
+left to right direction
 
 class "KeysymEntry" {}
 class "Mnemonic" {
@@ -11,6 +12,10 @@ class "Ucp" {
 class "Code" {
   code: int
 }
+
+"KeysymEntry" <|-- "Mnemonic"
+"KeysymEntry" <|-- "Ucp"
+"KeysymEntry" <|-- "Code"
 
 class "KeyboardMap" {
   {static} from(byXKeyName: ListMultimap<String, KeysymEntry>)
@@ -24,9 +29,5 @@ class "KeyboardMap" {
 class "SimpleSymbolsReader" {
   read(CharSource source): KeyboardMap
 }
-
-"KeysymEntry" <|-- "Mnemonic"
-"KeysymEntry" <|-- "Ucp"
-"KeysymEntry" <|-- "Code"
 
 @enduml
