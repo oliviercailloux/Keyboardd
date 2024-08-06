@@ -1,0 +1,13 @@
+@startuml Example
+left to right direction
+
+class "C1" {}
+class "C1a" {}
+
+"C1" <|-- "C1a"
+
+class "C2" {}
+
+class "C3" {}
+
+@enduml
