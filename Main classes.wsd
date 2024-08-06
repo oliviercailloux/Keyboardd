@@ -100,8 +100,8 @@ class "SvgRepresentation" {
 "Representation" <|-- "StringRepresentation"
 "Representation" <|-- "SvgRepresentation"
 
-class TODO"XKeyNamesRepresenter" {
-  {static} TODOusing(Function<String, Representation*>): VisibleKeyboardMap
+class "XKeyNamesRepresenter" {
+  {static} using(Function<String, Representation*>): XKeyNamesRepresenter
   representations(name: String): Representation [0..*]
 }
 
