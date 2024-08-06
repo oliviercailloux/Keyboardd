@@ -72,19 +72,19 @@ public class SimpleSymbolsReader {
     for (String entryStr : entriesMultStr) {
       Optional<Matcher> matcherOpt = ParseUtils.matcherOpt(entryStr, PATTERNS_VALUES);
       if (matcherOpt.isEmpty()) {
-        entries.add(KeysymEntry.mnemonic(entryStr));
+        entries.add(new KeysymEntry.Mnemonic(entryStr));
       } else {
         Matcher matcher = matcherOpt.orElseThrow(VerifyException::new);
         verify(matcher.matches());
         if (matcher.pattern().equals(P_UNICODE)) {
           String uStr = matcher.group("unicode");
           int u = Integer.parseInt(uStr, 16);
-          entries.add(KeysymEntry.ucp(u));
+          entries.add(new KeysymEntry.Ucp(u));
         } else {
           verify(matcher.pattern().equals(P_CODE));
           String cStr = matcher.group("code");
           int c = Integer.parseInt(cStr, 16);
-          entries.add(KeysymEntry.code(c));
+          entries.add(new KeysymEntry.Code(c));
         }
       }
     }

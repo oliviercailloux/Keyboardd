@@ -42,12 +42,12 @@ public class KeyboardMapTests {
 
     assertEquals(ImmutableSet.of("AD01"), kbMap.names());
 
-    assertEquals(KeysymEntry.mnemonic("a"), kbMap.entries("AD01").get(0));
-    assertEquals(KeysymEntry.mnemonic("A"), kbMap.entries("AD01").get(1));
-    assertEquals(KeysymEntry.mnemonic("ae"), kbMap.entries("AD01").get(2));
-    assertEquals(KeysymEntry.mnemonic("AE"), kbMap.entries("AD01").get(3));
-    assertEquals(KeysymEntry.ucp(945), kbMap.entries("AD01").get(4));
-    assertEquals(KeysymEntry.ucp(913), kbMap.entries("AD01").get(5));
+    assertEquals(new KeysymEntry.Mnemonic("a"), kbMap.entries("AD01").get(0));
+    assertEquals(new KeysymEntry.Mnemonic("A"), kbMap.entries("AD01").get(1));
+    assertEquals(new KeysymEntry.Mnemonic("ae"), kbMap.entries("AD01").get(2));
+    assertEquals(new KeysymEntry.Mnemonic("AE"), kbMap.entries("AD01").get(3));
+    assertEquals(new KeysymEntry.Ucp(945), kbMap.entries("AD01").get(4));
+    assertEquals(new KeysymEntry.Ucp(913), kbMap.entries("AD01").get(5));
 
     assertEquals(ImmutableSet.of("AD01"), kbMap.namesFromMnemonic("a"));
     assertEquals(ImmutableSet.of("AD01"), kbMap.namesFromMnemonic("A"));
@@ -65,7 +65,7 @@ public class KeyboardMapTests {
     CharSource source =
         Resources.asCharSource(KeyboardMapTests.class.getResource("fr(oss)"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = SimpleSymbolsReader.read(source);
-    assertEquals(KeysymEntry.mnemonic("a"), kbMap.entries("AD01").get(0));
+    assertEquals(new KeysymEntry.Mnemonic("a"), kbMap.entries("AD01").get(0));
   }
   
   @Test
@@ -81,12 +81,12 @@ public class KeyboardMapTests {
 
     assertEquals(56, kbMap.names().size());
 
-    assertEquals(KeysymEntry.mnemonic("a"), kbMap.entries("AD01").get(0));
-    assertEquals(KeysymEntry.mnemonic("A"), kbMap.entries("AD01").get(1));
-    assertEquals(KeysymEntry.mnemonic("ae"), kbMap.entries("AD01").get(2));
-    assertEquals(KeysymEntry.mnemonic("AE"), kbMap.entries("AD01").get(3));
-    assertEquals(KeysymEntry.ucp(945), kbMap.entries("AD01").get(4));
-    assertEquals(KeysymEntry.ucp(913), kbMap.entries("AD01").get(5));
+    assertEquals(new KeysymEntry.Mnemonic("a"), kbMap.entries("AD01").get(0));
+    assertEquals(new KeysymEntry.Mnemonic("A"), kbMap.entries("AD01").get(1));
+    assertEquals(new KeysymEntry.Mnemonic("ae"), kbMap.entries("AD01").get(2));
+    assertEquals(new KeysymEntry.Mnemonic("AE"), kbMap.entries("AD01").get(3));
+    assertEquals(new KeysymEntry.Ucp(945), kbMap.entries("AD01").get(4));
+    assertEquals(new KeysymEntry.Ucp(913), kbMap.entries("AD01").get(5));
 
     assertEquals(ImmutableSet.of("AD01", "NMLK"), kbMap.namesFromMnemonic("a"));
     assertEquals(ImmutableSet.of("AD01"), kbMap.namesFromMnemonic("A"));
@@ -130,13 +130,13 @@ public class KeyboardMapTests {
         KeyboardMapTests.class.getResource("Symbols using aliases good"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = SimpleSymbolsReader.read(source);
     assertEquals(ImmutableSet.of("AD03", "AC12"), kbMap.names());
-    assertEquals(ImmutableList.of(KeysymEntry.mnemonic("e")), kbMap.entries("AD03"));
-    assertEquals(ImmutableList.of(KeysymEntry.mnemonic("b")), kbMap.entries("AC12"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("e")), kbMap.entries("AD03"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("b")), kbMap.entries("AC12"));
 
     ImmutableMap<String, String> canonicalByAlias = Xkeys.latest().canonicalByAlias();
     KeyboardMap canonicalized = kbMap.canonicalize(canonicalByAlias);
     assertEquals(ImmutableSet.of("AD03", "BKSL"), canonicalized.names());
-    assertEquals(ImmutableList.of(KeysymEntry.mnemonic("e")), canonicalized.entries("AD03"));
-    assertEquals(ImmutableList.of(KeysymEntry.mnemonic("b")), canonicalized.entries("BKSL"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("e")), canonicalized.entries("AD03"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("b")), canonicalized.entries("BKSL"));
   }
 }

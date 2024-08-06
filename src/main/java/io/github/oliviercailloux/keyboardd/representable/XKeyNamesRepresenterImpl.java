@@ -14,6 +14,7 @@ class XKeyNamesRepresenterImpl implements XKeyNamesRepresenter {
     this.representations = representations;
   }
 
+  @Override
   public List<Representation> representations(String name) {
     return representations.apply(name);
   }

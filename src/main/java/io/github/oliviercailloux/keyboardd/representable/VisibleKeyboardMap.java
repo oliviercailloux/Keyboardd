@@ -1,5 +1,7 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
+import static com.google.common.base.Verify.verify;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -22,23 +24,14 @@ public class VisibleKeyboardMap implements XKeyNamesRepresenter {
         if (representations.containsKey(entry)) {
           representation = representations.get(entry);
         } else {
-          switch (entry.kind()) {
-            case CODE:
-              representation = Representation.fromString(entry.code().orElseThrow().toString());
-              break;
-            case MNEMONIC:
-              representation = Representation.fromString(entry.mnemonic().orElseThrow());
-              break;
-            case UCP:
-              /*
-               * http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs
-               * for invisible characters in our case, so let’s stick to the easy representation.
-               */
-              representation = Representation
-                  .fromString(new String(Character.toChars(entry.ucp().orElseThrow())));
-              break;
-            default:
-              throw new AssertionError();
+          if (entry instanceof KeysymEntry.Mnemonic mnemonic) {
+            representation = Representation.fromString(mnemonic.keysymMnemonic());
+          } else if (entry instanceof KeysymEntry.Ucp ucp) {
+            representation = Representation.fromString(ucp.asString());
+          } else {
+            verify (entry instanceof KeysymEntry.Code);
+            KeysymEntry.Code code = (KeysymEntry.Code) entry;
+            representation = Representation.fromString(String.valueOf(code.keysymCode()));
           }
         }
         builder.put(xKeyName, representation);
