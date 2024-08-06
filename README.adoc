@@ -33,6 +33,10 @@ The system file `evdev` maps X keycodes to X key names; local configuration file
 [[XM]]
 image::https://github.com/oliviercailloux/XKB-doc/blob/main/X%20mappings.svg[Mappings and sources, opts=inline]
 
+.TODO diag
+[[KB]]
+image::Diag.svg[Diag, opts=inline]
+
 == Usage (short)
 Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.
 Parse that jsonphysicalRowKeyboard and obtain a PhysicalKeyboard, write this as SVG, getting a keyboard with correct computed positions.
