@@ -1,5 +1,6 @@
 @startuml Main classes
 hide empty members
+left to right direction
 
 interface "Xkeys" {
   {static} latest(): Xkeys
