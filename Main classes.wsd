@@ -2,126 +2,118 @@
 hide empty members
 left to right direction
 
-interface "Xkeys" {
-  {static} latest(): Xkeys
-  {static} fromMaps(Map<String, Short>, Map<String, String>): Xkeys
-  {static} fromSource(evdev: CharSource): Xkeys
-  xKeycodeByXKeyName: Map<String, Short>
-  xKeycodeByCanonicalXKeyName: BiMap<String, Short>
-  canonicalXKeyNameByAliasXKeyName: Map<String, String>
-  withoutAliases(): XKeys
+package "xkeys" {
+  interface "Xkeys" {
+    {static} latest(): Xkeys
+    {static} fromMaps(Map<String, Short>, Map<String, String>): Xkeys
+    {static} fromSource(evdev: CharSource): Xkeys
+    xKeycodeByXKeyName: Map<String, Short>
+    xKeycodeByCanonicalXKeyName: BiMap<String, Short>
+    canonicalXKeyNameByAliasXKeyName: Map<String, String>
+    withoutAliases(): XKeys
+  }
 }
 
-together {
-  class "CanonicalMnemonic"
-  class "Mnemonics"
-  class "UcpByCode"
+package "mnemonics" {
+  class "CanonicalMnemonic" {
+    mnemonic: String
+    code: int
+    nonDeprecatedAliases: String [0..*]
+    deprecatedAliases: String [0..*]
+    ucp: int [0..1]
+    deprecated: boolean
+  }
+
+  class "Mnemonics" {
+    {static} latest(): Mnemonics
+    {static} fromCanonicals(Set<CanonicalMnemonic>): Mnemonics
+    {static} fromSource(keysyms: CharSource): Mnemonics
+    byKeysymMnemonic: Map<String, CanonicalMnemonic>
+    byKeysymCode: BiMap<Integer, CanonicalMnemonic>
+    byUcp: BiMap<Integer, CanonicalMnemonic>
+    withoutDeprecated(): Mnemonics
+  }
+
+  class "UcpByCode" {
+    {static} implicit(): UcpByCode
+    {static} implicitAndExplicit(explicit: Map<Integer, Integer>): UcpByCode
+    {static} implicitAndExplicit(explicit: Mnemonics): UcpByCode
+    domainOfCodes: int [0..*]
+    coDomainOfUcps: int [0..*]
+    ucp(code: int): int
+  }
 }
 
-class "CanonicalMnemonic" {
-   mnemonic: String
-   code: int
-   nonDeprecatedAliases: String [0..*]
-   deprecatedAliases: String [0..*]
-   ucp: int [0..1]
-   deprecated: boolean
+package "mapping" {
+  class "KeysymEntry" {}
+  class "Mnemonic" {
+    mnemonic: String
+  }
+  class "Ucp" {
+    ucp: int
+  }
+  class "Code" {
+    code: int
+  }
+
+  class "KeyboardMap" {
+    {static} from(byXKeyName: ListMultimap<String, KeysymEntry>)
+    entries(xKeyName: String): List<KeysymEntry>
+    xKeyNames(mnemonic: String): Set<String>
+    xKeyNames(ucp: int): Set<String>
+    xKeyNames(code: int): Set<String>
+    canonicalize(canonicalXKeyNameByAlias: Map<String, String>): KeyboardMap
+  }
+
+  class "SimpleSymbolsReader" {
+    read(CharSource source): KeyboardMap
+  }
+
+  "KeysymEntry" <|-- "Mnemonic"
+  "KeysymEntry" <|-- "Ucp"
+  "KeysymEntry" <|-- "Code"
 }
 
-class "Mnemonics" {
-  {static} latest(): Mnemonics
-  {static} fromCanonicals(Set<CanonicalMnemonic>): Mnemonics
-  {static} fromSource(keysyms: CharSource): Mnemonics
-  byKeysymMnemonic: Map<String, CanonicalMnemonic>
-  byKeysymCode: BiMap<Integer, CanonicalMnemonic>
-  byUcp: BiMap<Integer, CanonicalMnemonic>
-  withoutDeprecated(): Mnemonics
-}
+package "representable" {
+  class "Representation" {
+  }
+  class "StringRepresentation" {
+    string: String
+  }
+  class "SvgRepresentation" {
+    svg: Document
+  }
+  "Representation" <|-- "StringRepresentation"
+  "Representation" <|-- "SvgRepresentation"
 
-class "UcpByCode" {
-  {static} implicit(): UcpByCode
-  {static} implicitAndExplicit(explicit: Map<Integer, Integer>): UcpByCode
-  {static} implicitAndExplicit(explicit: Mnemonics): UcpByCode
-  domainOfCodes: int [0..*]
-  coDomainOfUcps: int [0..*]
-  ucp(code: int): int
-}
+  interface "XKeyNamesRepresenter" {
+    representations(name: String): Representation [0..*]
+  }
 
-together {
-  class "KeysymEntry"
-  class "Mnemonic" {}
-  class "Ucp" {}
-  class "Code" {}
-  class "KeyboardMap"
-  class "SimpleSymbolsReader"
-}
+  class "VisibleKeyboardMap" {
+    {static} from(KeyboardMap, Map<KeysymEntry, Representation>): VisibleKeyboardMap
+    names(): String [0..*]
+  }
+  "VisibleKeyboardMap" <|-- "XKeyNamesRepresenter"
 
-class "KeysymEntry" {}
-class "Mnemonic" {
-  mnemonic: String
-}
-class "Ucp" {
-  ucp: int
-}
-class "Code" {
-  code: int
-}
+  class "RectangularKey" {
+    topLeftCorner
+    size
+    xKeyName: String
+  }
+  
+  class "RectangularKeyboard" {
+    physicalKeys: RectangularKey [0..*]
+  }
 
-"KeysymEntry" <|-- "Mnemonic"
-"KeysymEntry" <|-- "Ucp"
-"KeysymEntry" <|-- "Code"
-
-class "KeyboardMap" {
-  {static} from(byXKeyName: ListMultimap<String, KeysymEntry>)
-  entries(xKeyName: String): List<KeysymEntry>
-  xKeyNames(mnemonic: String): Set<String>
-  xKeyNames(ucp: int): Set<String>
-  xKeyNames(code: int): Set<String>
-  canonicalize(canonicalXKeyNameByAlias: Map<String, String>): KeyboardMap
-}
-
-class "SimpleSymbolsReader" {
-  read(CharSource source): KeyboardMap
-}
-
-together {
-  class "Representation"
-  class "StringRepresentation"
-  class "SvgRepresentation"
-  class "VisibleKeyboardMap"
-}
-
-class "Representation" {
-}
-class "StringRepresentation" {
-  string: String
-}
-class "SvgRepresentation" {
-  svg: Document
-}
-"Representation" <|-- "StringRepresentation"
-"Representation" <|-- "SvgRepresentation"
-
-interface "XKeyNamesRepresenter" {
-  representations(name: String): Representation [0..*]
-}
-
-class "VisibleKeyboardMap" {
-  {static} from(KeyboardMap, Map<KeysymEntry, Representation>): VisibleKeyboardMap
-  names(): String [0..*]
-}
-"VisibleKeyboardMap" <|-- "XKeyNamesRepresenter"
-
-class "RectangularKeyboard" {
-  physicalKeys: RectangularKey [0..*]
-}
-
-class "SvgKeyboard" {
-  {static} zonedFrom(RectangularKeyboard): SvgKeyboard
-  {static} using(Document): SvgKeyboard
-  document(): Document
-  keyName(zone: RectangleElement): String
-  setFontSize(fontSize: double): SvgKeyboard
-  withRepresentations(XKeyNamesRepresenter): Document
+  class "SvgKeyboard" {
+    {static} zonedFrom(RectangularKeyboard): SvgKeyboard
+    {static} using(Document): SvgKeyboard
+    document(): Document
+    keyName(zone: RectangleElement): String
+    setFontSize(fontSize: double): SvgKeyboard
+    withRepresentations(XKeyNamesRepresenter): Document
+  }
 }
 
 @enduml

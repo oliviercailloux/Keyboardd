@@ -6,6 +6,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
+import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboardTests;
 import io.github.oliviercailloux.svgb.PositiveSize;

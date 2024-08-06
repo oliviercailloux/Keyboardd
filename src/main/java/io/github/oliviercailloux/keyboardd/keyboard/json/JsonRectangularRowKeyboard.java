@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import io.github.oliviercailloux.keyboardd.keyboard.RectangularKey;
-import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
+import io.github.oliviercailloux.keyboardd.representable.RectangularKey;
+import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 import java.util.List;

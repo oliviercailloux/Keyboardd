@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.keyboard;
+package io.github.oliviercailloux.keyboardd.representable;
 
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;

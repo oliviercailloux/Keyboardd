@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
-import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;

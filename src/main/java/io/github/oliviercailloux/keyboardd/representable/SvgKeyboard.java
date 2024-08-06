@@ -9,8 +9,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
-import io.github.oliviercailloux.keyboardd.keyboard.RectangularKey;
-import io.github.oliviercailloux.keyboardd.keyboard.RectangularKeyboard;
 import io.github.oliviercailloux.svgb.DoublePoint;
 import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
