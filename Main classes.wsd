@@ -101,8 +101,7 @@ class "SvgRepresentation" {
 "Representation" <|-- "StringRepresentation"
 "Representation" <|-- "SvgRepresentation"
 
-class "XKeyNamesRepresenter" {
-  {static} using(Function<String, Representation*>): XKeyNamesRepresenter
+interface "XKeyNamesRepresenter" {
   representations(name: String): Representation [0..*]
 }
 
