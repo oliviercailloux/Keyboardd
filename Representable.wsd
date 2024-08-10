@@ -41,4 +41,7 @@ class "SvgKeyboard" {
   withRepresentations(XKeyNamesRepresenter): Document
 }
 
+"RectangularKeyboard" -[hidden]> "Representation"
+"Representation" -[hidden]> "XKeyNamesRepresenter"
+"XKeyNamesRepresenter" -[hidden]> "SvgKeyboard"
 @enduml
