@@ -18,7 +18,6 @@ class "Code" {
 "KeysymEntry" <|-- "Code"
 
 class "KeyboardMap" {
-  {static} from(byXKeyName: ListMultimap<String, KeysymEntry>)
   entries(xKeyName: String): List<KeysymEntry>
   xKeyNames(mnemonic: String): Set<String>
   xKeyNames(ucp: int): Set<String>
