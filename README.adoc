@@ -3,14 +3,32 @@
 A keyboard drawer library. Can be used to parse and manipulate keyboard maps and display them as SVG, so as to represent a given keyboard layout or keyboard shortcuts.
 Includes support for XKB governed systems, including Wayland, but may be useful (and runs) on other systems.
 
-== TODO Kkeys class?
-
 == Preliminary
 You need to understand at least roughly (preferably, deeply) https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
 
 == This library
 Here is a quick overview of the main concepts (by class name) that this library permits to manipulate.
 The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc#Concepts[here].
+
+.X mappings
+[[XM]]
+image::https://github.com/oliviercailloux/XKB-doc/blob/main/X%20mappings.svg[Mappings and sources, opts=inline]
+
+.XKeys
+[[XKeys]]
+image::XKeys.svg[XKeys, opts=inline]
+
+.Mnemonics
+[[Mnemonics]]
+image::Mnemonics.svg[Mnemonics, opts=inline]
+
+.Mapping
+[[Mapping]]
+image::Mapping.svg[Mapping, opts=inline]
+
+.Representable
+[[Representable]]
+image::Representable.svg[Representable, opts=inline]
 
 * `XKeys`: the set of X key names (canonical and aliases) and corresponding X keycodes available on the system; can be obtained from a standard (embedded) `evdev` file
 * `Mnemonics`: a set of keysym mnemonics, together with information per mnemonic (the keysym code it maps to, whether it is an alias, whether it is deprecated, which UCP corresponds to it if any, …); can be obtained from a standard (embedded) `xkbcommon-keysyms.h` file; can be used to obtain a `UcpByCode`
@@ -28,14 +46,6 @@ The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/READM
 * _Functional keyboard_: a physical keyboard that also associates each key with a (possibly empty) list of representations
 
 The system file `evdev` maps X keycodes to X key names; local configuration files map X key names to keysym entries; and the system file `xkbcommon-keysyms.h` maps (mainly) keysym mnemonics to keysym codes and Unicode code points. See figure <<XM>> and read below for details.
-
-.X mappings
-[[XM]]
-image::https://github.com/oliviercailloux/XKB-doc/blob/main/X%20mappings.svg[Mappings and sources, opts=inline]
-
-.TODO diag
-[[KB]]
-image::Diag.svg[Diag, opts=inline]
 
 == Usage (short)
 Define manually a json physical row keyboard: that’s easy. Set special widths only where needed.

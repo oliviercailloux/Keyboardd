@@ -30,4 +30,7 @@ class "SimpleSymbolsReader" {
   read(CharSource source): KeyboardMap
 }
 
+KeysymEntry -[hidden]> KeyboardMap
+KeyboardMap -[hidden]> SimpleSymbolsReader
+
 @enduml

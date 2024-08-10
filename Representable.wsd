@@ -1,5 +1,6 @@
-@startuml Main classes
+@startuml Representable
 hide empty members
+left to right direction
 
 class "Representation" {
 }
