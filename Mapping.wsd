@@ -2,7 +2,7 @@
 hide empty members
 left to right direction
 
-class "KeysymEntry" {}
+interface "KeysymEntry" {}
 class "Mnemonic" {
   mnemonic: String
 }

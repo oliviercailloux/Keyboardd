@@ -17,11 +17,12 @@ interface "XKeyNamesRepresenter" {
   representations(name: String): Representation [0..*]
 }
 
-class "VisibleKeyboardMap" {
-  {static} from(KeyboardMap, Map<KeysymEntry, Representation>): VisibleKeyboardMap
+class "XKeyNamesAndRepresenter" {
+  {static} from(KeyboardMap, Map<KeysymEntry, Representation>): XKeyNamesAndRepresenter
+  {static} from(CanonicalKeyboardMap, Map<CanonicalKeysymEntry, Representation>): XKeyNamesAndRepresenter
   names(): String [0..*]
 }
-"XKeyNamesRepresenter" <|-[dashed]- "VisibleKeyboardMap"
+"XKeyNamesRepresenter" <|-- "XKeyNamesAndRepresenter"
 
 class "RectangularKey" {
   topLeftCorner

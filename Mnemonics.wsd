@@ -21,5 +21,11 @@ class "Mnemonics" {
 }
 
 interface "CanonicalKeysymEntry" {}
+"CanonicalKeysymEntry" <|-- "CanonicalMnemonic"
+"CanonicalKeysymEntry" <|-- "Ucp"
+
+class "CanonicalKeyboardMap" {
+  entries(xKeyName: String): List<KeysymEntry>
+}
 
 @enduml
