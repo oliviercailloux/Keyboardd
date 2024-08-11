@@ -122,7 +122,7 @@ public class SvgKeyboardTests {
         .asCharSource(KeyboardMapTests.class.getResource("Two keys short"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = XkbSymbolsReader.read(kbMapSource);
     Document svgR = svgK.withRepresentations(
-        VisibleKeyboardMap.from(kbMap, ImmutableMap.of()).representations()::get);
+        XKeyNamesAndRepresenter.from(kbMap, ImmutableMap.of()).representations()::get);
     String svg = domHelper.toString(svgR);
     assertEquals(expected, svg);
   }
