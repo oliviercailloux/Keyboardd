@@ -12,7 +12,7 @@ import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboard
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMapTests;
-import io.github.oliviercailloux.keyboardd.mapping.SimpleSymbolsReader;
+import io.github.oliviercailloux.keyboardd.mapping.XkbSymbolsReader;
 import io.github.oliviercailloux.svgb.PositiveSize;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -120,7 +120,7 @@ public class SvgKeyboardTests {
     SvgKeyboard svgK = SvgKeyboard.using(zoned);
     CharSource kbMapSource = Resources
         .asCharSource(KeyboardMapTests.class.getResource("Two keys short"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(kbMapSource);
+    KeyboardMap kbMap = XkbSymbolsReader.read(kbMapSource);
     Document svgR = svgK.withRepresentations(
         VisibleKeyboardMap.from(kbMap, ImmutableMap.of()).representations()::get);
     String svg = domHelper.toString(svgR);

@@ -33,7 +33,7 @@ public class KeyboardMapTests {
     ImmutableList<String> lines = source.readLines();
     CharSource sourceReduced =
         CharSource.wrap(lines.subList(0, 23).stream().collect(Collectors.joining("\n")));
-    KeyboardMap kbMap = SimpleSymbolsReader.read(sourceReduced);
+    KeyboardMap kbMap = XkbSymbolsReader.read(sourceReduced);
 
     int alphaUcp = Integer.parseInt(ALPHA_UCP_HEX, 16);
     assertEquals("α".codePointAt(0), alphaUcp);
@@ -64,7 +64,7 @@ public class KeyboardMapTests {
   void testReadOss() throws Exception {
     CharSource source =
         Resources.asCharSource(KeyboardMapTests.class.getResource("fr(oss)"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    KeyboardMap kbMap = XkbSymbolsReader.read(source);
     assertEquals(new KeysymEntry.Mnemonic("a"), kbMap.entries("AD01").get(0));
   }
   
@@ -72,7 +72,7 @@ public class KeyboardMapTests {
   void testRead() throws Exception {
     CharSource source =
         Resources.asCharSource(KeyboardMapTests.class.getResource("fr"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    KeyboardMap kbMap = XkbSymbolsReader.read(source);
 
     int alphaUcp = Integer.parseInt(ALPHA_UCP_HEX, 16);
     assertEquals("α".codePointAt(0), alphaUcp);
@@ -104,7 +104,7 @@ public class KeyboardMapTests {
   void testRead0x() throws Exception {
     CharSource source =
         Resources.asCharSource(KeyboardMapTests.class.getResource("fr(oss)"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    KeyboardMap kbMap = XkbSymbolsReader.read(source);
 
     Pattern P_CODE = Pattern.compile("0x(?<code>[0-9a-fA-F]+)");
     assertTrue(P_CODE.matcher("0x1002026").matches());
@@ -116,7 +116,7 @@ public class KeyboardMapTests {
   void testReadAliasesWrong() throws Exception {
     CharSource source = Resources.asCharSource(
         KeyboardMapTests.class.getResource("Symbols using aliases wrong"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    KeyboardMap kbMap = XkbSymbolsReader.read(source);
     ImmutableMap<String, String> canonicalByAlias = Xkeys.latest().canonicalByAlias();
     IllegalStateException thrown =
         assertThrows(IllegalStateException.class, () -> kbMap.canonicalize(canonicalByAlias));
@@ -128,7 +128,7 @@ public class KeyboardMapTests {
   void testReadAliases() throws Exception {
     CharSource source = Resources.asCharSource(
         KeyboardMapTests.class.getResource("Symbols using aliases good"), StandardCharsets.UTF_8);
-    KeyboardMap kbMap = SimpleSymbolsReader.read(source);
+    KeyboardMap kbMap = XkbSymbolsReader.read(source);
     assertEquals(ImmutableSet.of("AD03", "AC12"), kbMap.names());
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("e")), kbMap.entries("AD03"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("b")), kbMap.entries("AC12"));
@@ -138,5 +138,16 @@ public class KeyboardMapTests {
     assertEquals(ImmutableSet.of("AD03", "BKSL"), canonicalized.names());
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("e")), canonicalized.entries("AD03"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("b")), canonicalized.entries("BKSL"));
+  }
+
+  @Test
+  void testReadCommon() throws Exception {
+    KeyboardMap kbMap = XkbSymbolsReader.common();
+    assertTrue(kbMap.names().contains("RTRN"));
+    assertTrue(kbMap.names().contains("LSGT"));
+    assertTrue(kbMap.names().contains("OUTP"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("Return")), kbMap.entries("RTRN"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("less"), new KeysymEntry.Mnemonic("greater"), new KeysymEntry.Mnemonic("bar"), new KeysymEntry.Mnemonic("brokenbar")), kbMap.entries("LSGT"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("XF86Display")), kbMap.entries("OUTP"));
   }
 }
