@@ -8,6 +8,8 @@ import com.google.common.io.Resources;
 import io.github.oliviercailloux.jaris.io.PathUtils;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
+import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
+import io.github.oliviercailloux.keyboardd.mapping.XkbSymbolsReader;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
 import io.github.oliviercailloux.keyboardd.representable.Representation;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
@@ -21,13 +23,16 @@ public class TheKeyMapTests {
 
   @Test
   public void writeMapped() throws IOException {
-    CharSource expectedOutput = Resources.asCharSource(
-        getClass().getResource("The Key with X key names.svg"), StandardCharsets.UTF_8);
-
     Document inputDocument = DomHelper.domHelper().asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
-    Document outputDocument = inputSvg.withRepresentations(this::represent);
+    
+    KeyboardMap map = XkbSymbolsReader.us();
+    map.
+    // Document outputDocument = inputSvg.withRepresentations(this::represent);
     String outputString = DomHelper.domHelper().toString(outputDocument);
+    
+    CharSource expectedOutput = Resources.asCharSource(
+        getClass().getResource("The Key with X key names.svg"), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 

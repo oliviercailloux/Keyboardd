@@ -3,18 +3,15 @@ package io.github.oliviercailloux.keyboardd.mnemonics;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
-import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MoreCollectors;
-import com.google.common.collect.Sets;
-import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.io.CharSource;
+import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
 import java.io.IOException;
 import java.util.Comparator;
@@ -38,39 +35,6 @@ import java.util.Set;
  * <p>
  */
 public class Mnemonics {
-  public static record CanonicalMnemonic (String mnemonic, int code,
-      ImmutableSet<String> nonDeprecatedAliases, ImmutableSet<String> deprecatedAliases,
-      Optional<Integer> ucp, boolean deprecated) {
-    public CanonicalMnemonic {
-      checkArgument(!mnemonic.isEmpty());
-      checkArgument(Sets.intersection(nonDeprecatedAliases, deprecatedAliases).isEmpty());
-      if (deprecated) {
-        checkArgument(nonDeprecatedAliases.isEmpty());
-      }
-    }
-
-    /**
-     * Retrieves the mnemonics associated to the same code as this one.
-     *
-     * @return the relative mnemonics, starting with this one, followed by the non deprecated
-     *         aliases and finally by the deprecated aliases.
-     */
-    public ImmutableSet<String> mnemonics() {
-      return ImmutableSet.<String>builder().add(mnemonic).addAll(nonDeprecatedAliases)
-          .addAll(deprecatedAliases).build();
-    }
-
-    /**
-     * Retrieves the mnemonics associated to the same code as this one, except for this one.
-     *
-     * @return the non deprecated aliases followed by the deprecated aliases.
-     */
-    public ImmutableSet<String> aliases() {
-      return ImmutableSet.<String>builder().addAll(nonDeprecatedAliases).addAll(deprecatedAliases)
-          .build();
-    }
-  }
-
   public static Mnemonics latest() {
     ImmutableSet<ParsedMnemonic> parsedMns = KeysymReader.latest();
     return toMnemonics(parsedMns);
@@ -252,9 +216,31 @@ public class Mnemonics {
     return new Mnemonics(nonD);
   }
 
+  public CanonicalKeysymEntry canonicalize(KeysymEntry keysymEntry) {
+    final CanonicalKeysymEntry canonical;
+    if (keysymEntry instanceof KeysymEntry.Mnemonic mnemonic) {
+      canonical = canonical(mnemonic.keysymMnemonic());
+    } else if (keysymEntry instanceof KeysymEntry.Ucp ucp) {
+      if (byUcp.containsKey(ucp.ucp())) {
+        canonical = byUcp.get(ucp.ucp());
+      } else {
+        canonical = ImplicitUcp.byUcp(ucp.ucp());
+      }
+    } else {
+      verify(keysymEntry instanceof KeysymEntry.Code);
+      KeysymEntry.Code code = (KeysymEntry.Code) keysymEntry;
+      if (byCode.containsKey(((KeysymEntry.Code) keysymEntry).keysymCode())) {
+        canonical = byCode.get(code.keysymCode());
+      } else {
+        canonical = ImplicitUcp.byCode(((KeysymEntry.Code) keysymEntry).keysymCode());
+      }
+    }
+    return canonical;
+  }
+
   private static CanonicalMnemonic withoutDeprecatedAliases(CanonicalMnemonic canonicalMnemonic) {
-    return new CanonicalMnemonic(canonicalMnemonic.mnemonic, canonicalMnemonic.code,
-        canonicalMnemonic.nonDeprecatedAliases(), ImmutableSet.of(), canonicalMnemonic.ucp,
-        canonicalMnemonic.deprecated);
+    return new CanonicalMnemonic(canonicalMnemonic.mnemonic(), canonicalMnemonic.code(),
+        canonicalMnemonic.nonDeprecatedAliases(), ImmutableSet.of(), canonicalMnemonic.ucp(),
+        canonicalMnemonic.deprecated());
   }
 }

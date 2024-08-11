@@ -21,13 +21,13 @@ import org.w3c.dom.Document;
 public class TheKeyXKeyNamesTests {
   @Test
   public void writeWithXKeyNames() throws IOException {
-    CharSource expectedOutput = Resources.asCharSource(
-        getClass().getResource("The Key with X key names.svg"), StandardCharsets.UTF_8);
-
     Document inputDocument = DomHelper.domHelper().asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
     Document outputDocument = inputSvg.withRepresentations(this::represent);
     String outputString = DomHelper.domHelper().toString(outputDocument);
+    
+    CharSource expectedOutput = Resources.asCharSource(
+        getClass().getResource("The Key with X key names.svg"), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 

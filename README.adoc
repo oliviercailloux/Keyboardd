@@ -18,13 +18,13 @@ image::https://github.com/oliviercailloux/XKB-doc/blob/main/X%20mappings.svg[Map
 [[XKeys]]
 image::XKeys.svg[XKeys, opts=inline]
 
-.Mnemonics
-[[Mnemonics]]
-image::Mnemonics.svg[Mnemonics, opts=inline]
-
 .Mapping
 [[Mapping]]
 image::Mapping.svg[Mapping, opts=inline]
+
+.Mnemonics
+[[Mnemonics]]
+image::Mnemonics.svg[Mnemonics, opts=inline]
 
 .Representable
 [[Representable]]

@@ -146,4 +146,7 @@ public class XkbSymbolsReader {
     }
     return entries.build();
   }
+
+  private XkbSymbolsReader() {
+  }
 }

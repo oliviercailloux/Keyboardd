@@ -24,20 +24,16 @@ public class VisibleKeyboardMap implements XKeyNamesRepresenter {
         if (representations.containsKey(entry)) {
           representation = representations.get(entry);
         } else {
-          if (entry instanceof KeysymEntry.Mnemonic mnemonic) {
-            representation = Representation.fromString(mnemonic.keysymMnemonic());
-          } else if (entry instanceof KeysymEntry.Ucp ucp) {
-            representation = Representation.fromString(ucp.asString());
-          } else {
-            verify (entry instanceof KeysymEntry.Code);
-            KeysymEntry.Code code = (KeysymEntry.Code) entry;
-            representation = Representation.fromString(String.valueOf(code.keysymCode()));
-          }
+          representation = defaultRepresentation(entry);
         }
         builder.put(xKeyName, representation);
       }
     }
     return new VisibleKeyboardMap(builder.build());
+  }
+
+  private static Representation defaultRepresentation(KeysymEntry entry) {
+    return Representation.fromString(entry.asString());
   }
 
   private final ImmutableListMultimap<String, Representation> representations;

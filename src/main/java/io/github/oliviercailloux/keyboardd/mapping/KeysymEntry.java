@@ -1,6 +1,7 @@
 package io.github.oliviercailloux.keyboardd.mapping;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verify;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
@@ -15,18 +16,29 @@ public sealed interface KeysymEntry
     permits KeysymEntry.Mnemonic, KeysymEntry.Ucp, KeysymEntry.Code {
 
   public static record Mnemonic (String keysymMnemonic) implements KeysymEntry {
+    @Override
+    public String asString() {
+      return keysymMnemonic();
+    }
   }
 
   public static record Ucp (int ucp) implements KeysymEntry {
+    @Override
     public String asString() {
       /*
-       * http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs
-       * for invisible characters in our case, so let’s stick to the easy representation.
+       * http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs for
+       * invisible characters in our case, so let’s stick to the easy representation.
        */
       return new String(Character.toChars(ucp));
     }
   }
 
   public static record Code (int keysymCode) implements KeysymEntry {
+    @Override
+    public String asString() {
+      return String.valueOf(keysymCode());
+    }
   }
+
+  String asString();
 }

@@ -21,19 +21,23 @@ import org.w3c.dom.Document;
 public class TheKeyEmptySvgTests {
   private static final double KEYS_WIDTH_CM = 1d;
   private static final double KEYS_HEIGHT_CM = 1d;
+  private static final PositiveSize KEYS_SIZE = PositiveSize.given(KEYS_WIDTH_CM, KEYS_HEIGHT_CM);
+
   private static final double KEYS_HORIZONTAL_SPACING_CM = 0.2d;
+  private static final PositiveSize KEYS_SPACING =
+      PositiveSize.given(KEYS_HORIZONTAL_SPACING_CM, 0d);
 
   @Test
-  public void writeSvg() throws IOException {
-    CharSource json = Resources.asCharSource(
-        getClass().getResource("The Key.json"), StandardCharsets.UTF_8);
-    CharSource svg = Resources.asCharSource(
-        getClass().getResource("The Key.svg"), StandardCharsets.UTF_8);
-
-    RectangularKeyboard keyboard = JsonRectangularKeyboardReader.rowKeyboard(json)
-        .toPhysicalKeyboard(PositiveSize.given(KEYS_WIDTH_CM, KEYS_HEIGHT_CM), PositiveSize.given(KEYS_HORIZONTAL_SPACING_CM, 0d));
+  public void writeEmptySvg() throws IOException {
+    CharSource json =
+        Resources.asCharSource(getClass().getResource("The Key.json"), StandardCharsets.UTF_8);
+    RectangularKeyboard keyboard =
+        JsonRectangularKeyboardReader.rowKeyboard(json).toPhysicalKeyboard(KEYS_SIZE, KEYS_SPACING);
     Document svgDoc = SvgKeyboard.zonedFrom(keyboard).document();
     String svgString = DomHelper.domHelper().toString(svgDoc);
+
+    CharSource svg =
+        Resources.asCharSource(getClass().getResource("The Key.svg"), StandardCharsets.UTF_8);
     assertEquals(svg.read(), svgString);
   }
 }
