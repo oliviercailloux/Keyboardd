@@ -1,6 +1,7 @@
 package io.github.oliviercailloux.keyboardd.mapping;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -149,5 +150,29 @@ public class KeyboardMapTests {
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("Return")), kbMap.entries("RTRN"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("less"), new KeysymEntry.Mnemonic("greater"), new KeysymEntry.Mnemonic("bar"), new KeysymEntry.Mnemonic("brokenbar")), kbMap.entries("LSGT"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("XF86Display")), kbMap.entries("OUTP"));
+  }
+
+  @Test
+  void testReadUs() throws Exception {
+    KeyboardMap kbMap = XkbSymbolsReader.us();
+    assertTrue(kbMap.names().contains("TLDE"));
+    assertTrue(kbMap.names().contains("AD01"));
+    assertTrue(kbMap.names().contains("AB10"));
+    assertFalse(kbMap.names().contains("LSGT"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("grave"), new KeysymEntry.Mnemonic("asciitilde")), kbMap.entries("TLDE"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("q"), new KeysymEntry.Mnemonic("Q")), kbMap.entries("AD01"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("slash"), new KeysymEntry.Mnemonic("question")), kbMap.entries("AB10"));
+  }
+
+  @Test
+  void testReadUsIntl() throws Exception {
+    KeyboardMap kbMap = XkbSymbolsReader.usIntl();
+    assertTrue(kbMap.names().contains("TLDE"));
+    assertTrue(kbMap.names().contains("AD01"));
+    assertTrue(kbMap.names().contains("AB10"));
+    assertTrue(kbMap.names().contains("LSGT"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("dead_grave"), new KeysymEntry.Mnemonic("dead_tilde"), new KeysymEntry.Mnemonic("grave"), new KeysymEntry.Mnemonic("asciitilde")), kbMap.entries("TLDE"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("q"), new KeysymEntry.Mnemonic("Q"), new KeysymEntry.Mnemonic("adiaeresis"), new KeysymEntry.Mnemonic("Adiaeresis")), kbMap.entries("AD01"));
+    assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("backslash"), new KeysymEntry.Mnemonic("bar"), new KeysymEntry.Mnemonic("backslash"), new KeysymEntry.Mnemonic("bar")), kbMap.entries("LSGT"));
   }
 }

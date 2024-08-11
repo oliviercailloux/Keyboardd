@@ -7,8 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
-import io.github.oliviercailloux.jaris.io.CloseablePathFactory;
-import io.github.oliviercailloux.jaris.io.PathUtils;
+import com.google.common.io.Resources;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,27 +36,50 @@ public class XkbSymbolsReader {
   private static final Pattern P_CODE = Pattern.compile("0x(?<code>[0-9a-fA-F]+)");
   private static final ImmutableSet<Pattern> PATTERNS_VALUES = ImmutableSet.of(P_UNICODE, P_CODE);
 
+  /**
+   * From
+   * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/aa709f2f45e7b6164dd583389489043cf92c5b1c/symbols/pc
+   */
+  static CharSource commonSource() {
+    CharSource source = Resources.asCharSource(XkbSymbolsReader.class.getResource("pc - aa709f"),
+        StandardCharsets.UTF_8);
+    return source;
+  }
+
+  /**
+   * From
+   * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/f7eb40592a5c4a24d6313ec94153d7e15567eeb3/symbols/us
+   */
+  static CharSource usSource() {
+    CharSource source = Resources.asCharSource(XkbSymbolsReader.class.getResource("us - f7eb40"),
+        StandardCharsets.UTF_8);
+    return source;
+  }
+
   public static KeyboardMap common() {
-    /**
-     * From
-     * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/aa709f2f45e7b6164dd583389489043cf92c5b1c/symbols/pc
-     */
-    CloseablePathFactory res = PathUtils.fromResource(XkbSymbolsReader.class, "pc - aa709f");
+    CharSource source = commonSource();
     try {
-      return read(res.asByteSource().asCharSource(StandardCharsets.UTF_8));
+      return read(source);
     } catch (IOException e) {
       throw new VerifyException(e);
     }
   }
 
   public static KeyboardMap us() {
-    /**
-     * From
-     * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/f7eb40592a5c4a24d6313ec94153d7e15567eeb3/symbols/us
-     */
-    CloseablePathFactory res = PathUtils.fromResource(XkbSymbolsReader.class, "us - f7eb40");
+    CharSource source = usSource();
     try {
-      return read(res.asByteSource().asCharSource(StandardCharsets.UTF_8));
+      String symbolsMap = XkbKeymapDecomposer.bySymbolsMap(source).get("basic");
+      return read(CharSource.wrap(symbolsMap));
+    } catch (IOException e) {
+      throw new VerifyException(e);
+    }
+  }
+
+  public static KeyboardMap usIntl() {
+    CharSource source = usSource();
+    try {
+      String symbolsMap = XkbKeymapDecomposer.bySymbolsMap(source).get("intl");
+      return read(CharSource.wrap(symbolsMap));
     } catch (IOException e) {
       throw new VerifyException(e);
     }
@@ -99,9 +121,14 @@ public class XkbSymbolsReader {
 
     final ImmutableList.Builder<KeysymEntry> entries = new ImmutableList.Builder<>();
     for (String entryStr : entriesMultStr) {
+      LOGGER.debug("Parsing entry: {}.", entryStr);
       Optional<Matcher> matcherOpt = ParseUtils.matcherOpt(entryStr, PATTERNS_VALUES);
       if (matcherOpt.isEmpty()) {
-        entries.add(new KeysymEntry.Mnemonic(entryStr));
+        String m = entryStr.strip();
+        if (m.isEmpty()) {
+          throw new IllegalArgumentException("Unsupported empty entry in " + entriesOneStr);
+        }
+        entries.add(new KeysymEntry.Mnemonic(m));
       } else {
         Matcher matcher = matcherOpt.orElseThrow(VerifyException::new);
         verify(matcher.matches());

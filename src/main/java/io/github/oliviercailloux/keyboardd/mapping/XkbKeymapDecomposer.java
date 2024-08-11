@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XkbKeymapDecomposer {
-
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(XkbKeymapDecomposer.class);
 
@@ -19,8 +18,6 @@ public class XkbKeymapDecomposer {
   private static final Pattern SYMBOLS = Pattern.compile(
       INTRO + SKIP + "(?<contents>" + INSIDE_BRACKETS + "[^\\{\\}]++)[\\n\\r]*+\\};$",
       Pattern.MULTILINE | Pattern.DOTALL);
-  private static final Pattern P_OTHER = Pattern.compile(
-      "^(default )?(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|( *modifier_map.*)|(\\};)$");
 
   public static ImmutableMap<String, String> bySymbolsMap(CharSource source) throws IOException {
     Matcher matcher = SYMBOLS.matcher(source.read());
