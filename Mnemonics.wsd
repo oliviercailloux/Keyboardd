@@ -20,13 +20,6 @@ class "Mnemonics" {
   withoutDeprecated(): Mnemonics
 }
 
-class "UcpByCode" {
-  {static} implicit(): UcpByCode
-  {static} implicitAndExplicit(explicit: Map<Integer, Integer>): UcpByCode
-  {static} implicitAndExplicit(explicit: Mnemonics): UcpByCode
-  domainOfCodes: int [0..*]
-  coDomainOfUcps: int [0..*]
-  ucp(code: int): int
-}
+interface "CanonicalKeysymEntry" {}
 
 @enduml
