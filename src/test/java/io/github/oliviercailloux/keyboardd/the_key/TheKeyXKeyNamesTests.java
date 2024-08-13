@@ -2,6 +2,7 @@ package io.github.oliviercailloux.keyboardd.the_key;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
@@ -11,17 +12,21 @@ import io.github.oliviercailloux.keyboardd.representable.Representation;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 public class TheKeyXKeyNamesTests {
+  private DomHelper domHelper = DomHelper.domHelper();
+
   @Test
   public void writeWithXKeyNames() throws IOException {
     Document inputDocument =
-        DomHelper.domHelper().asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
+        domHelper.asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
     Document outputDocument = inputSvg.withRepresentations(this::representName);
-    String outputString = DomHelper.domHelper().toString(outputDocument);
+    String outputString = domHelper.toString(outputDocument);
 
     CharSource expectedOutput = Resources.asCharSource(
         getClass().getResource("The Key with X key names.svg"), StandardCharsets.UTF_8);
@@ -35,24 +40,34 @@ public class TheKeyXKeyNamesTests {
   @Test
   public void writeWithChosenRepresentations() throws IOException {
     Document inputDocument =
-        DomHelper.domHelper().asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
+        domHelper.asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
-    inputSvg.setFontSize(15);
+    inputSvg.setFontSize(25);
     Document outputDocument = inputSvg.withRepresentations(this::represent);
-    String outputString = DomHelper.domHelper().toString(outputDocument);
-    
+    String outputString = domHelper.toString(outputDocument);
+    Files.writeString(Path.of("out.svg"), outputString);
+
     CharSource expectedOutput = Resources.asCharSource(
         getClass().getResource("The Key with chosen representations.svg"), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 
   private ImmutableList<Representation> represent(String xKeyName) {
-    final String repr = switch(xKeyName) {
-      case "LCTL" -> "Ctrl";
-      case "AB03" -> "C";
-      case "AB04" -> "V";
-      default -> xKeyName;
+    final Representation repr = switch (xKeyName) {
+      case "LCTL" -> Representation.fromSvg(logo());
+      case "AB03" -> Representation.fromString("C");
+      case "AB04" -> Representation.fromString("V");
+      default -> Representation.fromString(xKeyName);
     };
-    return ImmutableList.of(Representation.fromString(repr));
+    return ImmutableList.of(repr);
+  }
+
+  private Document logo() {
+    try {
+      return domHelper
+          .asDocument(PathUtils.fromResource(getClass(), "Logo stackoverflow image.svg"));
+    } catch (IOException e) {
+      throw new VerifyException(e);
+    }
   }
 }

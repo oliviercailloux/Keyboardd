@@ -3,6 +3,7 @@ package io.github.oliviercailloux.keyboardd.representable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -195,6 +196,19 @@ public class SvgKeyboard {
   }
 
   /** TODO move to SVGHelper */
+  public static Element setXY(Element svgElement, DoublePoint point) {
+    if (point.equals(DoublePoint.zero())) {
+       svgElement.removeAttribute("x");
+       svgElement.removeAttribute("y");
+    } else {
+       svgElement.setAttribute("x", String.valueOf(point.x()));
+       svgElement.setAttribute("y", String.valueOf(point.y()));
+    }
+
+    return svgElement;
+ }
+
+  /** TODO move to SVGHelper */
   public static Optional<PositiveSize> size(Element svgElement) {
     if (svgElement.hasAttribute("width") && svgElement.hasAttribute("height")) {
       PositiveSize size = PositiveSize.given(Double.parseDouble(svgElement.getAttribute("width")),
@@ -214,15 +228,18 @@ public class SvgKeyboard {
     Element svgRepr = (Element) h.document().importNode(r.svg().getDocumentElement(), true);
     if (size(svgRepr).isEmpty()) {
       SvgHelper.setSize(svgRepr, subZone.size());
+    } else {
+      PositiveSize size = size(svgRepr).orElseThrow(VerifyException::new);
+      if(size.x() > subZone.size().x() || size.y() > subZone.size().y()) {
+        SvgHelper.setSize(svgRepr, subZone.size());
+      } else {
+        PositiveSize gap = subZone.size().plus(size.opposite());
+        PositiveSize halfGap = gap.mult(0.5d);
+        DoublePoint start = DoublePoint.zero().plus(halfGap);
+        setXY(svgRepr, start);
+      }
     }
     return svgRepr;
-  }
-
-  private static Element toSvg(SvgDocumentHelper h, Representation r) {
-    if (r.isString()) {
-      return h.text().setContent(r.string()).getElement();
-    }
-    return (Element) h.document().importNode(r.svg().getDocumentElement(), true);
   }
 
   /**
