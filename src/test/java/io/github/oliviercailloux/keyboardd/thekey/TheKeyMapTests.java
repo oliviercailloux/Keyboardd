@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.the_key;
+package io.github.oliviercailloux.keyboardd.thekey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,8 +37,9 @@ public class TheKeyMapTests {
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
-    CharSource expectedOutput = Resources.asCharSource(
-        getClass().getResource("The Key with default common+us representations.svg"), StandardCharsets.UTF_8);
+    String expRes = "The Key with default common+us representations.svg";
+    CharSource expectedOutput =
+        Resources.asCharSource(getClass().getResource(expRes), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 
@@ -55,8 +56,9 @@ public class TheKeyMapTests {
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
-    CharSource expectedOutput = Resources.asCharSource(
-        getClass().getResource("The Key with tweaked common+us representations.svg"), StandardCharsets.UTF_8);
+    String expRes = "The Key with tweaked common+us representations.svg";
+    CharSource expectedOutput =
+        Resources.asCharSource(getClass().getResource(expRes), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 
@@ -74,8 +76,9 @@ public class TheKeyMapTests {
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
-    CharSource expectedOutput = Resources.asCharSource(
-        getClass().getResource("The Key with tweaked common+us representations bigger.svg"), StandardCharsets.UTF_8);
+    String expRes = "The Key with tweaked common+us representations bigger.svg";
+    CharSource expectedOutput =
+        Resources.asCharSource(getClass().getResource(expRes), StandardCharsets.UTF_8);
     assertEquals(expectedOutput.read(), outputString);
   }
 

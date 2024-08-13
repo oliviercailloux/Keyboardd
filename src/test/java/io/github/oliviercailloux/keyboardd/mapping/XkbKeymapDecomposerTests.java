@@ -31,6 +31,7 @@ public class XkbKeymapDecomposerTests {
     assertTrue(bySymbolsMap.keySet().contains("basic"), bySymbolsMap.keySet().toString());
     assertTrue(bySymbolsMap.keySet().contains("intl"));
     assertTrue(bySymbolsMap.get("basic").contains("key <TLDE>\t{[   grave,\t asciitilde\t]};"));
-    assertTrue(bySymbolsMap.get("intl").contains("key <TLDE> { [dead_grave, dead_tilde,         grave,       asciitilde ] };"));
+    assertTrue(bySymbolsMap.get("intl")
+        .contains("key <TLDE> { [dead_grave, dead_tilde,         grave,       asciitilde ] };"));
   }
 }

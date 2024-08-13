@@ -21,7 +21,9 @@ public class CanonicalKeyboardMap {
   private final ImmutableListMultimap<String, CanonicalKeysymEntry> xKeyNameToEntries;
 
   private CanonicalKeyboardMap(KeyboardMap map, Mnemonics mnemonics) {
-    xKeyNameToEntries = map.nameToEntries().entries().stream().collect(ImmutableListMultimap.toImmutableListMultimap(Map.Entry::getKey, entry -> mnemonics.canonicalize(entry.getValue())));
+    xKeyNameToEntries = map.nameToEntries().entries().stream()
+        .collect(ImmutableListMultimap.toImmutableListMultimap(Map.Entry::getKey,
+            entry -> mnemonics.canonicalize(entry.getValue())));
   }
 
   /**

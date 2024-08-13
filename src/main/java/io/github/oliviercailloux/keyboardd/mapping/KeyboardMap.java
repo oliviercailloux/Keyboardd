@@ -91,9 +91,8 @@ public class KeyboardMap {
       {
         Map<KeysymEntry, Collection<String>> fromMnemonicEntriesMap =
             Maps.filterKeys(fromAllEntriesMap, e -> e instanceof KeysymEntry.Mnemonic);
-        ImmutableMap<String, Collection<String>> fromMnemonicMap =
-            CollectionUtils.transformKeys(fromMnemonicEntriesMap, e -> ((KeysymEntry.Mnemonic) e)
-                .keysymMnemonic());
+        ImmutableMap<String, Collection<String>> fromMnemonicMap = CollectionUtils.transformKeys(
+            fromMnemonicEntriesMap, e -> ((KeysymEntry.Mnemonic) e).keysymMnemonic());
         mnemonicToXKeyNames = fromMnemonicMap.entrySet().stream().collect(ImmutableSetMultimap
             .flatteningToImmutableSetMultimap(e -> e.getKey(), e -> e.getValue().stream()));
       }
@@ -101,17 +100,15 @@ public class KeyboardMap {
         Map<KeysymEntry, Collection<String>> fromUcpEntriesMap =
             Maps.filterKeys(fromAllEntriesMap, e -> e instanceof KeysymEntry.Ucp);
         ImmutableMap<Integer, Collection<String>> fromUcpMap =
-            CollectionUtils.transformKeys(fromUcpEntriesMap, e -> ((KeysymEntry.Ucp) e)
-            .ucp());
+            CollectionUtils.transformKeys(fromUcpEntriesMap, e -> ((KeysymEntry.Ucp) e).ucp());
         ucpToXKeyNames = fromUcpMap.entrySet().stream().collect(ImmutableSetMultimap
             .flatteningToImmutableSetMultimap(e -> e.getKey(), e -> e.getValue().stream()));
       }
       {
         Map<KeysymEntry, Collection<String>> fromCodeEntriesMap =
             Maps.filterKeys(fromAllEntriesMap, e -> e instanceof KeysymEntry.Code);
-        ImmutableMap<Integer, Collection<String>> fromCodeMap =
-            CollectionUtils.transformKeys(fromCodeEntriesMap, e -> ((KeysymEntry.Code) e)
-            .keysymCode());
+        ImmutableMap<Integer, Collection<String>> fromCodeMap = CollectionUtils
+            .transformKeys(fromCodeEntriesMap, e -> ((KeysymEntry.Code) e).keysymCode());
         codeToXKeyNames = fromCodeMap.entrySet().stream().collect(ImmutableSetMultimap
             .flatteningToImmutableSetMultimap(e -> e.getKey(), e -> e.getValue().stream()));
       }
@@ -202,13 +199,14 @@ public class KeyboardMap {
 
   public KeyboardMap overwrite(KeyboardMap other) {
     ImmutableListMultimap.Builder<String, KeysymEntry> builder = ImmutableListMultimap.builder();
-    
+
     ImmutableSet<String> onlyInThis = Sets.difference(names(), other.names()).immutableCopy();
-    builder.putAll(xKeyNameToEntries.entries().stream()
-        .filter(e -> onlyInThis.contains(e.getKey())).collect(ImmutableListMultimap.toImmutableListMultimap(e -> e.getKey(), e -> e.getValue())));
+    builder.putAll(
+        xKeyNameToEntries.entries().stream().filter(e -> onlyInThis.contains(e.getKey())).collect(
+            ImmutableListMultimap.toImmutableListMultimap(e -> e.getKey(), e -> e.getValue())));
 
     builder.putAll(other.xKeyNameToEntries);
-    
+
     return KeyboardMap.from(builder.build());
   }
 

@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.function.Function;
 
 class XKeyNamesRepresenterImpl implements XKeyNamesRepresenter {
-  public static XKeyNamesRepresenterImpl using(Function<String, List<Representation>> representations) {
+  public static XKeyNamesRepresenterImpl
+      using(Function<String, List<Representation>> representations) {
     return new XKeyNamesRepresenterImpl(representations);
   }
 

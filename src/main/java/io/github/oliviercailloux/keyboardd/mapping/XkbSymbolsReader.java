@@ -26,11 +26,12 @@ public class XkbSymbolsReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(XkbSymbolsReader.class);
 
   private static final Pattern P_COMMENT = Pattern.compile("^( *//.*)| *$");
-  private static final Pattern P_OTHER = Pattern.compile(
-      "^(default )?(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|( *modifier_map.*)|(\\};)$");
-  private static final Pattern P_KEY =
-      Pattern.compile("^ *key[ \\t]+<(?<name>.+)>[ \\t]*\\{[ \\t]*\\[[ \\t]*"
-          + "(?<entries>.*[^ \\t])[ \\t]*\\][ \\t]*(,[ \\t]*type=\".+\"[ \\t]*)?\\}[ \\t]*;[ \\t]*(//.*)?$");
+  private static final Pattern P_OTHER = Pattern
+      .compile("^(default )?(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|"
+          + "( *modifier_map.*)|(\\};)$");
+  private static final Pattern P_KEY = Pattern.compile(
+      "^ *key[ \\t]+<(?<name>.+)>" + "[ \\t]*\\{[ \\t]*\\[[ \\t]*" + "(?<entries>.*[^ \\t])"
+          + "[ \\t]*\\][ \\t]*" + "(,[ \\t]*type=\".+\"[ \\t]*)?" + "\\}[ \\t]*;[ \\t]*(//.*)?$");
   private static final ImmutableSet<Pattern> PATTERNS = ImmutableSet.of(P_COMMENT, P_OTHER, P_KEY);
   private static final Pattern P_UNICODE = Pattern.compile("U(?<unicode>[0-9a-fA-F]+)");
   private static final Pattern P_CODE = Pattern.compile("0x(?<code>[0-9a-fA-F]+)");
@@ -147,6 +148,5 @@ public class XkbSymbolsReader {
     return entries.build();
   }
 
-  private XkbSymbolsReader() {
-  }
+  private XkbSymbolsReader() {}
 }

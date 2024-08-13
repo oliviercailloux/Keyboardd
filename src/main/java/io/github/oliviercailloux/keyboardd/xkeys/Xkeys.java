@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * The set of X key names (canonical and aliases) and corresponding X keycodes available on a system.
+ * The set of X key names (canonical and aliases) and corresponding X keycodes available on a
+ * system.
  */
 public interface Xkeys {
   public static Xkeys latest() {

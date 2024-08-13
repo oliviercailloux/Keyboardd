@@ -1,4 +1,4 @@
-package io.github.oliviercailloux.keyboardd.the_key;
+package io.github.oliviercailloux.keyboardd.thekey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

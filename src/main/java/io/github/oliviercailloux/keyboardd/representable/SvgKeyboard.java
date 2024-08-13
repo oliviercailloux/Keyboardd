@@ -198,15 +198,15 @@ public class SvgKeyboard {
   /** TODO move to SVGHelper */
   public static Element setXY(Element svgElement, DoublePoint point) {
     if (point.equals(DoublePoint.zero())) {
-       svgElement.removeAttribute("x");
-       svgElement.removeAttribute("y");
+      svgElement.removeAttribute("x");
+      svgElement.removeAttribute("y");
     } else {
-       svgElement.setAttribute("x", String.valueOf(point.x()));
-       svgElement.setAttribute("y", String.valueOf(point.y()));
+      svgElement.setAttribute("x", String.valueOf(point.x()));
+      svgElement.setAttribute("y", String.valueOf(point.y()));
     }
 
     return svgElement;
- }
+  }
 
   /** TODO move to SVGHelper */
   public static Optional<PositiveSize> size(Element svgElement) {
@@ -230,7 +230,7 @@ public class SvgKeyboard {
       SvgHelper.setSize(svgRepr, subZone.size());
     } else {
       PositiveSize size = size(svgRepr).orElseThrow(VerifyException::new);
-      if(size.x() > subZone.size().x() || size.y() > subZone.size().y()) {
+      if (size.x() > subZone.size().x() || size.y() > subZone.size().y()) {
         SvgHelper.setSize(svgRepr, subZone.size());
       } else {
         PositiveSize gap = subZone.size().plus(size.opposite());
@@ -313,9 +313,8 @@ public class SvgKeyboard {
   }
 
   public double maxWidthPerCp(Function<String, ? extends List<String>> descriptionsByXKeyName) {
-    XKeyNamesRepresenter representationsByXKeyName =
-        s -> descriptionsByXKeyName.apply(s).stream().map(Representation::fromString)
-            .collect(ImmutableList.toImmutableList());
+    XKeyNamesRepresenter representationsByXKeyName = s -> descriptionsByXKeyName.apply(s).stream()
+        .map(Representation::fromString).collect(ImmutableList.toImmutableList());
     ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
     return maxWidthPerCp(zones);
   }
@@ -344,8 +343,7 @@ public class SvgKeyboard {
    * @param representationsByXKeyName the respective representations to add to the zones.
    * @return the document with the added representations.
    */
-  public Document withRepresentations(
-      XKeyNamesRepresenter representationsByXKeyName) {
+  public Document withRepresentations(XKeyNamesRepresenter representationsByXKeyName) {
     // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO
     // document in Jaris?
     // DOMResult result = new DOMResult();
@@ -378,8 +376,7 @@ public class SvgKeyboard {
     return h.document();
   }
 
-  private ImmutableSet<RepresentableZone>
-      getZones(XKeyNamesRepresenter representationsByXKeyName) {
+  private ImmutableSet<RepresentableZone> getZones(XKeyNamesRepresenter representationsByXKeyName) {
     ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
     ImmutableSet<RepresentableZone> zones = keyNameByZone.keySet().stream().map(zone -> {
       String xKeyName = keyNameByZone.get(zone);

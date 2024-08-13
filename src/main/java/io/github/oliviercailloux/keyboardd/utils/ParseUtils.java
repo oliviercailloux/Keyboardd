@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
 public class ParseUtils {
 
   public static Matcher matcher(String line, Set<Pattern> patterns) {
-    return matcherOpt(line, patterns).orElseThrow(() -> new IllegalArgumentException("Unrecognised pattern on line: ‘" + line + "’."));
+    return matcherOpt(line, patterns).orElseThrow(
+        () -> new IllegalArgumentException("Unrecognised pattern on line: ‘" + line + "’."));
   }
 
   public static Optional<Matcher> matcherOpt(String line, Set<Pattern> patterns) {
