@@ -296,7 +296,7 @@ public class SvgKeyboard {
   }
 
   public double maxWidthPerCp(Function<String, ? extends List<String>> descriptionsByXKeyName) {
-    Function<String, ImmutableList<Representation>> representationsByXKeyName =
+    XKeyNamesRepresenter representationsByXKeyName =
         s -> descriptionsByXKeyName.apply(s).stream().map(Representation::fromString)
             .collect(ImmutableList.toImmutableList());
     ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
@@ -328,7 +328,7 @@ public class SvgKeyboard {
    * @return the document with the added representations.
    */
   public Document withRepresentations(
-      Function<String, ? extends List<Representation>> representationsByXKeyName) {
+      XKeyNamesRepresenter representationsByXKeyName) {
     // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO
     // document in Jaris?
     // DOMResult result = new DOMResult();
@@ -362,11 +362,11 @@ public class SvgKeyboard {
   }
 
   private ImmutableSet<RepresentableZone>
-      getZones(Function<String, ? extends List<Representation>> representationsByXKeyName) {
+      getZones(XKeyNamesRepresenter representationsByXKeyName) {
     ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
     ImmutableSet<RepresentableZone> zones = keyNameByZone.keySet().stream().map(zone -> {
       String xKeyName = keyNameByZone.get(zone);
-      List<Representation> reprs = representationsByXKeyName.apply(xKeyName);
+      List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
       return new RepresentableZone(zone, ImmutableList.copyOf(reprs));
     }).collect(ImmutableSet.toImmutableSet());
     return zones;

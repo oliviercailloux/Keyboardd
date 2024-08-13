@@ -12,10 +12,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.github.oliviercailloux.jaris.collections.CollectionUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An association of X key names to a list of keysym entries, representing a set of directives found
@@ -196,6 +198,18 @@ public class KeyboardMap {
     }
     ImmutableListMultimap<String, KeysymEntry> withNewNamesBuilt = withNewNames.build();
     return KeyboardMap.from(withNewNamesBuilt);
+  }
+
+  public KeyboardMap overwrite(KeyboardMap other) {
+    ImmutableListMultimap.Builder<String, KeysymEntry> builder = ImmutableListMultimap.builder();
+    
+    ImmutableSet<String> onlyInThis = Sets.difference(names(), other.names()).immutableCopy();
+    builder.putAll(xKeyNameToEntries.entries().stream()
+        .filter(e -> onlyInThis.contains(e.getKey())).collect(ImmutableListMultimap.toImmutableListMultimap(e -> e.getKey(), e -> e.getValue())));
+
+    builder.putAll(other.xKeyNameToEntries);
+    
+    return KeyboardMap.from(builder.build());
   }
 
   @Override

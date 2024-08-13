@@ -12,7 +12,7 @@ The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/READM
 
 .X mappings
 [[XM]]
-image::https://github.com/oliviercailloux/XKB-doc/blob/main/X%20mappings.svg[Mappings and sources, opts=inline]
+image::https://github.com/oliviercailloux/XKB-doc/raw/main/X%20mappings.svg[Mappings and sources, opts=inline]
 
 .XKeys
 [[XKeys]]

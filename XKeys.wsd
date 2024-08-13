@@ -5,7 +5,7 @@ interface "Xkeys" {
   {static} fromSource(evdev: CharSource): Xkeys
   xKeycodeByXKeyName: Map<String, Short>
   xKeycodeByCanonicalXKeyName: BiMap<String, Short>
-  canonicalXKeyNameByAliasXKeyName: Map<String, String>
+  canonicalXKeyNameByAlias: Map<String, String>
   withoutAliases(): XKeys
 }
 

@@ -19,9 +19,6 @@ class "Code" {
 
 class "KeyboardMap" {
   entries(xKeyName: String): List<KeysymEntry>
-  xKeyNames(mnemonic: String): Set<String>
-  xKeyNames(ucp: int): Set<String>
-  xKeyNames(code: int): Set<String>
   canonicalize(canonicalXKeyNameByAlias: Map<String, String>): KeyboardMap
 }
 

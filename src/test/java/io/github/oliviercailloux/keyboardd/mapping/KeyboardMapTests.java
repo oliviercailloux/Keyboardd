@@ -10,6 +10,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
+import io.github.oliviercailloux.jaris.io.PathUtils;
+import io.github.oliviercailloux.jaris.xml.DomHelper;
+import io.github.oliviercailloux.keyboardd.mapping.KeysymEntry.Mnemonic;
+import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
 import io.github.oliviercailloux.keyboardd.xkeys.Xkeys;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 @SuppressWarnings("checkstyle:LocalVariableName")
 public class KeyboardMapTests {
@@ -174,5 +179,12 @@ public class KeyboardMapTests {
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("dead_grave"), new KeysymEntry.Mnemonic("dead_tilde"), new KeysymEntry.Mnemonic("grave"), new KeysymEntry.Mnemonic("asciitilde")), kbMap.entries("TLDE"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("q"), new KeysymEntry.Mnemonic("Q"), new KeysymEntry.Mnemonic("adiaeresis"), new KeysymEntry.Mnemonic("Adiaeresis")), kbMap.entries("AD01"));
     assertEquals(ImmutableList.of(new KeysymEntry.Mnemonic("backslash"), new KeysymEntry.Mnemonic("bar"), new KeysymEntry.Mnemonic("backslash"), new KeysymEntry.Mnemonic("bar")), kbMap.entries("LSGT"));
+  }
+
+  @Test
+  void testOverwrite() throws Exception {
+    KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
+    assertTrue(map.entries("LCTL").size() == 1);
+    assertEquals(ImmutableList.of(new Mnemonic("Control_L")), map.entries("LCTL"));
   }
 }

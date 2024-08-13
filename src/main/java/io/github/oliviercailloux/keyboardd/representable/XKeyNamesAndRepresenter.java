@@ -2,7 +2,6 @@ package io.github.oliviercailloux.keyboardd.representable;
 
 import static com.google.common.base.Verify.verify;
 
-import com.fasterxml.jackson.databind.cfg.ContextAttributes.Impl;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
@@ -14,8 +13,9 @@ import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalMnemonic;
 import io.github.oliviercailloux.keyboardd.mnemonics.ImplicitUcp;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
-public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter{
+public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
   public static XKeyNamesAndRepresenter from(ListMultimap<String, Representation> representations) {
     return new VisibleKeyboardMapImpl(representations);
   }
@@ -37,42 +37,42 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter{
     return new VisibleKeyboardMapImpl(builder.build());
   }
 
+  /** TODO apply same approach to other from, here above. */
   public static XKeyNamesAndRepresenter from(CanonicalKeyboardMap keyboardMap,
-      Map<CanonicalKeysymEntry, Representation> representations) {
+      Function<CanonicalKeysymEntry, Representation> representations) {
     ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();
     for (String xKeyName : keyboardMap.names()) {
       for (CanonicalKeysymEntry entry : keyboardMap.entries(xKeyName)) {
-        Representation representation;
-        if (representations.containsKey(entry)) {
-          representation = representations.get(entry);
-        } else {
-          representation = Representation.fromString(defaultString(entry));
-        }
+        Representation representation = representations.apply(entry);
         builder.put(xKeyName, representation);
       }
     }
     return new VisibleKeyboardMapImpl(builder.build());
   }
-  
+
   /** The ones having at least one representation. */
   ImmutableSet<String> names();
-  
+
   ImmutableListMultimap<String, Representation> representations();
 
-    private static String defaultString(CanonicalKeysymEntry entry) {
-      final String str;
-      if(entry instanceof CanonicalMnemonic mnemonic) {
-        Optional<Integer> ucp = mnemonic.ucp();
-        if(ucp.isPresent()) {
-          str = new KeysymEntry.Ucp(ucp.orElseThrow()).asString();
-        } else {
-          str = mnemonic.mnemonic();
-        }
+  public static Representation defaultRepresentation(CanonicalKeysymEntry entry) {
+    return Representation.fromString(defaultString(entry));
+  }
+
+  private static String defaultString(CanonicalKeysymEntry entry) {
+    final String str;
+    if (entry instanceof CanonicalMnemonic mnemonic) {
+      Optional<Integer> ucp = mnemonic.ucp();
+      if (ucp.isPresent()) {
+        str = new KeysymEntry.Ucp(ucp.orElseThrow()).asString();
       } else {
-        verify(entry instanceof ImplicitUcp);
-        ImplicitUcp implicitUcp = (ImplicitUcp) entry;
-        str = implicitUcp.asString();
+        str = mnemonic.mnemonic();
       }
-      return str;
+    } else {
+      verify(entry instanceof ImplicitUcp);
+      ImplicitUcp implicitUcp = (ImplicitUcp) entry;
+      str = implicitUcp.asString();
     }
+    return str;
+  }
 }
