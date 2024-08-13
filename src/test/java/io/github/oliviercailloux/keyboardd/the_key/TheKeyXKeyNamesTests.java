@@ -12,8 +12,6 @@ import io.github.oliviercailloux.keyboardd.representable.Representation;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
@@ -45,7 +43,6 @@ public class TheKeyXKeyNamesTests {
     inputSvg.setFontSize(25);
     Document outputDocument = inputSvg.withRepresentations(this::represent);
     String outputString = domHelper.toString(outputDocument);
-    Files.writeString(Path.of("out.svg"), outputString);
 
     CharSource expectedOutput = Resources.asCharSource(
         getClass().getResource("The Key with chosen representations.svg"), StandardCharsets.UTF_8);
