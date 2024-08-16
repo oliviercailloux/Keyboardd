@@ -21,7 +21,7 @@ public class TheKeyXKeyNamesTests {
   @Test
   public void writeWithXKeyNames() throws IOException {
     Document inputDocument =
-        domHelper.asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
+        domHelper.asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
     Document outputDocument = inputSvg.withRepresentations(this::representName);
     String outputString = domHelper.toString(outputDocument);
@@ -38,7 +38,7 @@ public class TheKeyXKeyNamesTests {
   @Test
   public void writeWithChosenRepresentations() throws IOException {
     Document inputDocument =
-        domHelper.asDocument(PathUtils.fromResource(getClass(), "The Key.svg"));
+        domHelper.asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
     inputSvg.setFontSize(25);
     Document outputDocument = inputSvg.withRepresentations(this::represent);
@@ -62,7 +62,7 @@ public class TheKeyXKeyNamesTests {
   private Document logo() {
     try {
       return domHelper
-          .asDocument(PathUtils.fromResource(getClass(), "Logo stackoverflow image.svg"));
+          .asDocument(Resources.asByteSource(Resources.getResource(getClass(), "Logo stackoverflow image.svg")));
     } catch (IOException e) {
       throw new VerifyException(e);
     }
