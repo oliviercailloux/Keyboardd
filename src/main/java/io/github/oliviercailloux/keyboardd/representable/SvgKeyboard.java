@@ -262,7 +262,10 @@ public class SvgKeyboard {
       PositiveSize sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
           h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
-      setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, key.xKeyName());
+      String xKeyName = key.xKeyName();
+      if (!xKeyName.isEmpty()) {
+        setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, xKeyName);
+      }
       doc.getDocumentElement().appendChild(rect.getElement());
     }
 

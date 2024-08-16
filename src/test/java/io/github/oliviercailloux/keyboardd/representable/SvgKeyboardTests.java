@@ -64,6 +64,22 @@ public class SvgKeyboardTests {
   }
 
   @Test
+  public void testZonesMissing() throws Exception {
+    CharSource source = Resources.asCharSource(
+        JsonRectangularKeyboardReader.class.getResource("Keyboard layout missing names.json"),
+        StandardCharsets.UTF_8);
+    String expected = Files
+        .readString(Path.of(SvgKeyboardTests.class.getResource("Keyboard missing names.svg").toURI()));
+
+    JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
+    RectangularKeyboard physicalKeyboard =
+        layout.toPhysicalKeyboard(PositiveSize.square(1d), PositiveSize.zero());
+    SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
+    String svg = domHelper.toString(svgK.document());
+    assertEquals(expected, svg);
+  }
+
+  @Test
   public void testMmmmPRepresentation() throws Exception {
     Document zoned = domHelper.asDocument(
         new StreamSource(SvgKeyboardTests.class.getResource("Keyboard two keys.svg").toString()));

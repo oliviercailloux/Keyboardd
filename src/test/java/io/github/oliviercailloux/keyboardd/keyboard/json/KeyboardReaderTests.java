@@ -76,7 +76,7 @@ public class KeyboardReaderTests {
     ObjectMapper mapper = new ObjectMapper();
 
     CharSource source = Resources.asCharSource(
-        getClass().getResource("Keyboard layout unknown mnemonics.json"), StandardCharsets.UTF_8);
+        getClass().getResource("Keyboard layout missing names.json"), StandardCharsets.UTF_8);
     JavaType type =
         mapper.getTypeFactory().constructCollectionType(List.class, JsonRectangularRowKey.class);
     JavaType type2 = mapper.getTypeFactory().constructCollectionType(List.class, type);
