@@ -25,10 +25,6 @@ public sealed interface KeysymEntry
   public static record Ucp (int ucp) implements KeysymEntry {
     @Override
     public String asString() {
-      /*
-       * http://www.unicode.org/faq/unsup_char.html suggests to use a font that has glyphs for
-       * invisible characters in our case, so let’s stick to the easy representation.
-       */
       return new String(Character.toChars(ucp));
     }
   }

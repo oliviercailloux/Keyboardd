@@ -88,3 +88,6 @@ Headers follow the https://svgwg.org/svg2-draft/struct.html#NewDocument[SVG2 spe
 == Limitations
 This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
 It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
+
+== Representing UCPs
+Maybe impossible to achieve: https://github.com/w3c/csswg-drafts/issues/8874
