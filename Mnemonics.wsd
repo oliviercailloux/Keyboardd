@@ -25,6 +25,7 @@ interface "CanonicalKeysymEntry" {}
 "CanonicalKeysymEntry" <|-- "Ucp"
 
 class "CanonicalKeyboardMap" {
+  {static} canonicalize(KeyboardMap, Mnemonics): CanonicalKeyboardMap
   entries(xKeyName: String): List<KeysymEntry>
 }
 
