@@ -195,29 +195,6 @@ public class SvgKeyboard {
     }
   }
 
-  /** TODO move to SVGHelper */
-  public static Element setXY(Element svgElement, DoublePoint point) {
-    if (point.equals(DoublePoint.zero())) {
-      svgElement.removeAttribute("x");
-      svgElement.removeAttribute("y");
-    } else {
-      svgElement.setAttribute("x", String.valueOf(point.x()));
-      svgElement.setAttribute("y", String.valueOf(point.y()));
-    }
-
-    return svgElement;
-  }
-
-  /** TODO move to SVGHelper */
-  public static Optional<PositiveSize> size(Element svgElement) {
-    if (svgElement.hasAttribute("width") && svgElement.hasAttribute("height")) {
-      PositiveSize size = PositiveSize.given(Double.parseDouble(svgElement.getAttribute("width")),
-          Double.parseDouble(svgElement.getAttribute("height")));
-      return Optional.of(size);
-    }
-    return Optional.empty();
-  }
-
   private static Element toSvg(SvgDocumentHelper h, RepresentableSubZone subZone) {
     final Representation r = subZone.repr;
     if (r.isString()) {
@@ -347,13 +324,6 @@ public class SvgKeyboard {
    * @return the document with the added representations.
    */
   public Document withRepresentations(XKeyNamesRepresenter representationsByXKeyName) {
-    // Thanks to https://stackoverflow.com/questions/5226852/cloning-dom-document-object . TODO
-    // document in Jaris?
-    // DOMResult result = new DOMResult();
-    // XmlTransformer.usingFoundFactory().usingEmptyStylesheet().transform(new DOMSource(doc),
-    // result);
-    // Document d = (Document) result.getNode();
-
     ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
     // it’s very unlikely that the font size will be constrained in height, so let’s just consider
     // the available width. We consider that 1px font size (which determines the height of am em
