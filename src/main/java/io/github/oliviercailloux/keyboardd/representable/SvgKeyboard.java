@@ -50,25 +50,6 @@ public class SvgKeyboard {
   }
 
   /**
-   * @deprecated Use JARiS.
-   */
-  @Deprecated()
-  private static boolean hasAttribute(Element element, XmlName name) {
-    return element.hasAttributeNS(name.namespace().map(URI::toString).orElse(null),
-        name.localName());
-  }
-
-  /**
-   * @deprecated Use JARiS.
-   */
-  @Deprecated()
-  private static String getAttribute(Element element, XmlName name) {
-    checkArgument(hasAttribute(element, name));
-    return element.getAttributeNS(name.namespace().map(URI::toString).orElse(null),
-        name.localName());
-  }
-
-  /**
    * @deprecated Move to JARiS.
    */
   @Deprecated()
@@ -285,7 +266,7 @@ public class SvgKeyboard {
   public ImmutableMap<RectangleElement, String> keyNameByZone() {
     ImmutableMap.Builder<RectangleElement, String> reprsBuilder = ImmutableMap.builder();
     for (Element rect : getElements(h.document().getDocumentElement(), SVG_RECT_NAME)) {
-      if (!hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
+      if (!DomHelper.hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
         continue;
       }
       String xKeyName = DomHelper.getAttribute(rect, KEYBOARDD_X_KEY_NAME);
