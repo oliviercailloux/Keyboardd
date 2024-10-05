@@ -11,6 +11,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import io.github.oliviercailloux.geometry.Displacement;
 import io.github.oliviercailloux.geometry.Point;
 import io.github.oliviercailloux.geometry.Zone;
+import io.github.oliviercailloux.jaris.collections.CollectionUtils;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
 import io.github.oliviercailloux.svgb.RectangleElement;
@@ -131,11 +132,11 @@ public class SvgKeyboard {
   private static record RepresentableZone (RectangleElement zone,
       ImmutableList<Representation> reprs) {
     public Point zoneStart() {
-      return zone.getStart();
+      return zone.zone().start();
     }
 
     public Point zoneSize() {
-      return zone.getSize();
+      return zone.zone().size();
     }
 
     public Point startOffset() {
@@ -263,7 +264,11 @@ public class SvgKeyboard {
         h.document().getDocumentElement().getFirstChild());
   }
 
-  public ImmutableMap<RectangleElement, String> keyNameByZone() {
+  private ImmutableMap<Zone, String> keyNameByZone() {
+    return CollectionUtils.transformKeys(keyNameByRectangle(), r -> r.zone());
+  }
+
+  public ImmutableMap<RectangleElement, String> keyNameByRectangle() {
     ImmutableMap.Builder<RectangleElement, String> reprsBuilder = ImmutableMap.builder();
     for (Element rect : getElements(h.document().getDocumentElement(), SVG_RECT_NAME)) {
       if (!DomHelper.hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
@@ -333,7 +338,7 @@ public class SvgKeyboard {
   }
 
   private ImmutableSet<RepresentableZone> getZones(XKeyNamesRepresenter representationsByXKeyName) {
-    ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByZone();
+    ImmutableMap<RectangleElement, String> keyNameByZone = keyNameByRectangle();
     ImmutableSet<RepresentableZone> zones = keyNameByZone.keySet().stream().map(zone -> {
       String xKeyName = keyNameByZone.get(zone);
       List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
