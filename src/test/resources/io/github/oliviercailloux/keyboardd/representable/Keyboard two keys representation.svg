@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" height="75.59055118110236" width="226.77165354330708" xmlns:kdd="https://io.github.oliviercailloux.keyboardd">
+<svg xmlns="http://www.w3.org/2000/svg" height="75.5906" width="226.7717" xmlns:kdd="https://io.github.oliviercailloux.keyboardd">
     <style>text {
 text-anchor: middle;
 dominant-baseline: middle;
-font-size: 25.196850393700785px;
+font-size: 25.196866666666665px;
 }</style>
     <style>rect {
 fill-opacity: 0;
 stroke: black;
 stroke-width: 1px;
 }</style>
-    <rect height="75.59055118110236" kdd:x-key-name="TAB" rx="10.0" width="113.38582677165354"/>
-    <g transform="translate(75.59055118110236, 0.0)">
-        <text x="18.89763779527559" y="18.89763779527559">Ζ</text>
+    <rect height="75.5906" kdd:x-key-name="TAB" rx="10" width="113.3858"/>
+    <g transform="translate(75.5905, 0)">
+        <text x="18.8976" y="18.8976">Ζ</text>
     </g>
-    <g transform="translate(75.59055118110236, 37.79527559055118)">
-        <text x="18.89763779527559" y="18.89763779527559">ζ</text>
+    <g transform="translate(75.5905, 37.7953)">
+        <text x="18.8976" y="18.8976">ζ</text>
     </g>
-    <g transform="translate(37.79527559055118, 0.0)">
-        <text x="18.89763779527559" y="18.89763779527559">â</text>
+    <g transform="translate(37.7953, 0)">
+        <text x="18.8976" y="18.8976">â</text>
     </g>
-    <g transform="translate(37.79527559055118, 37.79527559055118)">
-        <text x="18.89763779527559" y="18.89763779527559">Â</text>
+    <g transform="translate(37.7953, 37.7953)">
+        <text x="18.8976" y="18.8976">Â</text>
     </g>
-    <g transform="translate(0.0, 0.0)">
-        <text x="18.89763779527559" y="18.89763779527559">Z</text>
+    <g transform="translate(0, 0)">
+        <text x="18.8976" y="18.8976">Z</text>
     </g>
-    <g transform="translate(0.0, 37.79527559055118)">
-        <text x="18.89763779527559" y="18.89763779527559">z</text>
+    <g transform="translate(0, 37.7953)">
+        <text x="18.8976" y="18.8976">z</text>
     </g>
-    <rect height="75.59055118110236" kdd:x-key-name="AD01" rx="10.0" width="75.59055118110236" x="151.1811023622047" y="0.0"/>
-    <g transform="translate(201.57480314960628, 0.0)">
-        <text x="12.598425196850393" y="18.89763779527559">Α</text>
+    <rect height="75.5906" kdd:x-key-name="AD01" rx="10" width="75.5906" x="151.1811" y="0"/>
+    <g transform="translate(201.5748, 0)">
+        <text x="12.5984" y="18.8976">Α</text>
     </g>
-    <g transform="translate(201.57480314960628, 37.79527559055118)">
-        <text x="12.598425196850393" y="18.89763779527559">α</text>
+    <g transform="translate(201.5748, 37.7953)">
+        <text x="12.5984" y="18.8976">α</text>
     </g>
-    <g transform="translate(176.37795275590548, 0.0)">
-        <text x="12.598425196850393" y="18.89763779527559">Æ</text>
+    <g transform="translate(176.378, 0)">
+        <text x="12.5984" y="18.8976">Æ</text>
     </g>
-    <g transform="translate(176.37795275590548, 37.79527559055118)">
-        <text x="12.598425196850393" y="18.89763779527559">æ</text>
+    <g transform="translate(176.378, 37.7953)">
+        <text x="12.5984" y="18.8976">æ</text>
     </g>
-    <g transform="translate(151.1811023622047, 0.0)">
-        <text x="12.598425196850393" y="18.89763779527559">A</text>
+    <g transform="translate(151.1811, 0)">
+        <text x="12.5984" y="18.8976">A</text>
     </g>
-    <g transform="translate(151.1811023622047, 37.79527559055118)">
-        <text x="12.598425196850393" y="18.89763779527559">a</text>
+    <g transform="translate(151.1811, 37.7953)">
+        <text x="12.5984" y="18.8976">a</text>
     </g>
 </svg>
