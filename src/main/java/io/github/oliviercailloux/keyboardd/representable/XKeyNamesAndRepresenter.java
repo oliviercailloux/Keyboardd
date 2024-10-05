@@ -21,29 +21,21 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
   }
 
   public static XKeyNamesAndRepresenter from(KeyboardMap keyboardMap,
-      Map<KeysymEntry, Representation> representations) {
-    ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();
-    for (String xKeyName : keyboardMap.names()) {
-      for (KeysymEntry entry : keyboardMap.entries(xKeyName)) {
-        Representation representation;
-        if (representations.containsKey(entry)) {
-          representation = representations.get(entry);
-        } else {
-          representation = Representation.fromString(entry.asString());
-        }
-        builder.put(xKeyName, representation);
-      }
-    }
-    return new VisibleKeyboardMapImpl(builder.build());
+      Function<KeysymEntry, Representation> representations) {
+    return fromIndirect(keyboardMap.nameToEntries(), representations);
   }
 
-  /** TODO apply same approach to other from, here above. */
   public static XKeyNamesAndRepresenter from(CanonicalKeyboardMap keyboardMap,
       Function<CanonicalKeysymEntry, Representation> representations) {
+    return fromIndirect(keyboardMap.nameToEntries(), representations);
+  }
+
+  private static <V> XKeyNamesAndRepresenter fromIndirect(ListMultimap<String, V> toV,
+      Function<V, Representation> toRepresentations) {
     ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();
-    for (String xKeyName : keyboardMap.names()) {
-      for (CanonicalKeysymEntry entry : keyboardMap.entries(xKeyName)) {
-        Representation representation = representations.apply(entry);
+    for (String xKeyName : toV.keySet()) {
+      for (V entry : toV.get(xKeyName)) {
+        Representation representation = toRepresentations.apply(entry);
         builder.put(xKeyName, representation);
       }
     }
@@ -55,6 +47,9 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
 
   ImmutableListMultimap<String, Representation> representations();
 
+  public static Representation defaultRepresentation(KeysymEntry entry) {
+    return Representation.fromString(entry.asString());
+  }
   public static Representation defaultRepresentation(CanonicalKeysymEntry entry) {
     return Representation.fromString(defaultString(entry));
   }
