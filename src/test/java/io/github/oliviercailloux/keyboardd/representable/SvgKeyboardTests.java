@@ -20,9 +20,14 @@ import java.nio.file.Path;
 import javax.xml.transform.stream.StreamSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 public class SvgKeyboardTests {
+  @SuppressWarnings("unused")
+  private static final Logger LOGGER = LoggerFactory.getLogger(SvgKeyboardTests.class);
+
   private DomHelper domHelper;
 
   @BeforeEach
@@ -137,9 +142,13 @@ public class SvgKeyboardTests {
     CharSource kbMapSource = Resources
         .asCharSource(KeyboardMapTests.class.getResource("Two keys short"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = XkbSymbolsReader.read(kbMapSource);
-    Document svgR = svgK.withRepresentations(
-        XKeyNamesAndRepresenter.from(kbMap, XKeyNamesAndRepresenter::defaultRepresentation).representations()::get);
+
+    ImmutableListMultimap<String, Representation> representations = XKeyNamesAndRepresenter.from(kbMap, XKeyNamesAndRepresenter::defaultRepresentation).representations();
+    XKeyNamesRepresenter r = representations::get;
+    LOGGER.info("{}", representations.get("TAB"));
+    Document svgR = svgK.withRepresentations(r);
     String svg = domHelper.toString(svgR);
+    Files.writeString(Path.of("out.svg"), svg);
     assertEquals(expected, svg);
   }
 }
