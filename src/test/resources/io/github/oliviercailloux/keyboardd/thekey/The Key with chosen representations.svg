@@ -3,7 +3,7 @@
     <style>text {
 text-anchor: middle;
 dominant-baseline: middle;
-font-size: 25.0px;
+font-size: 25px;
 }</style>
     <style>rect {
 fill-opacity: 0;

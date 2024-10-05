@@ -3,7 +3,7 @@
     <style>text {
 text-anchor: middle;
 dominant-baseline: middle;
-font-size: 18.89763779527559px;
+font-size: 18.8976px;
 }</style>
     <style>rect {
 fill-opacity: 0;
@@ -20,7 +20,7 @@ stroke-width: 1px;
     </g>
     <rect height="75.5906" kdd:x-key-name="R2K1" rx="10" width="151.1811" x="0" y="113.3858"/>
     <g transform="translate(0, 113.3858)">
-        <text x="75.5906" y="37.7953">R2K1</text>
+        <text x="75.5905" y="37.7953">R2K1</text>
     </g>
     <rect height="75.5906" kdd:x-key-name="R2K2" rx="10" width="75.5906" x="188.9764" y="113.3858"/>
     <g transform="translate(188.9764, 113.3858)">

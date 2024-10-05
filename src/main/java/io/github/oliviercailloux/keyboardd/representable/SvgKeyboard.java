@@ -1,6 +1,5 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verify;
 
 import com.google.common.base.VerifyException;
@@ -20,7 +19,10 @@ import io.github.oliviercailloux.svgb.SvgDocumentHelper;
 import io.github.oliviercailloux.svgb.SvgHelper;
 import io.github.oliviercailloux.svgb.TextElement;
 import java.net.URI;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -33,6 +35,9 @@ import org.w3c.dom.Node;
 public class SvgKeyboard {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(SvgKeyboard.class);
+
+  private static DecimalFormat DECIMAL_FORMAT =
+      new DecimalFormat("0.####", new DecimalFormatSymbols(Locale.US));
 
   private static final XmlName SVG_RECT_NAME =
       XmlName.expandedName(SvgDocumentHelper.SVG_NS_URI, "rect");
@@ -95,14 +100,14 @@ public class SvgKeyboard {
       ImmutableSet.Builder<Point> builder = ImmutableSet.builder();
       for (int col = 0; col < nbCols - 1; ++col) {
         for (int line = nbLines - 1; line >= 0; --line) {
-          builder.add(new Point((col + additionalColFrac) * xStep,
-              (line + additionalColFrac) * yStep));
+          builder.add(
+              new Point((col + additionalColFrac) * xStep, (line + additionalColFrac) * yStep));
         }
       }
       int col = nbCols - 1;
       for (int line = nbLines - 1; line > nbLines - 1 - nbFullLines; --line) {
-        builder.add(new Point((col + additionalColFrac) * xStep,
-            (line + additionalColFrac) * yStep));
+        builder
+            .add(new Point((col + additionalColFrac) * xStep, (line + additionalColFrac) * yStep));
       }
       ImmutableSet<Point> offsets = builder.build();
       verify(offsets.size() == n);
@@ -222,7 +227,8 @@ public class SvgKeyboard {
       Point posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
       Point sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
-          h.rectangle(Zone.cornerMove(posScaled, Displacement.between(Point.zero(), sizeScaled))).setRounding(10d);
+          h.rectangle(Zone.cornerMove(posScaled, Displacement.between(Point.zero(), sizeScaled)))
+              .setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
         setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, xKeyName);
@@ -321,7 +327,7 @@ public class SvgKeyboard {
       String inner = """
           text-anchor: middle;
           dominant-baseline: middle;
-          font-size: %spx;""".formatted(effectiveFontSize);
+          font-size: %spx;""".formatted(DECIMAL_FORMAT.format(effectiveFontSize));
       appendStyle(TextElement.NODE_NAME, inner);
     }
 
