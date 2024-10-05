@@ -7,13 +7,13 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
+import io.github.oliviercailloux.geometry.Point;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMap;
 import io.github.oliviercailloux.keyboardd.mapping.KeyboardMapTests;
 import io.github.oliviercailloux.keyboardd.mapping.XkbSymbolsReader;
-import io.github.oliviercailloux.svgb.PositiveSize;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,7 +40,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
+        layout.toPhysicalKeyboard(Point.square(2d), Point.square(1d));
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     // Files.writeString(Path.of("out.svg"), svg);
@@ -57,7 +57,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(PositiveSize.square(2d), PositiveSize.square(1d));
+        layout.toPhysicalKeyboard(Point.square(2d), Point.square(1d));
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     assertEquals(expected, svg);
@@ -73,7 +73,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(PositiveSize.square(1d), PositiveSize.zero());
+        layout.toPhysicalKeyboard(Point.square(1d), Point.zero());
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     assertEquals(expected, svg);

@@ -15,12 +15,7 @@
     <dependency>
       <groupId>io.github.oliviercailloux</groupId>
       <artifactId>svgb</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.oliviercailloux</groupId>
-      <artifactId>jaris</artifactId>
-      <version>0.0.32-SNAPSHOT</version>
+      <version>0.0.4</version>
     </dependency>
     <dependency>
       <groupId>com.ibm.icu</groupId>

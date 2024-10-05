@@ -4,10 +4,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import io.github.oliviercailloux.geometry.Point;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKey;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
-import io.github.oliviercailloux.svgb.DoublePoint;
-import io.github.oliviercailloux.svgb.PositiveSize;
 import java.util.List;
 
 /**
@@ -51,19 +50,19 @@ public class JsonRectangularRowKeyboard {
    *        the vertical space between each row.
    * @return a (scaled) rectangular keyboard
    */
-  public RectangularKeyboard toPhysicalKeyboard(PositiveSize scale, PositiveSize spacing) {
-    DoublePoint currentCorner = DoublePoint.zero();
+  public RectangularKeyboard toPhysicalKeyboard(Point scale, Point spacing) {
+    Point currentCorner = Point.zero();
 
     final ImmutableSet.Builder<RectangularKey> keys = new ImmutableSet.Builder<>();
     for (ImmutableList<JsonRectangularRowKey> row : rows) {
       for (JsonRectangularRowKey sourceKey : row) {
         double targetWidth = sourceKey.width() * scale.x();
         RectangularKey targetKey = RectangularKey.from(currentCorner,
-            PositiveSize.given(targetWidth, scale.y()), sourceKey.xKeyName());
+        Point.given(targetWidth, scale.y()), sourceKey.xKeyName());
         keys.add(targetKey);
-        currentCorner = currentCorner.plus(PositiveSize.horizontal(targetWidth + spacing.x()));
+        currentCorner = currentCorner.plus(Point.horizontal(targetWidth + spacing.x()));
       }
-      currentCorner = DoublePoint.given(0d, currentCorner.y() + scale.y() + spacing.y());
+      currentCorner = Point.given(0d, currentCorner.y() + scale.y() + spacing.y());
     }
 
     return RectangularKeyboard.from(keys.build());

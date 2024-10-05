@@ -8,10 +8,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
+import io.github.oliviercailloux.geometry.Displacement;
+import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Zone;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
-import io.github.oliviercailloux.svgb.DoublePoint;
-import io.github.oliviercailloux.svgb.PositiveSize;
 import io.github.oliviercailloux.svgb.RectangleElement;
 import io.github.oliviercailloux.svgb.StyleElement;
 import io.github.oliviercailloux.svgb.SvgDocumentHelper;
@@ -96,40 +97,40 @@ public class SvgKeyboard {
       return new LineColDivision(n, x, y);
     }
 
-    public ImmutableSet<PositiveSize> offsetsToCorners(PositiveSize size) {
+    public ImmutableSet<Point> offsetsToCorners(Point size) {
       return offsets(size, 0d);
     }
 
-    public ImmutableSet<PositiveSize> offsetsToMiddle(PositiveSize size) {
+    public ImmutableSet<Point> offsetsToMiddle(Point size) {
       return offsets(size, 0.5d);
     }
 
-    private ImmutableSet<PositiveSize> offsets(PositiveSize size, double additionalColFrac) {
+    private ImmutableSet<Point> offsets(Point size, double additionalColFrac) {
       int nbShorterLines = nbCols * nbLines - n;
       int nbFullLines = nbLines - nbShorterLines;
       double xStep = size.x() / nbCols;
       double yStep = size.y() / nbLines;
-      ImmutableSet.Builder<PositiveSize> builder = ImmutableSet.builder();
+      ImmutableSet.Builder<Point> builder = ImmutableSet.builder();
       for (int col = 0; col < nbCols - 1; ++col) {
         for (int line = nbLines - 1; line >= 0; --line) {
-          builder.add(new PositiveSize((col + additionalColFrac) * xStep,
+          builder.add(new Point((col + additionalColFrac) * xStep,
               (line + additionalColFrac) * yStep));
         }
       }
       int col = nbCols - 1;
       for (int line = nbLines - 1; line > nbLines - 1 - nbFullLines; --line) {
-        builder.add(new PositiveSize((col + additionalColFrac) * xStep,
+        builder.add(new Point((col + additionalColFrac) * xStep,
             (line + additionalColFrac) * yStep));
       }
-      ImmutableSet<PositiveSize> offsets = builder.build();
+      ImmutableSet<Point> offsets = builder.build();
       verify(offsets.size() == n);
       return offsets;
     }
   }
 
-  private static record RepresentableSubZone (PositiveSize absoluteOffset, Representation repr,
+  private static record RepresentableSubZone (Point absoluteOffset, Representation repr,
       RepresentableZone parent) {
-    public PositiveSize size() {
+    public Point size() {
       return parent.subSize();
     }
 
@@ -141,47 +142,47 @@ public class SvgKeyboard {
       return size().x() / repr.string().codePoints().count();
     }
 
-    public PositiveSize absoluteOffsetToMiddle() {
+    public Point absoluteOffsetToMiddle() {
       return absoluteOffset.plus(size().mult(0.5d));
     }
   }
 
   private static record RepresentableZone (RectangleElement zone,
       ImmutableList<Representation> reprs) {
-    public DoublePoint zoneStart() {
+    public Point zoneStart() {
       return zone.getStart();
     }
 
-    public PositiveSize zoneSize() {
+    public Point zoneSize() {
       return zone.getSize();
     }
 
-    public PositiveSize startOffset() {
-      return PositiveSize.between(DoublePoint.zero(), zoneStart());
+    public Point startOffset() {
+      return zoneStart();
     }
 
     public LineColDivision div() {
       return LineColDivision.forNb(reprs.size());
     }
 
-    public PositiveSize subSize() {
-      return PositiveSize.given(zoneSize().x() / div().nbCols, zoneSize().y() / div().nbLines);
+    public Point subSize() {
+      return Point.given(zoneSize().x() / div().nbCols, zoneSize().y() / div().nbLines);
     }
 
-    public ImmutableSet<PositiveSize> relativeOffsets() {
+    public ImmutableSet<Point> relativeOffsets() {
       return div().offsetsToCorners(zoneSize());
     }
 
-    public ImmutableSet<PositiveSize> absoluteOffsets() {
+    public ImmutableSet<Point> absoluteOffsets() {
       return relativeOffsets().stream().map(offset -> startOffset().plus(offset))
           .collect(ImmutableSet.toImmutableSet());
     }
 
     public ImmutableSet<RepresentableSubZone> subZones() {
-      ImmutableSet<PositiveSize> offsets = absoluteOffsets();
+      ImmutableSet<Point> offsets = absoluteOffsets();
       UnmodifiableIterator<Representation> rIt = reprs.iterator();
       final ImmutableSet.Builder<RepresentableSubZone> subs = new ImmutableSet.Builder<>();
-      for (PositiveSize offset : offsets) {
+      for (Point offset : offsets) {
         Representation r = rIt.next();
         subs.add(new RepresentableSubZone(offset, r, this));
       }
@@ -198,22 +199,23 @@ public class SvgKeyboard {
   private static Element toSvg(SvgDocumentHelper h, RepresentableSubZone subZone) {
     final Representation r = subZone.repr;
     if (r.isString()) {
-      PositiveSize halfSize = subZone.size().mult(0.5d);
-      return h.text().setBaselineStart(DoublePoint.given(halfSize.x(), halfSize.y()))
+      Point halfSize = subZone.size().mult(0.5d);
+      return h.text().setBaselineStart(Point.given(halfSize.x(), halfSize.y()))
           .setContent(r.string()).getElement();
     }
     Element svgRepr = (Element) h.document().importNode(r.svg().getDocumentElement(), true);
-    if (size(svgRepr).isEmpty()) {
+    Optional<Point> sizeOpt = SvgHelper.tryGetSize(svgRepr);
+    if (sizeOpt.isEmpty()) {
       SvgHelper.setSize(svgRepr, subZone.size());
     } else {
-      PositiveSize size = size(svgRepr).orElseThrow(VerifyException::new);
+      Point size = sizeOpt.orElseThrow(VerifyException::new);
       if (size.x() > subZone.size().x() || size.y() > subZone.size().y()) {
         SvgHelper.setSize(svgRepr, subZone.size());
       } else {
-        PositiveSize gap = subZone.size().plus(size.opposite());
-        PositiveSize halfGap = gap.mult(0.5d);
-        DoublePoint start = DoublePoint.zero().plus(halfGap);
-        setXY(svgRepr, start);
+        Point gap = subZone.size().plus(size.opposite());
+        Point halfGap = gap.mult(0.5d);
+        Point start = Point.zero().plus(halfGap);
+        SvgHelper.setPosition(svgRepr, start);
       }
     }
     return svgRepr;
@@ -233,12 +235,12 @@ public class SvgKeyboard {
     double dotsPerCm = dpi / 2.54d;
     h.setSize(physicalKeyboard.size().mult(dotsPerCm));
 
-    DoublePoint start = DoublePoint.zero();
+    Point start = Point.zero();
     for (RectangularKey key : physicalKeyboard.keys()) {
-      DoublePoint posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
-      PositiveSize sizeScaled = key.size().mult(dotsPerCm);
+      Point posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
+      Point sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
-          h.rectangle().setRounding(10d).setStart(posScaled).setSize(sizeScaled);
+          h.rectangle(Zone.cornerMove(posScaled, Displacement.between(Point.zero(), sizeScaled))).setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
         setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, xKeyName);
@@ -286,7 +288,7 @@ public class SvgKeyboard {
       if (!hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
         continue;
       }
-      String xKeyName = getAttribute(rect, KEYBOARDD_X_KEY_NAME);
+      String xKeyName = DomHelper.getAttribute(rect, KEYBOARDD_X_KEY_NAME);
       reprsBuilder.put(RectangleElement.using(rect), xKeyName);
     }
     return reprsBuilder.build();

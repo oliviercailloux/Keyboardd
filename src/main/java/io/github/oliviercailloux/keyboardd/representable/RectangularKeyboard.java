@@ -5,8 +5,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
-import io.github.oliviercailloux.svgb.DoublePoint;
-import io.github.oliviercailloux.svgb.PositiveSize;
+import io.github.oliviercailloux.geometry.Point;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,11 +41,11 @@ public class RectangularKeyboard {
 
   private RectangularKeyboard(Set<RectangularKey> physicalKeys) {
     this.keys = ImmutableSet.copyOf(physicalKeys);
-    ImmutableMultiset<DoublePoint> corners = physicalKeys.stream().map(k -> k.topLeftCorner())
+    ImmutableMultiset<Point> corners = physicalKeys.stream().map(k -> k.topLeftCorner())
         .collect(ImmutableMultiset.toImmutableMultiset());
     checkArgument(corners.size() == corners.entrySet().size(), corners);
     if (!physicalKeys.isEmpty()) {
-      checkArgument(corners.stream().anyMatch(c -> c.equals(DoublePoint.zero())));
+      checkArgument(corners.stream().anyMatch(c -> c.equals(Point.zero())));
     }
   }
 
@@ -60,12 +59,12 @@ public class RectangularKeyboard {
     return keys;
   }
 
-  public PositiveSize size() {
-    ImmutableSet<DoublePoint> bottomRights = keys.stream()
+  public Point size() {
+    ImmutableSet<Point> bottomRights = keys.stream()
         .map(k -> k.topLeftCorner().plus(k.size())).collect(ImmutableSet.toImmutableSet());
     double rightest = bottomRights.stream().mapToDouble(p -> p.x()).max().orElse(0d);
     double bottomest = bottomRights.stream().mapToDouble(p -> p.y()).max().orElse(0d);
-    return PositiveSize.given(rightest, bottomest);
+    return Point.given(rightest, bottomest);
   }
 
   @Override
