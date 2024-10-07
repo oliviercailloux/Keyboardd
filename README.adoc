@@ -44,7 +44,7 @@ The terms are defined https://github.com/oliviercailloux/XKB-doc/blob/main/READM
 image::XKeys.svg[XKeys, opts=inline]
 
 * `Mnemonics`: a set of keysym mnemonics, together with information per mnemonic (the keysym code it maps to, whether it is an alias, whether it is deprecated, which UCP corresponds to it if any, …); can be obtained from a standard (embedded) `xkbcommon-keysyms.h` file; can be used to obtain a `UcpByCode`.
-* `KeyboardMap`: can be obtained using `SimpleSymbolsReader`; x key names to keysym entries.
+* `KeyboardMap`: x key names to keysym entries; typically defined in a set of local “symbol” configuration files; can be obtained using `SimpleSymbolsReader`.
 
 .Mapping
 [[Mapping]]
@@ -56,15 +56,10 @@ image::Mnemonics.svg[Mnemonics, opts=inline]
 
 * `RectangularKeyboard`: can be parsed from json using `JsonRectangularKeyboardReader`
 * `Representation`: a String or an SVG icon
-* `VisibleKeyboardMap`: combines a keyboard map and a mapping from keysym entry to representation, x key names to representations
-* `SvgKeyboard`: read from and produce https://github.com/oliviercailloux/SVG-keyboard[svg keyboard files]; a rectangular svg keyboard (simple physical keyboard) can be produced by combining a `RectangularKeyboard` and a `VisibleKeyboardMap`; a more complex svg (hence physical) keyboard can be produced by combining an SVG keyboard and a `VisibleKeyboardMap`.
+* `XKeyNamesRepresenter`: x key names to representations; may be obtained by combining a `KeyboardMap` and a mapping from keysym entry to representation (TODO)
+* `SvgKeyboard`: read from and produce https://github.com/oliviercailloux/SVG-keyboard[svg keyboard files]; can be obtained from a `RectangularKeyboard` together with an `XKeyNamesRepresenter` (yields a rectangular keyboard with labels) or from another `SvgKeyboard` together with an `XKeyNamesRepresenter` (yields a more complex SVG keyboard).
 
-* _UCP by keysym code_: maps keysym codes to their corresponding UCP (for those codes which have one)
-* _Keyboard map_: a subset of X key names, each mapped to a list of keysym entries (where a keysym entry is either a keysym mnemonic, a UCP or a keysym code, see above); typically defined in a set of local “symbol” configuration files
-* _Visible keyboard map_: a subset of X key names, each mapped to a list of representations
-* _Physical keyboard_: a set of physical keys; each with a position, a possibly complex shape, and a name, either an X key name that corresponds to the X keycode that the key sends when pressed, or just a name that describes the key in case the key does not send an X keycode (such as, generally, the “Fn” key)
-* _Rectangular keyboard_: a physical keyboard whose keys all have a rectangular shape and are aligned on rows that all have the same height (thus, all keys have the same height)
-* _Functional keyboard_: a physical keyboard that also associates each key with a (possibly empty) list of representations
+* _UCP by keysym code_: maps keysym codes to their corresponding UCP (for those codes which have one), TODO remove?
 
 .Representable
 [[Representable]]
