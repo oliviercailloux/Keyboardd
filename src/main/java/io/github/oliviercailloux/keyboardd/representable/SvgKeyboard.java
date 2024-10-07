@@ -122,22 +122,17 @@ public class SvgKeyboard {
         Point currentStart = currentStartOfLine;
         for (int col = 0; col < nbCols(line); ++col) {
           builder.add(Zone.cornerMove(currentStart, subDisplacement));
-          currentStart = currentStart.plus(Displacement.horizontal(subDisplacement.x()));
+          currentStart = currentStart.plus(subDisplacement.horizontal());
         }
-        currentStartOfLine = currentStartOfLine.plus(Displacement.vertical(subDisplacement.y()));
+        currentStartOfLine = currentStartOfLine.plus(subDisplacement.vertical());
       }
       ImmutableSortedSet<Zone> subs = builder.build();
       verify(subs.size() == n);
       return subs;
     }
 
-    @SuppressWarnings("unused")
-    public Point subSize(Zone entireZone) {
-      return Point.given(entireZone.size().x() / nbCols, entireZone.size().y() / nbLines());
-    }
-
     public Displacement subDisplacement(Zone entireZone) {
-      return Displacement.given(entireZone.size().x() / nbCols, entireZone.size().y() / nbLines());
+      return entireZone.across().mult(1d / nbCols, 1d / nbLines());
     }
   }
 
@@ -159,7 +154,7 @@ public class SvgKeyboard {
     }
 
     private Element toStringSvg(SvgDocumentHelper h) {
-      return h.text().setBaselineStart(subZone.center()).setContent(repr.string()).getElement();
+      return h.text().setBaselineStart(subZone.center()).setContent(repr.string()).element();
     }
 
     private Element toReprSvg(SvgDocumentHelper h) {
@@ -236,9 +231,9 @@ public class SvgKeyboard {
               .setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
-        setAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME, xKeyName);
+        setAttribute(rect.element(), KEYBOARDD_X_KEY_NAME, xKeyName);
       }
-      doc.getDocumentElement().appendChild(rect.getElement());
+      doc.getDocumentElement().appendChild(rect.element());
     }
 
     // return new SvgKeyboard(doc).withRepresentations(k ->
@@ -271,7 +266,7 @@ public class SvgKeyboard {
   private void appendStyle(String element, String inner) {
     String content = element + " {\n" + inner + "\n}";
     StyleElement style = h.style().setContent(content);
-    h.document().getDocumentElement().insertBefore(style.getElement(),
+    h.document().getDocumentElement().insertBefore(style.element(),
         h.document().getDocumentElement().getFirstChild());
   }
 
@@ -335,8 +330,8 @@ public class SvgKeyboard {
     for (RepresentableZone zone : zones) {
       Displacement shift = Displacement.between(Point.origin(), zone.rectangle().zone().start());
       Element g = h.g().translate(shift).getElement();
-      Node next = zone.rectangle.getElement().getNextSibling();
-      zone.rectangle.getElement().getParentNode().insertBefore(g, next);
+      Node next = zone.rectangle.element().getNextSibling();
+      zone.rectangle.element().getParentNode().insertBefore(g, next);
       for (RepresentableSubZone r : zone.subRepresentables(shift.opposite())) {
         Element svgRepr = r.toSvg(h);
         g.appendChild(svgRepr);
@@ -348,7 +343,7 @@ public class SvgKeyboard {
   private ImmutableSet<RepresentableZone> getZones(XKeyNamesRepresenter representationsByXKeyName) {
     ImmutableSet<RepresentableZone> zones =
         keyBindingZonesByXKeyName().values().stream().map(rect -> {
-          String xKeyName = DomHelper.getAttribute(rect.getElement(), KEYBOARDD_X_KEY_NAME);
+          String xKeyName = DomHelper.getAttribute(rect.element(), KEYBOARDD_X_KEY_NAME);
           List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
           return new RepresentableZone(rect, ImmutableList.copyOf(reprs));
         }).collect(ImmutableSet.toImmutableSet());
