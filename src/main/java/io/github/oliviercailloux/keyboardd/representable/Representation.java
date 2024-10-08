@@ -56,7 +56,7 @@ public class Representation {
       return false;
     }
     final Representation t2 = (Representation) o2;
-    return string.equals(t2.string) && svg.isEqualNode(t2.svg);
+    return Objects.equals(string, t2.string) && ((svg == null && t2.svg == null) || svg.isEqualNode(t2.svg));
   }
   
   @Override
