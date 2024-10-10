@@ -6,14 +6,17 @@ import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
+import io.github.oliviercailloux.jaris.exceptions.CheckedStream;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,7 @@ public class XkbSymbolsReader {
 
   private static final Pattern P_COMMENT = Pattern.compile("^( *//.*)| *$");
   private static final Pattern P_OTHER = Pattern
-      .compile("^(default )?(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|"
+      .compile("^(default .*)|^(hidden .*)|(partial.*)|(xkb_symbols .*)|( *key.type.*)|( *name.*)|( *include .+)|"
           + "( *modifier_map.*)|(\\};)$");
   private static final Pattern P_KEY = Pattern.compile(
       "^ *key[ \\t]+<(?<name>.+)>" + "[ \\t]*\\{[ \\t]*\\[[ \\t]*" + "(?<entries>.*[^ \\t])"
@@ -40,11 +43,14 @@ public class XkbSymbolsReader {
   /**
    * From
    * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/aa709f2f45e7b6164dd583389489043cf92c5b1c/symbols/pc
+   * and related files.
    */
-  static CharSource commonSource() {
-    CharSource source = Resources.asCharSource(XkbSymbolsReader.class.getResource("pc - aa709f"),
-        StandardCharsets.UTF_8);
-    return source;
+  static CheckedStream<CharSource, IOException> commonSources() {
+    Stream<CharSource> sources =
+        ImmutableSet.of("pc - aa709f", "srvr_ctrl - fd388426", "keypad - a1813cc5").stream()
+            .map(XkbSymbolsReader.class::getResource)
+            .map(u -> Resources.asCharSource(u, StandardCharsets.UTF_8));
+    return CheckedStream.wrapping(sources);
   }
 
   /**
@@ -58,12 +64,20 @@ public class XkbSymbolsReader {
   }
 
   public static KeyboardMap common() {
-    CharSource source = commonSource();
+    ImmutableSet<KeyboardMap> kbds;
     try {
-      return read(source);
+      kbds = commonSources().map(XkbSymbolsReader::read).collect(ImmutableSet.toImmutableSet());
     } catch (IOException e) {
       throw new VerifyException(e);
     }
+    UnmodifiableIterator<KeyboardMap> i = kbds.iterator();
+    verify(i.hasNext());
+    KeyboardMap kbd = i.next();
+    while (i.hasNext()) {
+      KeyboardMap other = i.next();
+      kbd = kbd.overwrite(other);
+    }
+    return kbd;
   }
 
   public static KeyboardMap us() {
