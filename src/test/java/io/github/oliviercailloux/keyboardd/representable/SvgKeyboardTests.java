@@ -73,8 +73,8 @@ public class SvgKeyboardTests {
     CharSource source = Resources.asCharSource(
         JsonRectangularKeyboardReader.class.getResource("Keyboard layout missing names.json"),
         StandardCharsets.UTF_8);
-    String expected = Files
-        .readString(Path.of(SvgKeyboardTests.class.getResource("Keyboard missing names.svg").toURI()));
+    String expected = Files.readString(
+        Path.of(SvgKeyboardTests.class.getResource("Keyboard missing names.svg").toURI()));
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
@@ -143,7 +143,8 @@ public class SvgKeyboardTests {
         .asCharSource(KeyboardMapTests.class.getResource("Two keys short"), StandardCharsets.UTF_8);
     KeyboardMap kbMap = XkbSymbolsReader.read(kbMapSource);
 
-    ImmutableListMultimap<String, Representation> representations = XKeyNamesAndRepresenter.from(kbMap, XKeyNamesAndRepresenter::defaultRepresentation).representations();
+    ImmutableListMultimap<String, Representation> representations = XKeyNamesAndRepresenter
+        .from(kbMap, XKeyNamesAndRepresenter::defaultRepresentation).representations();
     XKeyNamesRepresenter r = representations::get;
     LOGGER.info("{}", representations.get("TAB"));
     Document svgR = svgK.withRepresentations(r);

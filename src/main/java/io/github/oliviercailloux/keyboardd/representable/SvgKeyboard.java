@@ -116,8 +116,9 @@ public class SvgKeyboard {
     private ImmutableSortedSet<Zone> subZones(Zone entireZone) {
       Displacement subDisplacement = subDisplacement(entireZone);
       Point currentStartOfLine = entireZone.start();
-      ImmutableSortedSet.Builder<Zone> builder = ImmutableSortedSet.orderedBy(Comparator
-          .comparing(Zone::start, Comparator.comparing(Point::x).thenComparing(Comparator.comparing(Point::y).reversed())));
+      ImmutableSortedSet.Builder<Zone> builder = ImmutableSortedSet.orderedBy(Comparator.comparing(
+          Zone::start,
+          Comparator.comparing(Point::x).thenComparing(Comparator.comparing(Point::y).reversed())));
       for (int line = 0; line < nbLines(); ++line) {
         Point currentStart = currentStartOfLine;
         for (int col = 0; col < nbCols(line); ++col) {

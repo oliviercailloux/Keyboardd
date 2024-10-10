@@ -56,16 +56,18 @@ public class Representation {
       return false;
     }
     final Representation t2 = (Representation) o2;
-    return Objects.equals(string, t2.string) && ((svg == null && t2.svg == null) || svg.isEqualNode(t2.svg));
+    return Objects.equals(string, t2.string)
+        && ((svg == null && t2.svg == null) || svg.isEqualNode(t2.svg));
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hash(string, svg);
   }
-  
+
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("string", string).add("doc", svg == null ? "null" : DomHelper.toDebugString(svg)).toString();
+    return MoreObjects.toStringHelper(this).add("string", string)
+        .add("doc", svg == null ? "null" : DomHelper.toDebugString(svg)).toString();
   }
 }

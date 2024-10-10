@@ -37,15 +37,17 @@ public class XkbKeymapDecomposerTests {
 
   @Test
   void testDecomposeFr() throws Exception {
-    CharSource source = Resources.asCharSource(KeyboardMapTests.class.getResource("fr"),
-        StandardCharsets.UTF_8);
+    CharSource source =
+        Resources.asCharSource(KeyboardMapTests.class.getResource("fr"), StandardCharsets.UTF_8);
     ImmutableMap<String, String> bySymbolsMap = XkbKeymapDecomposer.bySymbolsMap(source);
     assertTrue(bySymbolsMap.keySet().contains("basic"), bySymbolsMap.keySet().toString());
     assertTrue(bySymbolsMap.keySet().contains("olpc"));
     assertTrue(bySymbolsMap.keySet().contains("nodeadkeys"));
     assertTrue(bySymbolsMap.keySet().contains("oss"));
-    assertTrue(bySymbolsMap.get("basic").contains("key <AE01>\t{ [ ampersand,          1,  onesuperior,   exclamdown ]\t};"));
-    assertTrue(bySymbolsMap.get("oss")
-        .contains("key <AE05>\t{ [        parenleft,                5,          bracketleft,             0x1002013 ] };"));
+    assertTrue(bySymbolsMap.get("basic")
+        .contains("key <AE01>\t{ [ ampersand,          1,  onesuperior,   exclamdown ]\t};"));
+    assertTrue(
+        bySymbolsMap.get("oss").contains("key <AE05>\t{ [        parenleft,                5,"
+            + "          bracketleft,             0x1002013 ] };"));
   }
 }

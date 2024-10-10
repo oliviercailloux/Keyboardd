@@ -14,9 +14,10 @@ public class XkbKeymapDecomposer {
 
   private static final String INTRO = "^xkb_symbols \"(?<name>[^\"]++)\" \\{";
   private static final String SKIP = "[\\n\\r]*+";
-  private static final String INSIDE_BRACKETS = "([^\\{\\}]*+\\{[^\\}]*+\\}([^/\\n]*//[^\\n]*$)?)*+";
+  private static final String INSIDE_BRACKETS =
+      "([^\\{\\}]*+\\{[^\\}]*+\\}([^/\\n]*//[^\\n]*$)?)*+";
   private static final Pattern SYMBOLS = Pattern.compile(
-      INTRO + SKIP + "(?<contents>" + INSIDE_BRACKETS + "[^\\{\\}]++)"+SKIP+"\\};$",
+      INTRO + SKIP + "(?<contents>" + INSIDE_BRACKETS + "[^\\{\\}]++)" + SKIP + "\\};$",
       Pattern.MULTILINE | Pattern.DOTALL);
 
   public static ImmutableMap<String, String> bySymbolsMap(CharSource source) throws IOException {

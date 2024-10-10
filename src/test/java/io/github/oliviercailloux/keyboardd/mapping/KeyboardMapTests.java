@@ -34,8 +34,8 @@ public class KeyboardMapTests {
 
   @Test
   void testReadPart() throws Exception {
-    CharSource source =
-        Resources.asCharSource(KeyboardMapTests.class.getResource("fr mine"), StandardCharsets.UTF_8);
+    CharSource source = Resources.asCharSource(KeyboardMapTests.class.getResource("fr mine"),
+        StandardCharsets.UTF_8);
     ImmutableList<String> lines = source.readLines();
     CharSource sourceReduced =
         CharSource.wrap(lines.subList(0, 23).stream().collect(Collectors.joining("\n")));
@@ -76,8 +76,8 @@ public class KeyboardMapTests {
 
   @Test
   void testRead() throws Exception {
-    CharSource source =
-        Resources.asCharSource(KeyboardMapTests.class.getResource("fr mine"), StandardCharsets.UTF_8);
+    CharSource source = Resources.asCharSource(KeyboardMapTests.class.getResource("fr mine"),
+        StandardCharsets.UTF_8);
     KeyboardMap kbMap = XkbSymbolsReader.read(source);
 
     int alphaUcp = Integer.parseInt(ALPHA_UCP_HEX, 16);

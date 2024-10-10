@@ -25,8 +25,8 @@ public class TheKeyMapTests {
 
   @Test
   public void writeMappedDefault() throws IOException {
-    Document inputDocument =
-        DomHelper.domHelper().asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
+    Document inputDocument = DomHelper.domHelper()
+        .asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
 
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
@@ -45,8 +45,8 @@ public class TheKeyMapTests {
 
   @Test
   public void writeMappedTweaked() throws IOException {
-    Document inputDocument =
-        DomHelper.domHelper().asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
+    Document inputDocument = DomHelper.domHelper()
+        .asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
 
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
@@ -64,8 +64,8 @@ public class TheKeyMapTests {
 
   @Test
   public void writeMappedTweakedBigger() throws IOException {
-    Document inputDocument =
-        DomHelper.domHelper().asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
+    Document inputDocument = DomHelper.domHelper()
+        .asDocument(Resources.asByteSource(Resources.getResource(getClass(), "The Key.svg")));
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
 
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());

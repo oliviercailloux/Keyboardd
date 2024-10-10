@@ -50,6 +50,7 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
   public static Representation defaultRepresentation(KeysymEntry entry) {
     return Representation.fromString(entry.asString());
   }
+
   public static Representation defaultRepresentation(CanonicalKeysymEntry entry) {
     return Representation.fromString(defaultString(entry));
   }

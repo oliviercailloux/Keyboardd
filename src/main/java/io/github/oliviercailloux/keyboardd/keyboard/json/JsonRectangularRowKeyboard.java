@@ -58,7 +58,7 @@ public class JsonRectangularRowKeyboard {
       for (JsonRectangularRowKey sourceKey : row) {
         double targetWidth = sourceKey.width() * scale.x();
         RectangularKey targetKey = RectangularKey.from(currentCorner,
-        Point.given(targetWidth, scale.y()), sourceKey.xKeyName());
+            Point.given(targetWidth, scale.y()), sourceKey.xKeyName());
         keys.add(targetKey);
         currentCorner = currentCorner.plus(Point.horizontal(targetWidth + spacing.x()));
       }
