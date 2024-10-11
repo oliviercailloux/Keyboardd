@@ -27,7 +27,6 @@ public class XkbKeymapDecomposer {
     while (matcher.find()) {
       String name = matcher.group("name");
       String symbols = matcher.group("contents");
-      LOGGER.info("Found name: ‘{}’, symbols ‘{}’…", name, symbols.substring(0, 50));
       builder.put(name, symbols);
     }
     return builder.build();

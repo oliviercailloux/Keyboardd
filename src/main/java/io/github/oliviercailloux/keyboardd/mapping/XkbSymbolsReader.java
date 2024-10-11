@@ -47,6 +47,18 @@ public class XkbSymbolsReader {
     return source;
   }
 
+  static CharSource embeddedSource(String name) {
+    CharSource source =
+        Resources.asCharSource(XkbSymbolsReader.class.getResource(name), StandardCharsets.UTF_8);
+    return source;
+  }
+
+  static KeyboardMap embeddedMap(String name, String key) throws IOException {
+    CharSource source = embeddedSource(name);
+    String symbols = XkbKeymapDecomposer.bySymbolsMap(source).get(key);
+    return read(CharSource.wrap(symbols));
+  }
+
   /**
    * From
    * https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config/-/blob/f7eb40592a5c4a24d6313ec94153d7e15567eeb3/symbols/us
@@ -58,12 +70,23 @@ public class XkbSymbolsReader {
   }
 
   public static KeyboardMap common() {
-    CharSource source = commonSource();
+    KeyboardMap first;
+    ImmutableSet<KeyboardMap> maps;
     try {
-      return read(source);
+      first = read(commonSource());
+      final ImmutableSet.Builder<KeyboardMap> mapsBuilder = new ImmutableSet.Builder<>();
+      mapsBuilder.add(embeddedMap("srvr_ctrl - fd388426", "fkey2vt"));
+      mapsBuilder.add(embeddedMap("keypad - a1813cc5", "x11"));
+      mapsBuilder.add(embeddedMap("keypad - a1813cc5", "ossmath"));
+      maps = mapsBuilder.build();
     } catch (IOException e) {
       throw new VerifyException(e);
     }
+    KeyboardMap total = first;
+    for (KeyboardMap map : maps) {
+      total = total.overwrite(map);
+    }
+    return total;
   }
 
   public static KeyboardMap us() {

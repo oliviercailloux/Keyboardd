@@ -174,7 +174,7 @@ public class Mnemonics {
   }
 
   public CanonicalMnemonic canonical(String keysymMnemonic) {
-    checkArgument(byMnemonic.containsKey(keysymMnemonic));
+    checkArgument(byMnemonic.containsKey(keysymMnemonic), "Unknown mnemonic: %s.", keysymMnemonic);
     return byMnemonic.get(keysymMnemonic);
   }
 

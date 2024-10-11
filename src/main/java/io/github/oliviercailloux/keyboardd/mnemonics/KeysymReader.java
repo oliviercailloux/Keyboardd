@@ -91,24 +91,24 @@ class KeysymReader {
   }
 
   private static final Pattern P_XKB_NO_COMMENT =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)$");
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)$");
   private static final Pattern P_XKB_UNICODE_MORE_SPECIFIC =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\*<U\\+(?<unicodeSpecific>[0-9a-fA-F]+) [^\\*]*>\\*/$");
   private static final Pattern P_XKB_UNICODE_DEPRECATED =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\*\\(U\\+(?<unicodeDeprecated>[0-9a-fA-F]+) [^\\*]*\\)\\*/$");
   private static final Pattern P_XKB_COMMENT =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +"
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +"
           + "/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
   private static final Pattern P_XKB_COMMENT_ALIAS =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\* ([aA]lias for |[sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
   private static final Pattern P_XKB_COMMENT_UNICODE =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
   private static final Pattern P_XKB_COMMENT_DEPRECATED =
-      Pattern.compile("^#define XKB_KEY_(?<name>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\* deprecated((, )| )?(?<commentRemaining>[^\\*]*) \\*/$");
   private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
       P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
@@ -155,7 +155,24 @@ class KeysymReader {
 
   private static ParsedMnemonic parseLine(Matcher matcherStart) {
     ParsedMnemonic parsed;
-    String name = matcherStart.group("name");
+    String rawName = matcherStart.group("rawName");
+    String name;
+    /*
+     * Need to change XF86Switch_… to XF86_Switch_… and other similar XF86 names, but not
+     * XF86Display or some other XF86 names. No idea why. Reached there by trial and error.
+     */
+    if (rawName.startsWith("XF86Switch") || rawName.startsWith("XF86Ungrab")
+        || rawName.startsWith("XF86ClearGrab") || rawName.startsWith("XF86Prev_VMode")
+        || rawName.startsWith("XF86Next_VMode")) {
+      name = "XF86_" + rawName.substring("XF86".length());
+    } else {
+      name = rawName;
+    }
+    // if(rawName.startsWith("XF86") && !rawName.equals("XF86Display")) {
+    // name = "XF86_" + rawName.substring("XF86".length());
+    // } else {
+    // name = rawName;
+    // }
     String codeStr = matcherStart.group("code");
     int code = Integer.parseInt(codeStr, 16);
     if (matcherStart.pattern().equals(P_XKB_NO_COMMENT)) {

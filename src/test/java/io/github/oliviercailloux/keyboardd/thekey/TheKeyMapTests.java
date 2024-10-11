@@ -30,8 +30,10 @@ public class TheKeyMapTests {
     SvgKeyboard inputSvg = SvgKeyboard.using(inputDocument);
 
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
+    KeyboardMap canonicalized = map.canonicalize(Xkeys.latest().canonicalByAlias());
+    Mnemonics mns = Mnemonics.latest();
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
-        .canonicalize(map.canonicalize(Xkeys.latest().canonicalByAlias()), Mnemonics.latest());
+        .canonicalize(canonicalized, mns);
     XKeyNamesAndRepresenter representer =
         XKeyNamesAndRepresenter.from(canonMap, XKeyNamesAndRepresenter::defaultRepresentation);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
