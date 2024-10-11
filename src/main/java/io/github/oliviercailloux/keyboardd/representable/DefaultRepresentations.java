@@ -198,7 +198,7 @@ class DefaultRepresentations {
   public static Representation represent(KeysymEntry e) {
     if (e instanceof Mnemonic m) {
       String mnemonic = m.keysymMnemonic();
-      if(MN_TO_STR.containsKey(mnemonic)) {
+      if (MN_TO_STR.containsKey(mnemonic)) {
         return Representation.fromString(MN_TO_STR.get(mnemonic));
       }
       return Representation.fromString(mnemonic);
@@ -217,7 +217,7 @@ class DefaultRepresentations {
   public static Representation represent(CanonicalKeysymEntry e) {
     if (e instanceof CanonicalMnemonic c) {
       String mnemonic = c.mnemonic();
-      if(MN_TO_STR.containsKey(mnemonic)) {
+      if (MN_TO_STR.containsKey(mnemonic)) {
         return Representation.fromString(MN_TO_STR.get(mnemonic));
       }
       String defaultString;
