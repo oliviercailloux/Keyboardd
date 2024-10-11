@@ -48,27 +48,10 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
   ImmutableListMultimap<String, Representation> representations();
 
   public static Representation defaultRepresentation(KeysymEntry entry) {
-    return Representation.fromString(entry.asString());
+    return DefaultRepresentations.represent(entry);
   }
 
   public static Representation defaultRepresentation(CanonicalKeysymEntry entry) {
-    return Representation.fromString(defaultString(entry));
-  }
-
-  private static String defaultString(CanonicalKeysymEntry entry) {
-    final String str;
-    if (entry instanceof CanonicalMnemonic mnemonic) {
-      Optional<Integer> ucp = mnemonic.ucp();
-      if (ucp.isPresent()) {
-        str = new KeysymEntry.Ucp(ucp.orElseThrow()).asString();
-      } else {
-        str = mnemonic.mnemonic();
-      }
-    } else {
-      verify(entry instanceof ImplicitUcp);
-      ImplicitUcp implicitUcp = (ImplicitUcp) entry;
-      str = implicitUcp.asString();
-    }
-    return str;
+    return DefaultRepresentations.represent(entry);
   }
 }
