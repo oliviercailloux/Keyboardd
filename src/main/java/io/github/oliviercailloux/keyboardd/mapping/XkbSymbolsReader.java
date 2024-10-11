@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
+import com.google.common.primitives.Chars;
 import io.github.oliviercailloux.keyboardd.utils.ParseUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +72,7 @@ public class XkbSymbolsReader {
     try {
       first = read(commonSource());
       final ImmutableSet.Builder<KeyboardMap> mapsBuilder = new ImmutableSet.Builder<>();
-      mapsBuilder.add(embeddedMap("srvr_ctrl - fd388426", "no_srvr_keys"));
+      mapsBuilder.add(read(embeddedSource("simplified srvr_ctrl")));
       mapsBuilder.add(embeddedMap("keypad - a1813cc5", "x11"));
       maps = mapsBuilder.build();
     } catch (IOException e) {
