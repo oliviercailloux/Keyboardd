@@ -17,6 +17,8 @@ import java.util.Optional;
  */
 class DefaultRepresentations {
   private static final ImmutableMap<String, String> MN_TO_STR = mnToStr();
+  /** If ucp key has canonical mnemonic, then that mnemonic is in MN_TO_STR. */
+  private static final ImmutableMap<Integer, String> UCP_TO_STR = ucpToStr();
 
   private static ImmutableMap<String, String> mnToStr() {
     final ImmutableMap.Builder<String, String> reprsBuilder = new ImmutableMap.Builder<>();
@@ -179,7 +181,8 @@ class DefaultRepresentations {
 
     reprsBuilder.put("space", "␣");
     reprsBuilder.put("nobreakspace", "⍽");
-    reprsBuilder.put("NoSymbol", "");
+    /* “NoSymbol means "don't overwrite it"”, https://who-t.blogspot.com/2020/09/user-specific-xkb-configuration-putting.html */
+    reprsBuilder.put("NoSymbol", "NoSymbol");
     reprsBuilder.put("Control_L", "⎈");
     reprsBuilder.put("Super_L", "⊞");
     reprsBuilder.put("Super_R", "⊞");
@@ -195,6 +198,13 @@ class DefaultRepresentations {
     return reprsBuilder.build();
   }
 
+  private static ImmutableMap<Integer, String> ucpToStr() {
+    final ImmutableMap.Builder<Integer, String> reprsBuilder = new ImmutableMap.Builder<>();
+    reprsBuilder.put(0xA0, MN_TO_STR.get("nobreakspace"));
+    reprsBuilder.put(0x202F, "╫");
+    return reprsBuilder.build();
+  }
+
   public static Representation represent(KeysymEntry e) {
     if (e instanceof Mnemonic m) {
       String mnemonic = m.keysymMnemonic();
@@ -205,13 +215,17 @@ class DefaultRepresentations {
     }
     if (e instanceof KeysymEntry.Ucp u) {
       int ucp = u.ucp();
-      if (ucp == 0x202F) {
-        return Representation.fromString("⍽");
-      }
-      return Representation.fromString(u.asString());
+      return represent(ucp);
     }
     verify(e instanceof KeysymEntry.Code);
     return Representation.fromString(e.asString());
+  }
+
+  private static Representation represent(int ucp) {
+    if(UCP_TO_STR.containsKey(ucp)) {
+      return Representation.fromString(UCP_TO_STR.get(ucp));
+    }
+    return Representation.fromString(new String(Character.toChars(ucp)));
   }
 
   public static Representation represent(CanonicalKeysymEntry e) {
@@ -220,22 +234,18 @@ class DefaultRepresentations {
       if (MN_TO_STR.containsKey(mnemonic)) {
         return Representation.fromString(MN_TO_STR.get(mnemonic));
       }
-      String defaultString;
-      Optional<Integer> ucp = c.ucp();
-      if (ucp.isPresent()) {
-        defaultString = new String(Character.toChars(ucp.orElseThrow()));
-      } else {
-        defaultString = c.mnemonic();
+      Optional<Integer> ucpOpt = c.ucp();
+      if (ucpOpt.isPresent()) {
+        int ucp = ucpOpt.orElseThrow();
+        verify(!UCP_TO_STR.containsKey(ucp));
+        return represent(ucp);
       }
-      return Representation.fromString(defaultString);
+      return Representation.fromString(c.mnemonic());
     }
 
     verify(e instanceof ImplicitUcp);
     ImplicitUcp imp = (ImplicitUcp) e;
     int ucp = imp.ucp();
-    if (ucp == 0x202F) {
-      return Representation.fromString("⍽");
-    }
-    return Representation.fromString(new String(Character.toChars(ucp)));
+    return represent(ucp);
   }
 }
