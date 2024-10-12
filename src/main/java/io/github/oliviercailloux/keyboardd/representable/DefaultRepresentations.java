@@ -181,7 +181,10 @@ class DefaultRepresentations {
 
     reprsBuilder.put("space", "␣");
     reprsBuilder.put("nobreakspace", "⍽");
-    /* “NoSymbol means "don't overwrite it"”, https://who-t.blogspot.com/2020/09/user-specific-xkb-configuration-putting.html */
+    /*
+     * “NoSymbol means "don't overwrite it"”,
+     * https://who-t.blogspot.com/2020/09/user-specific-xkb-configuration-putting.html
+     */
     reprsBuilder.put("NoSymbol", "NoSymbol");
     reprsBuilder.put("Control_L", "⎈");
     reprsBuilder.put("Super_L", "⊞");
@@ -222,7 +225,7 @@ class DefaultRepresentations {
   }
 
   private static Representation represent(int ucp) {
-    if(UCP_TO_STR.containsKey(ucp)) {
+    if (UCP_TO_STR.containsKey(ucp)) {
       return Representation.fromString(UCP_TO_STR.get(ucp));
     }
     return Representation.fromString(new String(Character.toChars(ucp)));
