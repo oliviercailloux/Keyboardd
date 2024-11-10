@@ -103,3 +103,10 @@ It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard 
 
 == Representing UCPs
 Maybe impossible to achieve: https://github.com/w3c/csswg-drafts/issues/8874
+
+https://graphicdesign.stackexchange.com/questions/57352/font-for-representing-unicode-non-printable-characters 
+https://packages.debian.org/bookworm/unifont 
+https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/font-family 
+https://unifoundry.com/unifont/ 
+https://stackoverflow.com/questions/13210729/make-spaces-tabs-newlines-visible-with-custom-font-instead-of-javascript 
+https://www.fileformat.info/info/unicode/char/2421/index.htm 
