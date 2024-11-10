@@ -25,12 +25,7 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
     return fromIndirect(keyboardMap.nameToEntries(), representations);
   }
 
-  public static XKeyNamesAndRepresenter from(CanonicalKeyboardMap keyboardMap,
-      Function<CanonicalKeysymEntry, Representation> representations) {
-    return fromIndirect(keyboardMap.nameToEntries(), representations);
-  }
-
-  private static <V> XKeyNamesAndRepresenter fromIndirect(ListMultimap<String, V> toV,
+  static <V> XKeyNamesAndRepresenter fromIndirect(ListMultimap<String, V> toV,
       Function<V, Representation> toRepresentations) {
     ImmutableListMultimap.Builder<String, Representation> builder = ImmutableListMultimap.builder();
     for (String xKeyName : toV.keySet()) {
@@ -43,9 +38,9 @@ public interface XKeyNamesAndRepresenter extends XKeyNamesRepresenter {
   }
 
   /** The ones having at least one representation. */
-  ImmutableSet<String> names();
+  public ImmutableSet<String> names();
 
-  ImmutableListMultimap<String, Representation> representations();
+  public ImmutableListMultimap<String, Representation> representations();
 
   public static Representation defaultRepresentation(KeysymEntry entry) {
     return DefaultRepresentations.represent(entry);

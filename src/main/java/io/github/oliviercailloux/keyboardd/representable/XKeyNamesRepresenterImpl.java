@@ -1,5 +1,6 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -16,7 +17,7 @@ class XKeyNamesRepresenterImpl implements XKeyNamesRepresenter {
   }
 
   @Override
-  public List<Representation> representations(String name) {
-    return representations.apply(name);
+  public ImmutableList<Representation> representations(String name) {
+    return ImmutableList.copyOf(representations.apply(name));
   }
 }

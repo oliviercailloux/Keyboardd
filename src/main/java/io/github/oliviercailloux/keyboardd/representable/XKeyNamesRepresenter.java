@@ -1,5 +1,6 @@
 package io.github.oliviercailloux.keyboardd.representable;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -8,5 +9,5 @@ public interface XKeyNamesRepresenter {
     return XKeyNamesRepresenterImpl.using(representations);
   }
 
-  List<Representation> representations(String name);
+  ImmutableList<Representation> representations(String name);
 }
