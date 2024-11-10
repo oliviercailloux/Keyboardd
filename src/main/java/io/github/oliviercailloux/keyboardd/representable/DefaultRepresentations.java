@@ -22,6 +22,12 @@ class DefaultRepresentations {
 
   private static ImmutableMap<String, String> mnToStr() {
     final ImmutableMap.Builder<String, String> reprsBuilder = new ImmutableMap.Builder<>();
+    /*
+     * “NoSymbol means "don't overwrite it"”,
+     * https://who-t.blogspot.com/2020/09/user-specific-xkb-configuration-putting.html
+     */
+    reprsBuilder.put("NoSymbol", "");
+    reprsBuilder.put("VoidSymbol", "");
     reprsBuilder.put("Escape", "⎋");
     reprsBuilder.put("XF86_Switch_VT_1", "VT1");
     reprsBuilder.put("XF86_Switch_VT_2", "VT2");
@@ -181,11 +187,6 @@ class DefaultRepresentations {
 
     reprsBuilder.put("space", "␣");
     reprsBuilder.put("nobreakspace", "⍽");
-    /*
-     * “NoSymbol means "don't overwrite it"”,
-     * https://who-t.blogspot.com/2020/09/user-specific-xkb-configuration-putting.html
-     */
-    reprsBuilder.put("NoSymbol", "NoSymbol");
     reprsBuilder.put("Control_L", "⎈");
     reprsBuilder.put("Super_L", "⊞");
     reprsBuilder.put("Super_R", "⊞");
