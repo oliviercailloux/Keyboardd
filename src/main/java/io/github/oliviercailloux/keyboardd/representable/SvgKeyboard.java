@@ -271,7 +271,7 @@ public class SvgKeyboard {
         h.document().getDocumentElement().getFirstChild());
   }
 
-  public ImmutableSetMultimap<String, RectangleElement> keyBindingZonesByXKeyName() {
+  public ImmutableMap<RectangleElement, String> keyBindingZonesToXKeyName() {
     ImmutableMap.Builder<RectangleElement, String> reprsBuilder = ImmutableMap.builder();
     for (Element rect : getElements(h.document().getDocumentElement(), SVG_RECT_NAME)) {
       if (!DomHelper.hasAttribute(rect, KEYBOARDD_X_KEY_NAME)) {
@@ -280,7 +280,7 @@ public class SvgKeyboard {
       String xKeyName = DomHelper.getAttribute(rect, KEYBOARDD_X_KEY_NAME);
       reprsBuilder.put(RectangleElement.using(rect), xKeyName);
     }
-    return reprsBuilder.build().asMultimap().inverse();
+    return reprsBuilder.build();
   }
 
   public double maxWidthPerCp(Function<String, ? extends List<String>> descriptionsByXKeyName) {
@@ -343,7 +343,7 @@ public class SvgKeyboard {
 
   private ImmutableSet<RepresentableZone> getZones(XKeyNamesRepresenter representationsByXKeyName) {
     ImmutableSet<RepresentableZone> zones =
-        keyBindingZonesByXKeyName().values().stream().map(rect -> {
+        keyBindingZonesToXKeyName().keySet().stream().map(rect -> {
           String xKeyName = DomHelper.getAttribute(rect.element(), KEYBOARDD_X_KEY_NAME);
           List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
           return new RepresentableZone(rect, ImmutableList.copyOf(reprs));
