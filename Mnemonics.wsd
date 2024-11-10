@@ -26,7 +26,7 @@ interface "CanonicalKeysymEntry" {}
 
 class "CanonicalKeyboardMap" {
   {static} canonicalize(KeyboardMap, Mnemonics): CanonicalKeyboardMap
-  entries(xKeyName: String): List<KeysymEntry>
+  entries(xKeyName: String): List<CanonicalKeysymEntry>
 }
 
 @enduml
