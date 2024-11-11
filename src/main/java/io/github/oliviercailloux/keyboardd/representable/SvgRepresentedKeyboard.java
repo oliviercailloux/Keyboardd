@@ -42,7 +42,8 @@ public class SvgRepresentedKeyboard {
   }
 
   public ImmutableSortedSet<SvgXKey> svgXKeys(String xKeyName) {
-    return ImmutableSortedSet.copyOf(svgXKeysToXKeyName.comparator(), svgXKeysToXKeyName.asMultimap().inverse().get(xKeyName));
+    return ImmutableSortedSet.copyOf(svgXKeysToXKeyName.comparator(),
+        svgXKeysToXKeyName.asMultimap().inverse().get(xKeyName));
   }
 
   public ImmutableSet<String> xKeyNames() {

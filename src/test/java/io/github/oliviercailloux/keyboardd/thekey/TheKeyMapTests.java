@@ -40,10 +40,9 @@ public class TheKeyMapTests {
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
     KeyboardMap canonicalized = map.canonicalize(Xkeys.latest().canonicalByAlias());
     Mnemonics mns = Mnemonics.latest();
-    CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
-        .canonicalize(canonicalized, mns);
-        CanonicalKeyboardMapRepresenter representer =
-    CanonicalKeyboardMapRepresenter.from(canonMap, XKeyNamesAndRepresenter::defaultRepresentation);
+    CanonicalKeyboardMap canonMap = CanonicalKeyboardMap.canonicalize(canonicalized, mns);
+    CanonicalKeyboardMapRepresenter representer = CanonicalKeyboardMapRepresenter.from(canonMap,
+        XKeyNamesAndRepresenter::defaultRepresentation);
     SvgRepresentedKeyboard represented = inputSvg.withCanonicalRepresentations(representer);
     ImmutableSet<String> xKeyNames = represented.xKeyNames();
     assertEquals(ImmutableSet.of("LCTL", "AB03", "AB04"), xKeyNames);
@@ -53,7 +52,7 @@ public class TheKeyMapTests {
     assertEquals("(0.0, 0.0)", svgL.keyZone().start().coordinates());
     assertEquals("(37.7953, 37.7953)", svgL.keyZone().end().coordinates());
     SvgKeysymEntry lCtlEntry = Iterables.getOnlyElement(svgL.svgKeysymEntries());
-    assertEquals("Control_L", ((CanonicalMnemonic)lCtlEntry.canonicalKeysymEntry()).mnemonic());
+    assertEquals("Control_L", ((CanonicalMnemonic) lCtlEntry.canonicalKeysymEntry()).mnemonic());
     assertEquals(svgL, lCtlEntry.xKey());
     assertEquals("(0.0, 0.0)", lCtlEntry.zone().start().coordinates());
     assertEquals("(37.7953, 37.7953)", lCtlEntry.zone().end().coordinates());
@@ -66,21 +65,21 @@ public class TheKeyMapTests {
     assertEquals(2, ab03Entries.size());
     UnmodifiableIterator<SvgKeysymEntry> ab3It = ab03Entries.iterator();
     SvgKeysymEntry ab3Entry1 = ab3It.next();
-    assertEquals("c", ((CanonicalMnemonic)ab3Entry1.canonicalKeysymEntry()).mnemonic());
+    assertEquals("c", ((CanonicalMnemonic) ab3Entry1.canonicalKeysymEntry()).mnemonic());
     assertEquals(svg3, ab3Entry1.xKey());
     assertEquals("(45.3543, 0.0)", ab3Entry1.zone().start().coordinates());
     assertEquals("(64.25195, 37.7953)", ab3Entry1.zone().end().coordinates());
     SvgKeysymEntry ab3Entry2 = ab3It.next();
-    assertEquals("C", ((CanonicalMnemonic)ab3Entry2.canonicalKeysymEntry()).mnemonic());
+    assertEquals("C", ((CanonicalMnemonic) ab3Entry2.canonicalKeysymEntry()).mnemonic());
     assertEquals(svg3, ab3Entry2.xKey());
     assertEquals("(64.25195, 0.0)", ab3Entry2.zone().start().coordinates());
     assertEquals("(83.14959999999999, 37.7953)", ab3Entry2.zone().end().coordinates());
     assertFalse(ab3It.hasNext());
-    
+
     SvgXKey svg4 = Iterables.getOnlyElement(represented.svgXKeys("AB04"));
     assertEquals("AB04", svg4.xKeyName());
     assertEquals("(90.7087, 0.0)", svg4.keyZone().start().coordinates());
-    
+
     Document outputDocument = represented.document();
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
@@ -99,7 +98,8 @@ public class TheKeyMapTests {
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
         .canonicalize(map.canonicalize(Xkeys.latest().canonicalByAlias()), Mnemonics.latest());
-    XKeyNamesAndRepresenter representer = CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
+    XKeyNamesAndRepresenter representer =
+        CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
@@ -118,7 +118,8 @@ public class TheKeyMapTests {
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
         .canonicalize(map.canonicalize(Xkeys.latest().canonicalByAlias()), Mnemonics.latest());
-    XKeyNamesAndRepresenter representer = CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
+    XKeyNamesAndRepresenter representer =
+        CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
     inputSvg.setFontSize(20);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
