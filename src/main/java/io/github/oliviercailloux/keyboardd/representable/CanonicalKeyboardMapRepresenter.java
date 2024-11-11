@@ -30,6 +30,18 @@ public class CanonicalKeyboardMapRepresenter implements XKeyNamesAndRepresenter 
     return representer.names();
   }
 
+  public CanonicalKeyboardMap keyboardMap() {
+    return keyboardMap;
+  }
+
+  public ImmutableList<CanonicalKeysymEntry> entries(String name) {
+    return keyboardMap.entries(name);
+  }
+
+  public Representation representation(CanonicalKeysymEntry entry) {
+    return representations.apply(entry);
+  }
+
   @Override
   public ImmutableListMultimap<String, Representation> representations() {
     return representer.representations();
@@ -38,9 +50,5 @@ public class CanonicalKeyboardMapRepresenter implements XKeyNamesAndRepresenter 
   @Override
   public ImmutableList<Representation> representations(String name) {
     return representer.representations(name);
-  }
-
-  public Representation representation(CanonicalKeysymEntry entry) {
-    return representations.apply(entry);
   }
 }

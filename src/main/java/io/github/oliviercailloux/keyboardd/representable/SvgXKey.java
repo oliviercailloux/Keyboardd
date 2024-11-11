@@ -11,7 +11,10 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 
-/** Not really immutable as the XML elements are not. */
+/** Not really immutable as the XML elements are not. 
+ * 
+ * Does not implement equals because hashCode would be infinitely recursive.
+*/
 public class SvgXKey {
   static SvgXKey create(String xKeyName, Zone keyZone, RectangleElement rectangle) {
     return new SvgXKey(xKeyName, keyZone, rectangle);
@@ -53,21 +56,6 @@ public class SvgXKey {
 
   public ImmutableSortedSet<SvgKeysymEntry> svgKeysymEntries() {
     return svgKeysymEntries;
-  }
-
-  @Override
-  public boolean equals(Object o2) {
-    if (!(o2 instanceof SvgXKey)) {
-      return false;
-    }
-    final SvgXKey t2 = (SvgXKey) o2;
-    return xKeyName.equals(t2.xKeyName) && keyZone.equals(t2.keyZone)
-        && rectangle.equals(t2.rectangle) && svgKeysymEntries.equals(t2.svgKeysymEntries);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(xKeyName, keyZone, rectangle, svgKeysymEntries);
   }
 
   @Override

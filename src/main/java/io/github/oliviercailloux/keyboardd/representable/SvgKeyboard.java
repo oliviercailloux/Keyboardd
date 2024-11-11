@@ -139,21 +139,26 @@ public class SvgKeyboard {
   }
 
   private static interface RepresentableSubZone {
+    public Zone absoluteSubZone();
+
     /** A positive finite double if non-empty string; otherwise positive infinity. */
     public double maxWidthPerCp();
 
     public Element toSvg(SvgDocumentHelper h);
   }
 
-  private static record SimpleRepresentableSubZone (Zone subZone, Representation repr)
-      implements RepresentableSubZone {
+  private static record SimpleRepresentableSubZone (Zone absoluteSubZone, Displacement shift,
+      Representation repr) implements RepresentableSubZone {
+    public Zone subZone() {
+      return absoluteSubZone.plus(shift);
+    }
 
     @Override
     public double maxWidthPerCp() {
       if (!repr.isString()) {
         return Double.POSITIVE_INFINITY;
       }
-      return subZone.size().mult(1d / repr.string().codePoints().count()).x();
+      return subZone().size().mult(1d / repr.string().codePoints().count()).x();
     }
 
     @Override
@@ -165,7 +170,7 @@ public class SvgKeyboard {
     }
 
     private Element toStringSvg(SvgDocumentHelper h) {
-      return h.text().setBaselineStart(subZone.center()).setContent(repr.string()).element();
+      return h.text().setBaselineStart(subZone().center()).setContent(repr.string()).element();
     }
 
     private Element toReprSvg(SvgDocumentHelper h) {
@@ -174,11 +179,11 @@ public class SvgKeyboard {
       Element importedSvg = (Element) h.document().importNode(svg, true);
       Point svgSizeMaxSubZone;
       if (svgSizeOpt.isEmpty()) {
-        svgSizeMaxSubZone = subZone.size();
+        svgSizeMaxSubZone = subZone().size();
       } else {
         Point svgSize = svgSizeOpt.orElseThrow(VerifyException::new);
-        if (svgSize.x() > subZone.size().x() || svgSize.y() > subZone.size().y()) {
-          svgSizeMaxSubZone = subZone.size();
+        if (svgSize.x() > subZone().size().x() || svgSize.y() > subZone().size().y()) {
+          svgSizeMaxSubZone = subZone().size();
         } else {
           svgSizeMaxSubZone = svgSize;
         }
@@ -186,7 +191,7 @@ public class SvgKeyboard {
       // Point gap = subZone.size().plus(svgSizeMaxSubZone.opposite());
       // Point halfGap = gap.mult(0.5d);
       // Point elemPos = subZone.start().plus(halfGap);
-      Zone posAndSize = Zone.centered(subZone.center(), svgSizeMaxSubZone);
+      Zone posAndSize = Zone.centered(subZone().center(), svgSizeMaxSubZone);
       SvgHelper.setPosition(importedSvg, posAndSize.start());
       SvgHelper.setSize(importedSvg, svgSizeMaxSubZone);
       return importedSvg;
@@ -194,17 +199,27 @@ public class SvgKeyboard {
   }
 
   private static class CanonicRepresentableSubZone implements RepresentableSubZone {
-    public static CanonicRepresentableSubZone from(Zone subZone, CanonicalKeysymEntry c,
-        Representation repr) {
-      return new CanonicRepresentableSubZone(subZone, c, repr);
+    public static CanonicRepresentableSubZone from(Zone absoluteSubZone, Displacement shift,
+        CanonicalKeysymEntry c, Representation repr) {
+      return new CanonicRepresentableSubZone(absoluteSubZone, shift, c, repr);
     }
 
     private final SimpleRepresentableSubZone delegate;
     private final CanonicalKeysymEntry c;
 
-    private CanonicRepresentableSubZone(Zone subZone, CanonicalKeysymEntry c, Representation repr) {
-      this.delegate = new SimpleRepresentableSubZone(subZone, repr);
+    private CanonicRepresentableSubZone(Zone absoluteSubZone, Displacement shift,
+        CanonicalKeysymEntry c, Representation repr) {
+      this.delegate = new SimpleRepresentableSubZone(absoluteSubZone, shift, repr);
       this.c = c;
+    }
+
+    public CanonicalKeysymEntry c() {
+      return c;
+    }
+
+    @Override
+    public Zone absoluteSubZone() {
+      return delegate.absoluteSubZone();
     }
 
     @Override
@@ -238,6 +253,8 @@ public class SvgKeyboard {
   }
 
   private static interface RepresentableZone {
+    public String xKeyName();
+
     public ImmutableList<Representation> reprs();
 
     public ImmutableSet<? extends RepresentableSubZone> subRepresentables(Displacement shift);
@@ -275,8 +292,7 @@ public class SvgKeyboard {
 
     @Override
     public ImmutableSet<RepresentableSubZone> subRepresentables(Displacement shift) {
-      ImmutableSortedSet<Zone> subZones = div().subZones(
-          Zone.cornerMove(rectangle.zone().start().plus(shift), rectangle.zone().across()));
+      ImmutableSortedSet<Zone> subZones = div().subZones(rectangle.zone());
       UnmodifiableIterator<T> dIt = data.iterator();
       final ImmutableSet.Builder<RepresentableSubZone> subRepresentables =
           new ImmutableSet.Builder<>();
@@ -284,9 +300,9 @@ public class SvgKeyboard {
         T t = dIt.next();
         Representation r = repr.apply(t);
         if (t instanceof CanonicalKeysymEntry c) {
-          subRepresentables.add(CanonicRepresentableSubZone.from(subZone, c, r));
+          subRepresentables.add(CanonicRepresentableSubZone.from(subZone, shift, c, r));
         } else {
-          subRepresentables.add(new SimpleRepresentableSubZone(subZone, r));
+          subRepresentables.add(new SimpleRepresentableSubZone(subZone, shift, r));
         }
       }
       verify(!dIt.hasNext());
@@ -312,6 +328,11 @@ public class SvgKeyboard {
         ImmutableList<Representation> reprs) {
       this.delegate =
           new GenericRepresentableZone<>(xKeyName, rectangle, reprs, Function.identity());
+    }
+
+    @Override
+    public String xKeyName() {
+      return delegate.xKeyName;
     }
 
     @Override
@@ -348,6 +369,11 @@ public class SvgKeyboard {
         ImmutableList<CanonicalKeysymEntry> entries,
         Function<CanonicalKeysymEntry, Representation> representer) {
       this.delegate = new GenericRepresentableZone<>(xKeyName, rectangle, entries, representer);
+    }
+
+    @Override
+    public String xKeyName() {
+      return delegate.xKeyName;
     }
 
     @Override
@@ -478,6 +504,21 @@ public class SvgKeyboard {
    * @return the document with the added representations.
    */
   public Document withRepresentations(XKeyNamesRepresenter representationsByXKeyName) {
+    ImmutableSet<SvgXKey> svgKeys = withRepresentationsInternal(representationsByXKeyName);
+    if (!(representationsByXKeyName instanceof CanonicalKeyboardMapRepresenter)) {
+      verify(svgKeys.isEmpty());
+    }
+    return h.document();
+  }
+
+  public SvgRepresentedKeyboard
+      withCanonicalRepresentations(CanonicalKeyboardMapRepresenter representer) {
+    ImmutableSet<SvgXKey> svgKeys = withRepresentationsInternal(representer);
+    return SvgRepresentedKeyboard.given(this, svgKeys);
+  }
+
+  public ImmutableSet<SvgXKey>
+      withRepresentationsInternal(XKeyNamesRepresenter representationsByXKeyName) {
     ImmutableSet<? extends RepresentableZone> zones = getZones(representationsByXKeyName);
     // it’s very unlikely that the font size will be constrained in height, so let’s just consider
     // the available width. We consider that 1px font size (which determines the height of am em
@@ -491,18 +532,31 @@ public class SvgKeyboard {
       appendStyle(TextElement.NODE_NAME, inner);
     }
 
+    final ImmutableSet.Builder<SvgXKey> svgKeys = new ImmutableSet.Builder<>();
     for (RepresentableZone zone : zones) {
       Displacement shift = Displacement.between(Point.origin(), zone.rectangle().zone().start());
       Element g = h.g().translate(shift).getElement();
       Node next = zone.rectangle().element().getNextSibling();
       zone.rectangle().element().getParentNode().insertBefore(g, next);
-      for (RepresentableSubZone r : zone.subRepresentables(shift.opposite())) {
-        Element svgRepr = r.toSvg(h);
-        g.appendChild(svgRepr);
-        // new SvgKeysymEntry();
+
+      if (zone instanceof CanonicRepresentableZone c) {
+        SvgXKey svgXKey = SvgXKey.create(c.xKeyName(), zone.rectangle().zone(), zone.rectangle());
+        final ImmutableSet.Builder<SvgKeysymEntry> entries = new ImmutableSet.Builder<>();
+        for (CanonicRepresentableSubZone r : c.subRepresentables(shift.opposite())) {
+          Element svgRepr = r.toSvg(h);
+          g.appendChild(svgRepr);
+          entries.add(new SvgKeysymEntry(r.c(), r.absoluteSubZone(), svgRepr, svgXKey));
+        }
+        svgXKey.setContent(entries.build());
+        svgKeys.add(svgXKey);
+      } else {
+        for (RepresentableSubZone r : zone.subRepresentables(shift.opposite())) {
+          Element svgRepr = r.toSvg(h);
+          g.appendChild(svgRepr);
+        }
       }
     }
-    return h.document();
+    return svgKeys.build();
   }
 
   private ImmutableSet<? extends RepresentableZone>
@@ -510,6 +564,10 @@ public class SvgKeyboard {
     ImmutableSet<? extends RepresentableZone> zones =
         keyBindingZonesToXKeyName().keySet().stream().map(rect -> {
           String xKeyName = DomHelper.getAttribute(rect.element(), KEYBOARDD_X_KEY_NAME);
+          if (representationsByXKeyName instanceof CanonicalKeyboardMapRepresenter c) {
+            ImmutableList<CanonicalKeysymEntry> entries = c.entries(xKeyName);
+            return CanonicRepresentableZone.from(xKeyName, rect, entries, c::representation);
+          }
           List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
           return GenericRepresentableZone.from(xKeyName, rect, ImmutableList.copyOf(reprs));
         }).collect(ImmutableSet.toImmutableSet());

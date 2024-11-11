@@ -3,7 +3,9 @@ package io.github.oliviercailloux.keyboardd.representable;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableSortedSet;
 import io.github.oliviercailloux.geometry.Point;
 import io.github.oliviercailloux.geometry.Zone;
 import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalKeysymEntry;
@@ -37,5 +39,13 @@ public class SvgRepresentedKeyboard {
 
   public ImmutableSortedMap<SvgXKey, String> svgXKeysToXKeyName() {
     return svgXKeysToXKeyName;
+  }
+
+  public ImmutableSortedSet<SvgXKey> svgXKeys(String xKeyName) {
+    return ImmutableSortedSet.copyOf(svgXKeysToXKeyName.comparator(), svgXKeysToXKeyName.asMultimap().inverse().get(xKeyName));
+  }
+
+  public ImmutableSet<String> xKeyNames() {
+    return ImmutableSet.copyOf(svgXKeysToXKeyName.values());
   }
 }
