@@ -2,20 +2,20 @@ package io.github.oliviercailloux.keyboardd.representable;
 
 import static com.google.common.base.Verify.verify;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.math.IntMath;
 import io.github.oliviercailloux.geometry.Displacement;
 import io.github.oliviercailloux.geometry.Point;
 import io.github.oliviercailloux.geometry.Zone;
-import io.github.oliviercailloux.jaris.collections.CollectionUtils;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
+import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalKeysymEntry;
 import io.github.oliviercailloux.svgb.RectangleElement;
 import io.github.oliviercailloux.svgb.StyleElement;
 import io.github.oliviercailloux.svgb.SvgDocumentHelper;
@@ -28,6 +28,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -137,9 +138,17 @@ public class SvgKeyboard {
     }
   }
 
-  private static record RepresentableSubZone (Zone subZone, Representation repr) {
-
+  private static interface RepresentableSubZone {
     /** A positive finite double if non-empty string; otherwise positive infinity. */
+    public double maxWidthPerCp();
+
+    public Element toSvg(SvgDocumentHelper h);
+  }
+
+  private static record SimpleRepresentableSubZone (Zone subZone, Representation repr)
+      implements RepresentableSubZone {
+
+    @Override
     public double maxWidthPerCp() {
       if (!repr.isString()) {
         return Double.POSITIVE_INFINITY;
@@ -147,6 +156,7 @@ public class SvgKeyboard {
       return subZone.size().mult(1d / repr.string().codePoints().count()).x();
     }
 
+    @Override
     public Element toSvg(SvgDocumentHelper h) {
       if (repr.isString()) {
         return toStringSvg(h);
@@ -183,29 +193,182 @@ public class SvgKeyboard {
     }
   }
 
-  private static record RepresentableZone (RectangleElement rectangle,
-      ImmutableList<Representation> reprs) {
-    private LineColDivision div() {
-      return LineColDivision.forNb(reprs.size());
+  private static class CanonicRepresentableSubZone implements RepresentableSubZone {
+    public static CanonicRepresentableSubZone from(Zone subZone, CanonicalKeysymEntry c,
+        Representation repr) {
+      return new CanonicRepresentableSubZone(subZone, c, repr);
     }
 
+    private final SimpleRepresentableSubZone delegate;
+    private final CanonicalKeysymEntry c;
+
+    private CanonicRepresentableSubZone(Zone subZone, CanonicalKeysymEntry c, Representation repr) {
+      this.delegate = new SimpleRepresentableSubZone(subZone, repr);
+      this.c = c;
+    }
+
+    @Override
+    public double maxWidthPerCp() {
+      return delegate.maxWidthPerCp();
+    }
+
+    @Override
+    public Element toSvg(SvgDocumentHelper h) {
+      return delegate.toSvg(h);
+    }
+
+    @Override
+    public boolean equals(Object o2) {
+      if (!(o2 instanceof CanonicRepresentableSubZone)) {
+        return false;
+      }
+      final CanonicRepresentableSubZone t2 = (CanonicRepresentableSubZone) o2;
+      return delegate.equals(t2.delegate) && c.equals(t2.c);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(delegate, c);
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this).add("delegate", delegate).add("c", c).toString();
+    }
+  }
+
+  private static interface RepresentableZone {
+    public ImmutableList<Representation> reprs();
+
+    public ImmutableSet<? extends RepresentableSubZone> subRepresentables(Displacement shift);
+
+    public double maxWidthPerCp();
+
+    public RectangleElement rectangle();
+  }
+
+  // private static class CanonicalRepresentableZone implements RepresentableZone {
+  // public static CanonicalRepresentableZone from (String xKeyName, RectangleElement rectangle,
+  // ImmutableList<CanonicalKeysymEntry> entries, Function<CanonicalKeysymEntry, Representation>
+  // representer) {
+  // ImmutableList<Representation> reprs =
+  // entries.stream().map(representer).collect(ImmutableList.toImmutableList());
+  // return new RepresentableZoneRecord(xKeyName, rectangle, reprs);
+  // }
+  // }
+
+  private static record GenericRepresentableZone<T> (String xKeyName, RectangleElement rectangle,
+      ImmutableList<T> data, Function<T, Representation> repr) implements RepresentableZone {
+    public static RepresentableZone from(String xKeyName, RectangleElement rectangle,
+        ImmutableList<Representation> reprs) {
+      return new GenericRepresentableZone<>(xKeyName, rectangle, reprs, Function.identity());
+    }
+
+    @Override
+    public ImmutableList<Representation> reprs() {
+      return data.stream().map(repr).collect(ImmutableList.toImmutableList());
+    }
+
+    private LineColDivision div() {
+      return LineColDivision.forNb(data.size());
+    }
+
+    @Override
     public ImmutableSet<RepresentableSubZone> subRepresentables(Displacement shift) {
       ImmutableSortedSet<Zone> subZones = div().subZones(
           Zone.cornerMove(rectangle.zone().start().plus(shift), rectangle.zone().across()));
-      UnmodifiableIterator<Representation> rIt = reprs.iterator();
+      UnmodifiableIterator<T> dIt = data.iterator();
       final ImmutableSet.Builder<RepresentableSubZone> subRepresentables =
           new ImmutableSet.Builder<>();
       for (Zone subZone : subZones) {
-        Representation r = rIt.next();
-        subRepresentables.add(new RepresentableSubZone(subZone, r));
+        T t = dIt.next();
+        Representation r = repr.apply(t);
+        if (t instanceof CanonicalKeysymEntry c) {
+          subRepresentables.add(CanonicRepresentableSubZone.from(subZone, c, r));
+        } else {
+          subRepresentables.add(new SimpleRepresentableSubZone(subZone, r));
+        }
       }
-      verify(!rIt.hasNext());
+      verify(!dIt.hasNext());
       return subRepresentables.build();
     }
 
+    @Override
     public double maxWidthPerCp() {
       return subRepresentables(Displacement.noMove()).stream()
           .mapToDouble(RepresentableSubZone::maxWidthPerCp).min().orElse(Double.POSITIVE_INFINITY);
+    }
+  }
+
+  private static class SimpleRepresentableZoneToDelete implements RepresentableZone {
+    public static SimpleRepresentableZoneToDelete from(String xKeyName, RectangleElement rectangle,
+        ImmutableList<Representation> reprs) {
+      return new SimpleRepresentableZoneToDelete(xKeyName, rectangle, reprs);
+    }
+
+    private final GenericRepresentableZone<Representation> delegate;
+
+    private SimpleRepresentableZoneToDelete(String xKeyName, RectangleElement rectangle,
+        ImmutableList<Representation> reprs) {
+      this.delegate =
+          new GenericRepresentableZone<>(xKeyName, rectangle, reprs, Function.identity());
+    }
+
+    @Override
+    public ImmutableList<Representation> reprs() {
+      return delegate.reprs();
+    }
+
+    @Override
+    public ImmutableSet<RepresentableSubZone> subRepresentables(Displacement shift) {
+      return delegate.subRepresentables(shift);
+    }
+
+    @Override
+    public double maxWidthPerCp() {
+      return delegate.maxWidthPerCp();
+    }
+
+    @Override
+    public RectangleElement rectangle() {
+      return delegate.rectangle;
+    }
+  }
+
+  private static class CanonicRepresentableZone implements RepresentableZone {
+    public static CanonicRepresentableZone from(String xKeyName, RectangleElement rectangle,
+        ImmutableList<CanonicalKeysymEntry> entries,
+        Function<CanonicalKeysymEntry, Representation> representer) {
+      return new CanonicRepresentableZone(xKeyName, rectangle, entries, representer);
+    }
+
+    private final GenericRepresentableZone<CanonicalKeysymEntry> delegate;
+
+    private CanonicRepresentableZone(String xKeyName, RectangleElement rectangle,
+        ImmutableList<CanonicalKeysymEntry> entries,
+        Function<CanonicalKeysymEntry, Representation> representer) {
+      this.delegate = new GenericRepresentableZone<>(xKeyName, rectangle, entries, representer);
+    }
+
+    @Override
+    public ImmutableList<Representation> reprs() {
+      return delegate.reprs();
+    }
+
+    @Override
+    public ImmutableSet<CanonicRepresentableSubZone> subRepresentables(Displacement shift) {
+      return delegate.subRepresentables(shift).stream().map(z -> (CanonicRepresentableSubZone) z)
+          .collect(ImmutableSet.toImmutableSet());
+    }
+
+    @Override
+    public double maxWidthPerCp() {
+      return delegate.maxWidthPerCp();
+    }
+
+    @Override
+    public RectangleElement rectangle() {
+      return delegate.rectangle;
     }
   }
 
@@ -286,11 +449,11 @@ public class SvgKeyboard {
   public double maxWidthPerCp(Function<String, ? extends List<String>> descriptionsByXKeyName) {
     XKeyNamesRepresenter representationsByXKeyName = s -> descriptionsByXKeyName.apply(s).stream()
         .map(Representation::fromString).collect(ImmutableList.toImmutableList());
-    ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
+    ImmutableSet<? extends RepresentableZone> zones = getZones(representationsByXKeyName);
     return maxWidthPerCp(zones);
   }
 
-  private double maxWidthPerCp(Set<RepresentableZone> zones) {
+  private double maxWidthPerCp(Set<? extends RepresentableZone> zones) {
     return zones.stream().mapToDouble(t -> t.maxWidthPerCp()).min()
         .orElse(Double.POSITIVE_INFINITY);
   }
@@ -301,7 +464,7 @@ public class SvgKeyboard {
     return this;
   }
 
-  private double fontSize(Set<RepresentableZone> zones) {
+  private double fontSize(Set<? extends RepresentableZone> zones) {
     if (!Double.isNaN(fontSize)) {
       return fontSize;
     }
@@ -315,7 +478,7 @@ public class SvgKeyboard {
    * @return the document with the added representations.
    */
   public Document withRepresentations(XKeyNamesRepresenter representationsByXKeyName) {
-    ImmutableSet<RepresentableZone> zones = getZones(representationsByXKeyName);
+    ImmutableSet<? extends RepresentableZone> zones = getZones(representationsByXKeyName);
     // it’s very unlikely that the font size will be constrained in height, so let’s just consider
     // the available width. We consider that 1px font size (which determines the height of am em
     // box) is about a 1px car wide. A very rough approximation, to be sure.
@@ -331,22 +494,24 @@ public class SvgKeyboard {
     for (RepresentableZone zone : zones) {
       Displacement shift = Displacement.between(Point.origin(), zone.rectangle().zone().start());
       Element g = h.g().translate(shift).getElement();
-      Node next = zone.rectangle.element().getNextSibling();
-      zone.rectangle.element().getParentNode().insertBefore(g, next);
+      Node next = zone.rectangle().element().getNextSibling();
+      zone.rectangle().element().getParentNode().insertBefore(g, next);
       for (RepresentableSubZone r : zone.subRepresentables(shift.opposite())) {
         Element svgRepr = r.toSvg(h);
         g.appendChild(svgRepr);
+        // new SvgKeysymEntry();
       }
     }
     return h.document();
   }
 
-  private ImmutableSet<RepresentableZone> getZones(XKeyNamesRepresenter representationsByXKeyName) {
-    ImmutableSet<RepresentableZone> zones =
+  private ImmutableSet<? extends RepresentableZone>
+      getZones(XKeyNamesRepresenter representationsByXKeyName) {
+    ImmutableSet<? extends RepresentableZone> zones =
         keyBindingZonesToXKeyName().keySet().stream().map(rect -> {
           String xKeyName = DomHelper.getAttribute(rect.element(), KEYBOARDD_X_KEY_NAME);
           List<Representation> reprs = representationsByXKeyName.representations(xKeyName);
-          return new RepresentableZone(rect, ImmutableList.copyOf(reprs));
+          return GenericRepresentableZone.from(xKeyName, rect, ImmutableList.copyOf(reprs));
         }).collect(ImmutableSet.toImmutableSet());
     return zones;
   }

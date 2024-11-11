@@ -12,6 +12,7 @@ import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalKeyboardMap;
 import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalKeysymEntry;
 import io.github.oliviercailloux.keyboardd.mnemonics.CanonicalMnemonic;
 import io.github.oliviercailloux.keyboardd.mnemonics.Mnemonics;
+import io.github.oliviercailloux.keyboardd.representable.CanonicalKeyboardMapRepresenter;
 import io.github.oliviercailloux.keyboardd.representable.Representation;
 import io.github.oliviercailloux.keyboardd.representable.SvgKeyboard;
 import io.github.oliviercailloux.keyboardd.representable.XKeyNamesAndRepresenter;
@@ -35,7 +36,7 @@ public class TheKeyMapTests {
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
         .canonicalize(canonicalized, mns);
     XKeyNamesAndRepresenter representer =
-        XKeyNamesAndRepresenter.from(canonMap, XKeyNamesAndRepresenter::defaultRepresentation);
+    CanonicalKeyboardMapRepresenter.from(canonMap, XKeyNamesAndRepresenter::defaultRepresentation);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
@@ -54,7 +55,7 @@ public class TheKeyMapTests {
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
         .canonicalize(map.canonicalize(Xkeys.latest().canonicalByAlias()), Mnemonics.latest());
-    XKeyNamesAndRepresenter representer = XKeyNamesAndRepresenter.from(canonMap, this::represent);
+    XKeyNamesAndRepresenter representer = CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
 
@@ -73,7 +74,7 @@ public class TheKeyMapTests {
     KeyboardMap map = XkbSymbolsReader.common().overwrite(XkbSymbolsReader.us());
     CanonicalKeyboardMap canonMap = CanonicalKeyboardMap
         .canonicalize(map.canonicalize(Xkeys.latest().canonicalByAlias()), Mnemonics.latest());
-    XKeyNamesAndRepresenter representer = XKeyNamesAndRepresenter.from(canonMap, this::represent);
+    XKeyNamesAndRepresenter representer = CanonicalKeyboardMapRepresenter.from(canonMap, this::represent);
     inputSvg.setFontSize(20);
     Document outputDocument = inputSvg.withRepresentations(representer::representations);
     String outputString = DomHelper.domHelper().toString(outputDocument);
