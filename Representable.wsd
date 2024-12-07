@@ -45,6 +45,7 @@ class "SvgKeyboard" {
   keyName(zone: RectangleElement): String
   setFontSize(fontSize: double)
   withRepresentations(XKeyNamesRepresenter): Document
+  withCanonicalRepresentations(CanonicalKeyboardMapRepresenter): SvgRepresentedKeyboard
 }
 
 "RectangularKeyboard" -[hidden]> "Representation"
