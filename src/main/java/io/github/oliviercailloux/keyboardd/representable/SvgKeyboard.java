@@ -123,18 +123,18 @@ public class SvgKeyboard {
       for (int line = 0; line < nbLines(); ++line) {
         Point currentStart = currentStartOfLine;
         for (int col = 0; col < nbCols(line); ++col) {
-          builder.add(Zone.cornerMove(currentStart, subDisplacement));
-          currentStart = currentStart.plus(subDisplacement.horizontal());
+          builder.add(Zone.at(currentStart).extend(subSize));
+          currentStart = currentStart.plus(subSize.horizontal());
         }
-        currentStartOfLine = currentStartOfLine.plus(subDisplacement.vertical());
+        currentStartOfLine = currentStartOfLine.plus(subSize.vertical());
       }
       ImmutableSortedSet<Zone> subs = builder.build();
       verify(subs.size() == n);
       return subs;
     }
 
-    public Displacement subDisplacement(Zone entireZone) {
-      return entireZone.across().mult(1d / nbCols, 1d / nbLines());
+    public Point subSize(Zone entireZone) {
+      return entireZone.size().mult(1d / nbCols, 1d / nbLines());
     }
   }
 
@@ -150,7 +150,7 @@ public class SvgKeyboard {
   private static record SimpleRepresentableSubZone (Zone absoluteSubZone, Displacement shift,
       Representation repr) implements RepresentableSubZone {
     public Zone subZone() {
-      return absoluteSubZone.plus(shift);
+      return absoluteSubZone.move(shift);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class SvgKeyboard {
       // Point gap = subZone.size().plus(svgSizeMaxSubZone.opposite());
       // Point halfGap = gap.mult(0.5d);
       // Point elemPos = subZone.start().plus(halfGap);
-      Zone posAndSize = Zone.centered(subZone().center(), svgSizeMaxSubZone);
+      Zone posAndSize = Zone.at(subZone().center()).sizeCentered(svgSizeMaxSubZone);
       SvgHelper.setPosition(importedSvg, posAndSize.start());
       SvgHelper.setSize(importedSvg, svgSizeMaxSubZone);
       return importedSvg;
@@ -316,46 +316,6 @@ public class SvgKeyboard {
     }
   }
 
-  private static class SimpleRepresentableZoneToDelete implements RepresentableZone {
-    public static SimpleRepresentableZoneToDelete from(String xKeyName, RectangleElement rectangle,
-        ImmutableList<Representation> reprs) {
-      return new SimpleRepresentableZoneToDelete(xKeyName, rectangle, reprs);
-    }
-
-    private final GenericRepresentableZone<Representation> delegate;
-
-    private SimpleRepresentableZoneToDelete(String xKeyName, RectangleElement rectangle,
-        ImmutableList<Representation> reprs) {
-      this.delegate =
-          new GenericRepresentableZone<>(xKeyName, rectangle, reprs, Function.identity());
-    }
-
-    @Override
-    public String xKeyName() {
-      return delegate.xKeyName;
-    }
-
-    @Override
-    public ImmutableList<Representation> reprs() {
-      return delegate.reprs();
-    }
-
-    @Override
-    public ImmutableSet<RepresentableSubZone> subRepresentables(Displacement shift) {
-      return delegate.subRepresentables(shift);
-    }
-
-    @Override
-    public double maxWidthPerCp() {
-      return delegate.maxWidthPerCp();
-    }
-
-    @Override
-    public RectangleElement rectangle() {
-      return delegate.rectangle;
-    }
-  }
-
   private static class CanonicRepresentableZone implements RepresentableZone {
     public static CanonicRepresentableZone from(String xKeyName, RectangleElement rectangle,
         ImmutableList<CanonicalKeysymEntry> entries,
@@ -417,7 +377,7 @@ public class SvgKeyboard {
       Point posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
       Point sizeScaled = key.size().mult(dotsPerCm);
       RectangleElement rect =
-          h.rectangle(Zone.cornerMove(posScaled, Displacement.between(Point.zero(), sizeScaled)))
+          h.rectangle(Zone.at(posScaled).extend(sizeScaled))
               .setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
