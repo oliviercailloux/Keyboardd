@@ -20,11 +20,11 @@ https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/java/io/github/o
 
 .The Key as a labeled SVG keyboard
 [[Labeled]]
-image::file:///home/olivier/Local/Nextcloud%20LAMSADE/Professions/Enseignement/Java%20&%20HTML/Keyboardd/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20X%20key%20names.svg[opts=inline]
+image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20X%20key%20names.svg[opts=inline]
 
 .The Key, our final SVG keyboard
 [[Final]]
-image::file:///home/olivier/Local/Nextcloud%20LAMSADE/Professions/Enseignement/Java%20&%20HTML/Keyboardd/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20chosen%20representations.svg[opts=inline]
+image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20chosen%20representations.svg[opts=inline]
 
 == More details
 To exploit the full potential of this library, you might need to understand at least roughly https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
