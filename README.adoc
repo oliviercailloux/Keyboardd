@@ -102,14 +102,14 @@ This library represents in the same way a key mapping using UCP written as U+xxx
 It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
 
 == Generating the diagrams
-java -jar "$HOME/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar" -tsvg *.wsd
+`java -jar "$HOME/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar" -tsvg *.wsd`
 
 == Representing UCPs
-Maybe impossible to achieve: https://github.com/w3c/csswg-drafts/issues/8874
+Maybe https://github.com/w3c/csswg-drafts/issues/8874[impossible] to achieve.
 
-https://graphicdesign.stackexchange.com/questions/57352/font-for-representing-unicode-non-printable-characters 
-https://packages.debian.org/bookworm/unifont 
-https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/font-family 
-https://unifoundry.com/unifont/ 
-https://stackoverflow.com/questions/13210729/make-spaces-tabs-newlines-visible-with-custom-font-instead-of-javascript 
-https://www.fileformat.info/info/unicode/char/2421/index.htm 
+- https://graphicdesign.stackexchange.com/questions/57352/font-for-representing-unicode-non-printable-characters 
+- https://packages.debian.org/bookworm/unifont 
+- https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/font-family 
+- https://unifoundry.com/unifont/ 
+- https://stackoverflow.com/questions/13210729/make-spaces-tabs-newlines-visible-with-custom-font-instead-of-javascript 
+- https://www.fileformat.info/info/unicode/char/2421/index.htm 
