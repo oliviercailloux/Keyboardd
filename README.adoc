@@ -16,15 +16,19 @@ image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources
 
 This is an https://github.com/oliviercailloux/SVG-keyboard/blob/main/README.adoc[SVG keyboard]: the file contains the X key names of the corresponding keys.
 
-https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/java/io/github/oliviercailloux/keyboardd/thekey/TheKeyXKeyNamesTests.java#L22-L36[This code] uses the above SVG unlabeled file to produce a labeled keyboard (figure <<Labeled>>). Alternatively, https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/java/io/github/oliviercailloux/keyboardd/thekey/TheKeyXKeyNamesTests.java#L39-L69[this code] produces a more appealing representation (figure <<Final>>).
+https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/java/io/github/oliviercailloux/keyboardd/thekey/TheKeyXKeyNamesTests.java#L22-L36[This code] uses the above SVG unlabeled file to produce a labeled keyboard (figure <<Labeled>>). 
 
 .The Key as a labeled SVG keyboard
 [[Labeled]]
 image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20X%20key%20names.svg[opts=inline]
 
+Alternatively, https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/java/io/github/oliviercailloux/keyboardd/thekey/TheKeyXKeyNamesTests.java#L39-L69[this code] produces a more appealing representation (figure <<Final>>).
+
 .The Key, our final SVG keyboard
 [[Final]]
 image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources/io/github/oliviercailloux/keyboardd/thekey/The%20Key%20with%20chosen%20representations.svg[opts=inline]
+
+Here is https://raw.githubusercontent.com/oliviercailloux/mykbd/[a more realistic example] use of this library, that displays a “real” keyboard.
 
 == More details
 To exploit the full potential of this library, you might need to understand at least roughly https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
