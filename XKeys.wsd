@@ -6,7 +6,7 @@ interface "Xkeys" {
   xKeycodeByXKeyName: Map<String, Short>
   xKeycodeByCanonicalXKeyName: BiMap<String, Short>
   canonicalXKeyNameByAlias: Map<String, String>
-  withoutAliases(): XKeys
+  withoutAliases(): Xkeys
 }
 
 @enduml
