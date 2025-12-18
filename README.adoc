@@ -30,6 +30,9 @@ image::https://github.com/oliviercailloux/Keyboardd/blob/main/src/test/resources
 
 Here is https://github.com/oliviercailloux/mykbd/[a more realistic example] use of this library, that displays a “real” keyboard.
 
+== More realistic example
+https://github.com/oliviercailloux/mykbd/[This repository] shows how to generate an image for a real keyboard with a real layout (namely, the one I use).
+
 == More details
 To exploit the full potential of this library, you might need to understand at least roughly https://github.com/oliviercailloux/XKB-doc/blob/main/README.adoc[how keyboards work under XKB]. Sorry for this.
 Referring to figure <<XM>> while reading further might help.
@@ -73,8 +76,8 @@ image::Representable.svg[Representable, opts=inline]
 The code uses the following terms and abbreviations.
 
 * `name` is an X key name (when not specifying whether it’s a canonical name or an alias)
-* `canonical name` (previously `canonical`, to be changed) is an X key name that is not an alias
-* `alias name` (or `alias`, to be changed) is an X key name that is an alias
+* `canonical name` is an X key name that is not an alias
+* `alias name` is an X key name that is an alias
 * `code` as `short` is an X keycode
 * `code` as `int` is a keysym code
 * `mnemonic` is a keysym mnemonic (when not specifying whether it’s a canonical mnemonic or an alias)
@@ -85,35 +88,14 @@ The argument names use the non-abbreviated names; the method and class names use
 
 For example, an argument that represents a canonical X key name is (following the https://google.github.io/styleguide/javaguide.html#s5.3-camel-case[GJSG], despite https://github.com/checkstyle/checkstyle/issues/14239#issuecomment-1883019025[disagreement]) `canonicalXKeyName`.
 
-== TODO
-Big keyboard X key names.
-Big keyboard french mapping.
-The first one requires json; the second one an installed x system.
-
 == SVG keyboards
-I have some impression that FF (Firefox uses GTK3 on my system) prints at 96 DPI. Eog seems to print at 72 DPI (configurable). Let’s go for 96 DPI for the standard.
-
 This library produces https://github.com/oliviercailloux/SVG-keyboard/blob/main/README.adoc[SVG keyboards] that target a given physical size so as to represent the keys and the keyboard with a scale of 1:1. To do this, the library assumes that the viewer (or printer) uses 96 DPI. SVG keyboards that this library produces therefore have a size in pixels, equivalently (given the DPI value), a size in cm.
-(If no size is set, “the browser should fall back to a size of [300px × 150px as an] outer <svg> element is technically a replaced element as far as the html/css specifications are concerned” -- https://stackoverflow.com/questions/65625935/how-does-chrome-determines-svg-size/65626536#65626536[SO]; as “when the referenced resource does not have an intrinsic size” -- https://svgwg.org/svg2-draft/embedded.html#Placement[SVG2 spec]; and there seems to be no way to implicitly set the size to the size of the content -- https://stackoverflow.com/questions/50813950/how-do-i-make-an-svg-size-to-fit-its-content/50820586#50820586[SO]; also no viewBox is used (“This attribute provides a convenient way to design SVG documents to scale-to-fit into an arbitrary SVG viewport” -- https://svgwg.org/svg2-draft/struct.html#SVGElement[SVG2 spec]) so that the keyboard does not change size (TODO check).)
 
 Key bindings may be represented by embedded SVG documents. Such documents may themselves have a native size in pixels (thus, still assuming 96 DPI, a native size in cm). This is useful if the embedded SVG document contains letters in a font that should be represented exactly at 10px, for example. Which in turn is useful for uniformity accross keys. This also permits to use a drawing that represents the key cap and whose size represents the physical size of the keyboard key cap.
-Thus, if the given SVG documents (to be embedded) have a size, the library will respect this size and center the document in the key binding zone. If the document is too large, it will be resized to fit the zone (TODO check).
+Thus, if the given SVG documents (to be embedded) have a size, the library will respect this size and center the document in the key binding zone. If the document is too large, it will be resized to fit the zone.
 
 Headers follow the https://svgwg.org/svg2-draft/struct.html#NewDocument[SVG2 spec].
 
 == Limitations
-This library represents in the same way a key mapping using UCP written as U+xxxx, using the character, or using the mnemonic. But internally, X may use different codes. For example the mnemonic “exclam” with keysym code 0x21 and the mnemonic absent with keysym code 0x1000021 corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
+This library represents in the same way a key mapping using UCP written as U+xxxx, using the corresponding character, or using the corresponding mnemonic. But internally, X may use different codes. Consider for example the mnemonic “exclam” with keysym code 0x21 and the keysym code 0x1000021, with no mnemonic, corresponding to U+0021 EXCLAMATION MARK. This happens for most mnemonics defined from lines 0 to 1800, then not for most mnemonics defined from lines 1800 to 3200.
 It https://github.com/xkbcommon/libxkbcommon/issues/433[might be] that keyboard shortcuts differ, for example.
-
-== Generating the diagrams
-`java -jar "$HOME/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar" -tsvg *.wsd`
-
-== Representing UCPs
-Maybe https://github.com/w3c/csswg-drafts/issues/8874[impossible] to achieve.
-
-- https://graphicdesign.stackexchange.com/questions/57352/font-for-representing-unicode-non-printable-characters 
-- https://packages.debian.org/bookworm/unifont 
-- https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/font-family 
-- https://unifoundry.com/unifont/ 
-- https://stackoverflow.com/questions/13210729/make-spaces-tabs-newlines-visible-with-custom-font-instead-of-javascript 
-- https://www.fileformat.info/info/unicode/char/2421/index.htm 
