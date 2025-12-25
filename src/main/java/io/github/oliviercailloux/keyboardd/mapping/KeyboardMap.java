@@ -17,7 +17,6 @@ import io.github.oliviercailloux.jaris.collections.CollectionUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An association of X key names to a list of keysym entries, representing a set of directives found

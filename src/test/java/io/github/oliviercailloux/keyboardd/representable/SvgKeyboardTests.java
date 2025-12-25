@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Size;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularRowKeyboard;
@@ -45,7 +46,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(Point.square(2d), Point.square(1d));
+        layout.toPhysicalKeyboard(Size.square(2d), Size.square(1d));
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     // Files.writeString(Path.of("out.svg"), svg);
@@ -62,7 +63,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(Point.square(2d), Point.square(1d));
+        layout.toPhysicalKeyboard(Size.square(2d), Size.square(1d));
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     assertEquals(expected, svg);
@@ -78,7 +79,7 @@ public class SvgKeyboardTests {
 
     JsonRectangularRowKeyboard layout = JsonRectangularKeyboardReader.rowKeyboard(source);
     RectangularKeyboard physicalKeyboard =
-        layout.toPhysicalKeyboard(Point.square(1d), Point.zero());
+        layout.toPhysicalKeyboard(Size.square(1d), Size.zero());
     SvgKeyboard svgK = SvgKeyboard.zonedFrom(physicalKeyboard);
     String svg = domHelper.toString(svgK.document());
     assertEquals(expected, svg);

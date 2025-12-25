@@ -5,7 +5,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import io.github.oliviercailloux.geometry.Displacement;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Zone;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,38 +35,32 @@ public class RectangularKeyboard {
   }
 
   /**
-   * Allows for duplicate x key names (not required usually, it seems, as even similar keys such as
-   * the left shift and right shift keys send different codes, but some keyboards might differ from
-   * mine in that respect).
+   * Allows for duplicate x key names.
    */
   private final ImmutableSet<RectangularKey> keys;
 
   private RectangularKeyboard(Set<RectangularKey> physicalKeys) {
     this.keys = ImmutableSet.copyOf(physicalKeys);
-    ImmutableMultiset<Point> corners = physicalKeys.stream().map(k -> k.topLeftCorner())
+    ImmutableMultiset<Point> starts = physicalKeys.stream().map(k -> k.zone().topLeft())
         .collect(ImmutableMultiset.toImmutableMultiset());
-    checkArgument(corners.size() == corners.entrySet().size(), corners);
+    checkArgument(starts.size() == starts.entrySet().size(), starts);
     if (!physicalKeys.isEmpty()) {
-      checkArgument(corners.stream().anyMatch(c -> c.equals(Point.zero())));
+      checkArgument(starts.stream().anyMatch(c -> c.equals(Point.zero())));
     }
   }
 
   /**
    * Returns the set of keys that compose this keyboard.
    *
-   * @return a possibly empty set of keys, one of which having the top left corner at the origin
+   * @return an empty set, or a set of keys, one of which having the top left corner at the origin
    *         ({@link Point#zero()})
    */
   public ImmutableSet<RectangularKey> keys() {
     return keys;
   }
 
-  public Point size() {
-    ImmutableSet<Point> bottomRights = keys.stream()
-        .map(k -> k.topLeftCorner().plus(k.size())).collect(ImmutableSet.toImmutableSet());
-    double rightest = bottomRights.stream().mapToDouble(p -> p.x()).max().orElse(0d);
-    double bottomest = bottomRights.stream().mapToDouble(p -> p.y()).max().orElse(0d);
-    return Point.given(rightest, bottomest);
+  public Zone zone() {
+    return Zone.enclosing(keys.stream().map(k -> k.zone()).toArray(Zone[]::new));
   }
 
   @Override

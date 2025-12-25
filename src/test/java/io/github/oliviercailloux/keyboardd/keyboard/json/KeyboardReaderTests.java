@@ -9,6 +9,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Size;
+import io.github.oliviercailloux.geometry.Zone;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKey;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
 import java.io.Reader;
@@ -120,18 +122,18 @@ public class KeyboardReaderTests {
         getClass().getResource("Keyboard layout two rows.json"), StandardCharsets.UTF_8);
 
     RectangularKey r1k1 =
-        RectangularKey.from(Point.zero(), Point.given(3d, 2d), "R1K1");
+        RectangularKey.from(Zone.at(Point.zero(), Size.given(3d, 2d)), "R1K1");
     RectangularKey r1k2 =
-        RectangularKey.from(Point.given(4d, 0d), Point.given(4.5d, 2d), "R1K2");
+        RectangularKey.from(Zone.at(Point.given(4d, 0d), Size.given(4.5d, 2d)), "R1K2");
     RectangularKey r2k1 =
-        RectangularKey.from(Point.given(0d, 3.2d), Point.given(6d, 2d), "R2K1");
+        RectangularKey.from(Zone.at(Point.given(0d, 3.2d), Size.given(6d, 2d)), "R2K1");
     RectangularKey r2k2 =
-        RectangularKey.from(Point.given(7d, 3.2d), Point.given(3d, 2d), "R2K2");
+        RectangularKey.from(Zone.at(Point.given(7d, 3.2d), Size.given(3d, 2d)), "R2K2");
     RectangularKeyboard expected =
         RectangularKeyboard.from(ImmutableSet.of(r1k1, r1k2, r2k1, r2k2));
 
     RectangularKeyboard keyboard = JsonRectangularKeyboardReader.rowKeyboard(source)
-        .toPhysicalKeyboard(Point.given(3d, 2d), Point.given(1d, 1.2d));
+        .toPhysicalKeyboard(Size.given(3d, 2d), Size.given(1d, 1.2d));
     assertEquals(expected, keyboard);
   }
 }

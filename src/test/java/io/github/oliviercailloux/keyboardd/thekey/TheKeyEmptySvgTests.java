@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Size;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.keyboardd.keyboard.json.JsonRectangularKeyboardReader;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
@@ -17,11 +18,11 @@ import org.w3c.dom.Document;
 public class TheKeyEmptySvgTests {
   private static final double KEYS_WIDTH_CM = 1d;
   private static final double KEYS_HEIGHT_CM = 1d;
-  private static final Point KEYS_SIZE = Point.given(KEYS_WIDTH_CM, KEYS_HEIGHT_CM);
+  private static final Size KEYS_SIZE = Size.given(KEYS_WIDTH_CM, KEYS_HEIGHT_CM);
 
   private static final double KEYS_HORIZONTAL_SPACING_CM = 0.2d;
-  private static final Point KEYS_SPACING =
-      Point.given(KEYS_HORIZONTAL_SPACING_CM, 0d);
+  private static final Size KEYS_SPACING =
+      Size.given(KEYS_HORIZONTAL_SPACING_CM, 0d);
 
   @Test
   public void writeEmptySvg() throws IOException {

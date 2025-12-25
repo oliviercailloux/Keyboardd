@@ -12,6 +12,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.math.IntMath;
 import io.github.oliviercailloux.geometry.Displacement;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Size;
 import io.github.oliviercailloux.geometry.Zone;
 import io.github.oliviercailloux.jaris.xml.DomHelper;
 import io.github.oliviercailloux.jaris.xml.XmlName;
@@ -115,26 +116,28 @@ public class SvgKeyboard {
     }
 
     private ImmutableSortedSet<Zone> subZones(Zone entireZone) {
-      Point subSize = subSize(entireZone);
-      Point currentStartOfLine = entireZone.start();
+      Size subSize = subSize(entireZone);
+      Point currentStartOfLine = entireZone.topLeft();
       ImmutableSortedSet.Builder<Zone> builder = ImmutableSortedSet.orderedBy(Comparator.comparing(
-          Zone::start,
+          Zone::topLeft,
           Comparator.comparing(Point::x).thenComparing(Comparator.comparing(Point::y).reversed())));
       for (int line = 0; line < nbLines(); ++line) {
         Point currentStart = currentStartOfLine;
         for (int col = 0; col < nbCols(line); ++col) {
-          builder.add(Zone.at(currentStart).extend(subSize));
-          currentStart = currentStart.plus(subSize.horizontal());
+          Zone subZone = Zone.at(currentStart, subSize);
+          builder.add(subZone);
+          currentStart = subZone.topRight();
         }
-        currentStartOfLine = currentStartOfLine.plus(subSize.vertical());
+        currentStartOfLine = currentStartOfLine.plus(subSize.asDisplacement().vertical());
       }
       ImmutableSortedSet<Zone> subs = builder.build();
       verify(subs.size() == n);
       return subs;
     }
 
-    public Point subSize(Zone entireZone) {
-      return entireZone.size().mult(1d / nbCols, 1d / nbLines());
+    public Size subSize(Zone entireZone) {
+      Size scale = Size.given(1d / nbCols, 1d / nbLines());
+      return entireZone.size().mult(scale);
     }
   }
 
@@ -158,7 +161,7 @@ public class SvgKeyboard {
       if (!repr.isString()) {
         return Double.POSITIVE_INFINITY;
       }
-      return subZone().size().mult(1d / repr.string().codePoints().count()).x();
+      return subZone().size().mult(1d / repr.string().codePoints().count()).width();
     }
 
     @Override
@@ -175,14 +178,14 @@ public class SvgKeyboard {
 
     private Element toReprSvg(SvgDocumentHelper h) {
       Element svg = repr.svg().getDocumentElement();
-      Optional<Point> svgSizeOpt = SvgHelper.tryGetSize(svg);
+      Optional<Size> svgSizeOpt = SvgHelper.tryGetSize(svg);
       Element importedSvg = (Element) h.document().importNode(svg, true);
-      Point svgSizeMaxSubZone;
+      Size svgSizeMaxSubZone;
       if (svgSizeOpt.isEmpty()) {
         svgSizeMaxSubZone = subZone().size();
       } else {
-        Point svgSize = svgSizeOpt.orElseThrow(VerifyException::new);
-        if (svgSize.x() > subZone().size().x() || svgSize.y() > subZone().size().y()) {
+        Size svgSize = svgSizeOpt.orElseThrow(VerifyException::new);
+        if (svgSize.width() > subZone().size().width() || svgSize.height() > subZone().size().height()) {
           svgSizeMaxSubZone = subZone().size();
         } else {
           svgSizeMaxSubZone = svgSize;
@@ -191,8 +194,8 @@ public class SvgKeyboard {
       // Point gap = subZone.size().plus(svgSizeMaxSubZone.opposite());
       // Point halfGap = gap.mult(0.5d);
       // Point elemPos = subZone.start().plus(halfGap);
-      Zone posAndSize = Zone.at(subZone().center()).sizeCentered(svgSizeMaxSubZone);
-      SvgHelper.setPosition(importedSvg, posAndSize.start());
+      Zone posAndSize = Zone.enclosing(subZone().center()).resizedFixedCenter(svgSizeMaxSubZone);
+      SvgHelper.setPosition(importedSvg, posAndSize.topLeft());
       SvgHelper.setSize(importedSvg, svgSizeMaxSubZone);
       return importedSvg;
     }
@@ -370,14 +373,13 @@ public class SvgKeyboard {
 
     double dpi = 96d;
     double dotsPerCm = dpi / 2.54d;
-    h.setSize(physicalKeyboard.size().mult(dotsPerCm));
+    h.setSize(physicalKeyboard.zone().size().mult(dotsPerCm));
 
-    Point start = Point.zero();
     for (RectangularKey key : physicalKeyboard.keys()) {
-      Point posScaled = start.plus(key.topLeftCorner()).mult(dotsPerCm);
-      Point sizeScaled = key.size().mult(dotsPerCm);
+      Point posScaled = key.zone().topLeft().mult(dotsPerCm);
+      Size sizeScaled = key.zone().size().mult(dotsPerCm);
       RectangleElement rect =
-          h.rectangle(Zone.at(posScaled).extend(sizeScaled))
+          h.rectangle(Zone.at(posScaled, sizeScaled))
               .setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
@@ -494,7 +496,7 @@ public class SvgKeyboard {
 
     final ImmutableSet.Builder<SvgXKey> svgKeys = new ImmutableSet.Builder<>();
     for (RepresentableZone zone : zones) {
-      Displacement shift = Displacement.between(Point.origin(), zone.rectangle().zone().start());
+      Displacement shift = Displacement.between(Point.origin(), zone.rectangle().zone().topLeft());
       Element g = h.g().translate(shift).getElement();
       Node next = zone.rectangle().element().getNextSibling();
       zone.rectangle().element().getParentNode().insertBefore(g, next);

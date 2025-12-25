@@ -36,8 +36,8 @@ public class SvgXKey {
     checkArgument(entries.stream().map(SvgKeysymEntry::zone).distinct().count() == entries.size());
     Comparator<Point> pointComparator = Comparator.comparing(Point::x).thenComparing(Point::y,
         Comparator.<Double>naturalOrder().reversed());
-    Comparator<Zone> zoneComparator = Comparator.comparing(Zone::start, pointComparator)
-        .thenComparing(Zone::end, pointComparator);
+    Comparator<Zone> zoneComparator = Comparator.comparing(Zone::topLeft, pointComparator)
+        .thenComparing(Zone::bottomRight, pointComparator);
     this.svgKeysymEntries = ImmutableSortedSet
         .copyOf(Comparator.comparing(SvgKeysymEntry::zone, zoneComparator), entries);
   }

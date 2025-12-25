@@ -4,7 +4,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import io.github.oliviercailloux.geometry.Displacement;
 import io.github.oliviercailloux.geometry.Point;
+import io.github.oliviercailloux.geometry.Size;
+import io.github.oliviercailloux.geometry.Zone;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKey;
 import io.github.oliviercailloux.keyboardd.representable.RectangularKeyboard;
 import java.util.List;
@@ -50,19 +53,20 @@ public class JsonRectangularRowKeyboard {
    *        the vertical space between each row.
    * @return a (scaled) rectangular keyboard
    */
-  public RectangularKeyboard toPhysicalKeyboard(Point scale, Point spacing) {
-    Point currentCorner = Point.zero();
+  public RectangularKeyboard toPhysicalKeyboard(Size scale, Size spacing) {
+    Zone rowZone = Zone.enclosing(Point.zero());
 
     final ImmutableSet.Builder<RectangularKey> keys = new ImmutableSet.Builder<>();
     for (ImmutableList<JsonRectangularRowKey> row : rows) {
       for (JsonRectangularRowKey sourceKey : row) {
-        double targetWidth = sourceKey.width() * scale.x();
-        RectangularKey targetKey = RectangularKey.from(currentCorner,
-            Point.given(targetWidth, scale.y()), sourceKey.xKeyName());
+        Size targetSize = sourceKey.relativeSize().mult(scale);
+        Zone targetZone = Zone.at(rowZone.topRight(), targetSize);
+        RectangularKey targetKey = RectangularKey.from(targetZone, sourceKey.xKeyName());
         keys.add(targetKey);
-        currentCorner = currentCorner.plus(Point.horizontal(targetWidth + spacing.x()));
+        Zone wholeZone = targetZone.extend(spacing.asDisplacement());
+        rowZone = rowZone.andEnclosing(wholeZone.bottomRight());
       }
-      currentCorner = Point.given(0d, currentCorner.y() + scale.y() + spacing.y());
+      rowZone = Zone.enclosing(Point.given(0d, rowZone.bottomRight().y()));
     }
 
     return RectangularKeyboard.from(keys.build());

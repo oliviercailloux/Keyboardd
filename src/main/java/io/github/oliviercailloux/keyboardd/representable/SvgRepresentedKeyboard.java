@@ -27,8 +27,8 @@ public class SvgRepresentedKeyboard {
   private SvgRepresentedKeyboard(SvgKeyboard svgKeyboard, Set<SvgXKey> svgXKeys) {
     this.svgKeyboard = svgKeyboard;
     Comparator<Point> pointComparator = Comparator.comparing(Point::y).thenComparing(Point::x);
-    Comparator<Zone> zoneComparator = Comparator.comparing(Zone::start, pointComparator)
-        .thenComparing(Zone::end, pointComparator);
+    Comparator<Zone> zoneComparator = Comparator.comparing(Zone::topLeft, pointComparator)
+        .thenComparing(Zone::bottomRight, pointComparator);
     this.svgXKeysToXKeyName = svgXKeys.stream().collect(ImmutableSortedMap.toImmutableSortedMap(
         Comparator.comparing(SvgXKey::keyZone, zoneComparator), s -> s, SvgXKey::xKeyName));
   }

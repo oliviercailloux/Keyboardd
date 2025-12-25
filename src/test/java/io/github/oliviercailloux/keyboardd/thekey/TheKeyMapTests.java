@@ -49,36 +49,36 @@ public class TheKeyMapTests {
 
     SvgXKey svgL = Iterables.getOnlyElement(represented.svgXKeys("LCTL"));
     assertEquals("LCTL", svgL.xKeyName());
-    assertEquals("(0.0, 0.0)", svgL.keyZone().start().coordinates());
-    assertEquals("(37.7953, 37.7953)", svgL.keyZone().end().coordinates());
+    assertEquals("(0.0, 0.0)", svgL.keyZone().topLeft().coordinates());
+    assertEquals("(37.7953, 37.7953)", svgL.keyZone().bottomRight().coordinates());
     SvgKeysymEntry lCtlEntry = Iterables.getOnlyElement(svgL.svgKeysymEntries());
     assertEquals("Control_L", ((CanonicalMnemonic) lCtlEntry.canonicalKeysymEntry()).mnemonic());
     assertEquals(svgL, lCtlEntry.xKey());
-    assertEquals("(0.0, 0.0)", lCtlEntry.zone().start().coordinates());
-    assertEquals("(37.7953, 37.7953)", lCtlEntry.zone().end().coordinates());
+    assertEquals("(0.0, 0.0)", lCtlEntry.zone().topLeft().coordinates());
+    assertEquals("(37.7953, 37.7953)", lCtlEntry.zone().bottomRight().coordinates());
 
     SvgXKey svg3 = Iterables.getOnlyElement(represented.svgXKeys("AB03"));
     assertEquals("AB03", svg3.xKeyName());
-    assertEquals("(45.3543, 0.0)", svg3.keyZone().start().coordinates());
-    assertEquals("(83.14959999999999, 37.7953)", svg3.keyZone().end().coordinates());
+    assertEquals("(45.3543, 0.0)", svg3.keyZone().topLeft().coordinates());
+    assertEquals("(83.14959999999999, 37.7953)", svg3.keyZone().bottomRight().coordinates());
     ImmutableSortedSet<SvgKeysymEntry> ab03Entries = svg3.svgKeysymEntries();
     assertEquals(2, ab03Entries.size());
     UnmodifiableIterator<SvgKeysymEntry> ab3It = ab03Entries.iterator();
     SvgKeysymEntry ab3Entry1 = ab3It.next();
     assertEquals("c", ((CanonicalMnemonic) ab3Entry1.canonicalKeysymEntry()).mnemonic());
     assertEquals(svg3, ab3Entry1.xKey());
-    assertEquals("(45.3543, 0.0)", ab3Entry1.zone().start().coordinates());
-    assertEquals("(64.25195, 37.7953)", ab3Entry1.zone().end().coordinates());
+    assertEquals("(45.3543, 0.0)", ab3Entry1.zone().topLeft().coordinates());
+    assertEquals("(64.25195, 37.7953)", ab3Entry1.zone().bottomRight().coordinates());
     SvgKeysymEntry ab3Entry2 = ab3It.next();
     assertEquals("C", ((CanonicalMnemonic) ab3Entry2.canonicalKeysymEntry()).mnemonic());
     assertEquals(svg3, ab3Entry2.xKey());
-    assertEquals("(64.25195, 0.0)", ab3Entry2.zone().start().coordinates());
-    assertEquals("(83.14959999999999, 37.7953)", ab3Entry2.zone().end().coordinates());
+    assertEquals("(64.25195, 0.0)", ab3Entry2.zone().topLeft().coordinates());
+    assertEquals("(83.14959999999999, 37.7953)", ab3Entry2.zone().bottomRight().coordinates());
     assertFalse(ab3It.hasNext());
 
     SvgXKey svg4 = Iterables.getOnlyElement(represented.svgXKeys("AB04"));
     assertEquals("AB04", svg4.xKeyName());
-    assertEquals("(90.7087, 0.0)", svg4.keyZone().start().coordinates());
+    assertEquals("(90.7087, 0.0)", svg4.keyZone().topLeft().coordinates());
 
     Document outputDocument = represented.document();
     String outputString = DomHelper.domHelper().toString(outputDocument);
