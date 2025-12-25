@@ -185,7 +185,8 @@ public class SvgKeyboard {
         svgSizeMaxSubZone = subZone().size();
       } else {
         Size svgSize = svgSizeOpt.orElseThrow(VerifyException::new);
-        if (svgSize.width() > subZone().size().width() || svgSize.height() > subZone().size().height()) {
+        if (svgSize.width() > subZone().size().width()
+            || svgSize.height() > subZone().size().height()) {
           svgSizeMaxSubZone = subZone().size();
         } else {
           svgSizeMaxSubZone = svgSize;
@@ -378,9 +379,7 @@ public class SvgKeyboard {
     for (RectangularKey key : physicalKeyboard.keys()) {
       Point posScaled = key.zone().topLeft().mult(dotsPerCm);
       Size sizeScaled = key.zone().size().mult(dotsPerCm);
-      RectangleElement rect =
-          h.rectangle(Zone.at(posScaled, sizeScaled))
-              .setRounding(10d);
+      RectangleElement rect = h.rectangle(Zone.at(posScaled, sizeScaled)).setRounding(10d);
       String xKeyName = key.xKeyName();
       if (!xKeyName.isEmpty()) {
         setAttribute(rect.element(), KEYBOARDD_X_KEY_NAME, xKeyName);

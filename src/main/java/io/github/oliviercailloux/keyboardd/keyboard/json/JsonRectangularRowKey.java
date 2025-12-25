@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.oliviercailloux.geometry.Size;
 
 /**
- * A key, part of a rectangular keyboard. Such a key has a specified relative width but no specified height:
- * all keys in a rectangular keyboard have the same height.
+ * A key, part of a rectangular keyboard. Such a key has a specified relative width but no specified
+ * height: all keys in a rectangular keyboard have the same height.
  */
 public record JsonRectangularRowKey (String xKeyName, double relativeWidth) {
   @JsonCreator()
