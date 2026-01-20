@@ -22,7 +22,7 @@ class "Mnemonics" {
 
 interface "CanonicalKeysymEntry" {}
 "CanonicalKeysymEntry" <|-- "CanonicalMnemonic"
-"CanonicalKeysymEntry" <|-- "Ucp"
+"CanonicalKeysymEntry" <|-- "ImplicitUcp"
 
 class "CanonicalKeyboardMap" {
   {static} canonicalize(KeyboardMap, Mnemonics): CanonicalKeyboardMap
