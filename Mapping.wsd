@@ -22,11 +22,14 @@ class "KeyboardMap" {
   canonicalize(canonicalXKeyNameByAlias: Map<String, String>): KeyboardMap
 }
 
-class "SimpleSymbolsReader" {
+class "XkbSymbolsReader" {
   read(CharSource source): KeyboardMap
+  common(): KeyboardMap
+  us(): KeyboardMap
+  usIntl(): KeyboardMap
 }
 
 KeysymEntry -[hidden]> KeyboardMap
-KeyboardMap -[hidden]> SimpleSymbolsReader
+KeyboardMap -[hidden]> XkbSymbolsReader
 
 @enduml

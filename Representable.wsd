@@ -17,7 +17,7 @@ interface "XKeyNamesRepresenter" {
   representations(name: String): Representation [0..*]
 }
 
-class "XKeyNamesAndRepresenter" {
+interface "XKeyNamesAndRepresenter" {
   {static} from(KeyboardMap, Map<KeysymEntry, Representation>)
   names(): String [0..*]
 }
@@ -27,7 +27,7 @@ class "CanonicalKeyboardMapRepresenter" {
   {static} from(CanonicalKeyboardMap, Map<CanonicalKeysymEntry, Representation>)
   entries(xKeyName: String): List<CanonicalKeysymEntry>
 }
-"XKeyNamesAndRepresenter" <|-- "CanonicalKeyboardMapRepresenter"
+"XKeyNamesAndRepresenter" <|.. "CanonicalKeyboardMapRepresenter"
 
 class "RectangularKey" {
   topLeftCorner
