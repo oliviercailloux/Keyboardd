@@ -49,34 +49,42 @@ class KeysymReader {
    * Reflects a single entry in the source.
    */
   public static record ParsedMnemonic (String mnemonic, int code, Optional<Integer> unicode,
-      boolean deprecated, boolean specific, String comment) {
+      boolean deprecated, boolean specific, boolean alias, String comment) {
     public static ParsedMnemonic noComment(String mnemonic, int code) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, false, "");
     }
 
     public static ParsedMnemonic unicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, false, false, "");
     }
 
     public static ParsedMnemonic deprecatedUnicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), true, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), true, false, false, "");
     }
 
     public static ParsedMnemonic specificUnicode(String mnemonic, int code, int unicode) {
-      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, true, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.of(unicode), false, true, false, "");
     }
 
     public static ParsedMnemonic deprecated(String mnemonic, int code) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, "");
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, false, "");
+    }
+
+    public static ParsedMnemonic alias(String mnemonic, int code, String alias) {
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, true, alias);
     }
 
     public static ParsedMnemonic commented(String mnemonic, int code, String comment) {
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, comment);
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), false, false, false, comment);
     }
 
     public static ParsedMnemonic deprecatedComment(String mnemonic, int code, String comment) {
-      checkArgument(comment.toLowerCase().startsWith("deprecated"));
-      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, comment);
+      checkArgument(comment.toLowerCase().startsWith("deprecated"), comment);
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, false, comment);
+    }
+
+    public static ParsedMnemonic deprecatedAlias(String mnemonic, int code, String alias) {
+      return new ParsedMnemonic(mnemonic, code, Optional.empty(), true, false, true, alias);
     }
 
     public ParsedMnemonic {
@@ -101,9 +109,12 @@ class KeysymReader {
   private static final Pattern P_XKB_COMMENT =
       Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+) +"
           + "/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
-  private static final Pattern P_XKB_COMMENT_ALIAS =
+  private static final Pattern P_XKB_COMMENT_NON_DEPRECATED_ALIAS =
       Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
-          + "/\\* ([aA]lias for |[sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
+          + "/\\* ((non deprecated )?[aA]lias for )(?<alias>[^\\*]+) \\*/$");
+  private static final Pattern P_XKB_COMMENT_DEPRECATED_ALIAS =
+      Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
+          + "/\\* ([sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
   private static final Pattern P_XKB_COMMENT_UNICODE =
       Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\* U\\+(?<unicode>[0-9a-fA-F]+) .*\\*/$");
@@ -113,7 +124,7 @@ class KeysymReader {
   private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
       P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
   private static final ImmutableSet<Pattern> PATTERNS_COMMENTS =
-      ImmutableSet.of(P_XKB_COMMENT_ALIAS, P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
+      ImmutableSet.of(P_XKB_COMMENT_NON_DEPRECATED_ALIAS, P_XKB_COMMENT_DEPRECATED_ALIAS, P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
 
   /**
    * Returns the latest version of the mnemonics, as included in this library. This will evolve with
@@ -203,8 +214,12 @@ class KeysymReader {
   private static ParsedMnemonic parseLineComments(String name, int code, String comment,
       Matcher matcherComments) {
     ParsedMnemonic parsed;
-    if (matcherComments.pattern().equals(P_XKB_COMMENT_ALIAS)) {
-      parsed = (ParsedMnemonic.commented(name, code, comment));
+    if (matcherComments.pattern().equals(P_XKB_COMMENT_DEPRECATED_ALIAS)) {
+      String alias = matcherComments.group("alias");
+      parsed = (ParsedMnemonic.deprecatedAlias(name, code, alias));
+    } else if (matcherComments.pattern().equals(P_XKB_COMMENT_NON_DEPRECATED_ALIAS)) {
+      String alias = matcherComments.group("alias");
+      parsed = (ParsedMnemonic.alias(name, code, alias));
     } else if (matcherComments.pattern().equals(P_XKB_COMMENT_UNICODE)) {
       String unicodeStr = matcherComments.group("unicode");
       int unicode = Integer.parseInt(unicodeStr, 16);

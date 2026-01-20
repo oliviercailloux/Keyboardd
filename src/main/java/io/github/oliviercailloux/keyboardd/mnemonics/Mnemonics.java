@@ -121,6 +121,20 @@ public class Mnemonics {
     return bestCode;
   }
 
+  /**
+   * A remaining (thus non-first mnemonic for a given code) is generally deprecated, unless
+   * explicitly marked so, so we have to consider a wider notion of deprecation than what is visible
+   * from line-by-line myopic parsing.
+   * 
+   * @param remaining non-first mnemonic for a given code
+   * @return true, unless has been recognized as a non deprecated alias when parsing
+   * @see https://github.com/xkbcommon/libxkbcommon/issues/433
+   */
+  private static boolean deprecated(ParsedMnemonic remaining) {
+    boolean notDeprecated = remaining.alias() && !remaining.deprecated();
+    return !notDeprecated;
+  }
+
   private static CanonicalMnemonic toCanonical(Set<ParsedMnemonic> parsedMns, boolean keepUcp) {
     Iterator<ParsedMnemonic> iterator = parsedMns.iterator();
     checkArgument(iterator.hasNext());
@@ -129,7 +143,7 @@ public class Mnemonics {
         ImmutableSet.<ParsedMnemonic>builder().addAll(iterator).build();
     boolean deprecated = first.deprecated();
     if (deprecated) {
-      checkArgument(parsedMns.stream().allMatch(ParsedMnemonic::deprecated));
+      checkArgument(parsedMns.stream().allMatch(Mnemonics::deprecated));
     }
     int code = parsedMns.stream().map(ParsedMnemonic::code).distinct()
         .collect(MoreCollectors.onlyElement());
@@ -139,10 +153,10 @@ public class Mnemonics {
     } else {
       ucp = Optional.empty();
     }
-    ImmutableSet<ParsedMnemonic> deprecateds = remaining.stream().filter(ParsedMnemonic::deprecated)
-        .collect(ImmutableSet.toImmutableSet());
+    ImmutableSet<ParsedMnemonic> deprecateds =
+        remaining.stream().filter(Mnemonics::deprecated).collect(ImmutableSet.toImmutableSet());
     ImmutableSet<ParsedMnemonic> nonDeprecateds =
-        remaining.stream().filter(p -> !p.deprecated()).collect(ImmutableSet.toImmutableSet());
+        remaining.stream().filter(p -> !deprecated(p)).collect(ImmutableSet.toImmutableSet());
     return new CanonicalMnemonic(first.mnemonic(), code,
         nonDeprecateds.stream().map(ParsedMnemonic::mnemonic)
             .collect(ImmutableSet.toImmutableSet()),
