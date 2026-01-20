@@ -139,8 +139,8 @@ public class KeysymReaderTests {
     CharSource source =
         CharSource.wrap("#define XKB_KEY_ISO_Group_Shift  0xff7e  /* Alias for Mode_switch */\n");
     ImmutableSet<ParsedMnemonic> mns = KeysymReader.parse(source);
-    assertEquals(ImmutableSet.of(ParsedMnemonic.commented("ISO_Group_Shift",
-        Integer.parseInt("ff7e", 16), "Alias for Mode_switch")), mns);
+    assertEquals(ImmutableSet.of(ParsedMnemonic.alias("ISO_Group_Shift",
+        Integer.parseInt("ff7e", 16), "Mode_switch")), mns);
   }
 
   @Test
