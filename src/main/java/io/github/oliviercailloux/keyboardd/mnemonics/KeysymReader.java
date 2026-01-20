@@ -111,7 +111,7 @@ class KeysymReader {
           + "/\\* +(?<comment>[^\\* ]+( +[^\\* ]+)*) *\\*/$");
   private static final Pattern P_XKB_COMMENT_NON_DEPRECATED_ALIAS =
       Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
-          + "/\\* ((non deprecated )?[aA]lias for )(?<alias>[^\\*]+) \\*/$");
+          + "/\\* ((non-deprecated )?[aA]lias for )(?<alias>[^\\*]+) \\*/$");
   private static final Pattern P_XKB_COMMENT_DEPRECATED_ALIAS =
       Pattern.compile("^#define XKB_KEY_(?<rawName>[^ ]+) + 0x(?<code>[0-9a-fA-F]+)  "
           + "/\\* ([sS]ame as XKB_KEY_)(?<alias>[^\\*]+) \\*/$");
@@ -135,7 +135,7 @@ class KeysymReader {
    */
   public static ImmutableSet<ParsedMnemonic> latest() {
     CharSource keysyms = Resources.asCharSource(
-        KeysymReader.class.getResource("xkbcommon-keysyms - 238d13.h"), StandardCharsets.UTF_8);
+        KeysymReader.class.getResource("xkbcommon-keysyms - 244f3a8.h"), StandardCharsets.UTF_8);
     ImmutableSet<ParsedMnemonic> latest;
     try {
       latest = parse(keysyms);

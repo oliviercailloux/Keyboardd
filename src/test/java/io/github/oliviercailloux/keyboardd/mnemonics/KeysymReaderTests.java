@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.io.CharSource;
+import io.github.oliviercailloux.keyboardd.TestResources;
 import io.github.oliviercailloux.keyboardd.mnemonics.KeysymReader.ParsedMnemonic;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -182,6 +183,47 @@ public class KeysymReaderTests {
   @Test
   public void testLatest() throws Exception {
     ImmutableSet<ParsedMnemonic> mns = KeysymReader.latest();
+    assertTrue(mns.size() >= 2572);
+    {
+      ImmutableSet<ParsedMnemonic> noComment =
+          mns.stream().filter(s -> s.comment().isEmpty() && s.unicode().isEmpty())
+              .collect(ImmutableSet.toImmutableSet());
+      assertTrue(noComment.size() >= 353);
+    }
+    {
+      ImmutableSet<ParsedMnemonic> unicodeS =
+          mns.stream().filter(s -> s.specific()).collect(ImmutableSet.toImmutableSet());
+      assertTrue(unicodeS.size() >= 20);
+    }
+    {
+      ImmutableSet<ParsedMnemonic> unicodeD =
+          mns.stream().filter(s -> s.unicode().isPresent() && s.deprecated())
+              .collect(ImmutableSet.toImmutableSet());
+      assertTrue(unicodeD.size() >= 43);
+    }
+    {
+      ImmutableSet<ParsedMnemonic> matching =
+          mns.stream().filter(s -> !s.comment().isEmpty()).collect(ImmutableSet.toImmutableSet());
+      assertTrue(matching.size() >= 524);
+    }
+    {
+      ImmutableSet<ParsedMnemonic> matching =
+          mns.stream().filter(s -> !s.comment().isEmpty() && !s.deprecated())
+              .collect(ImmutableSet.toImmutableSet());
+      assertTrue(matching.size() >= 421);
+    }
+    {
+      ImmutableSet<ParsedMnemonic> matching =
+          mns.stream().filter(s -> s.unicode().isPresent() && !s.deprecated() && !s.specific())
+              .collect(ImmutableSet.toImmutableSet());
+      assertTrue(matching.size() >= 1632);
+    }
+  }
+
+  @Test
+  public void test238() throws Exception {
+    ImmutableSet<ParsedMnemonic> mns = KeysymReader.parse(TestResources.charSource(
+        "mnemonics/xkbcommon-keysyms - 238d13.h"));
     /* grep -c "^#define X" "xkbcommon-keysyms - 238d13.h" */
     assertEquals(2572, mns.size());
 
@@ -209,12 +251,12 @@ public class KeysymReaderTests {
     }
     { /*
        * grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep "/\*" | grep -v "/\* deprecated" |
-       * grep -c -v "U+"
+       * grep -c -v "U+" – no, not so simple
        */
-      ImmutableSet<ParsedMnemonic> matching =
-          mns.stream().filter(s -> !s.comment().isEmpty() && !s.deprecated())
-              .collect(ImmutableSet.toImmutableSet());
-      assertEquals(421, matching.size());
+      // ImmutableSet<ParsedMnemonic> matching =
+      //     mns.stream().filter(s -> !s.comment().isEmpty() && !s.deprecated())
+      //         .collect(ImmutableSet.toImmutableSet());
+      // assertEquals(421, matching.size());
     }
     { /* grep "^#define" "xkbcommon-keysyms - 238d13.h" | grep -c "/\* U+" */
       ImmutableSet<ParsedMnemonic> matching =

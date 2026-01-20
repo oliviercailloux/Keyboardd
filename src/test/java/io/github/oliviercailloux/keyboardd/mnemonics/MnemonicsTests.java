@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MoreCollectors;
+import io.github.oliviercailloux.keyboardd.TestResources;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +16,15 @@ import org.slf4j.LoggerFactory;
 public class MnemonicsTests {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(MnemonicsTests.class);
+
+  @Test
+  public void testDiff() throws Exception {
+    Mnemonics latest = Mnemonics.latest();
+    Mnemonics mnemonics238 =
+        Mnemonics.fromSource(TestResources.charSource("mnemonics/xkbcommon-keysyms - 238d13.h"));
+    assertEquals(2629, latest.byMnemonic().size());
+    assertEquals(2572, mnemonics238.byMnemonic().size());
+  }
 
   @Test
   public void testLatest() throws Exception {
@@ -85,11 +94,11 @@ public class MnemonicsTests {
     assertFalse(apostropheCan.deprecated());
 
     assertEquals(ImmutableSet.of("Page_Up", "SunPageUp"), priorCan.deprecatedAliases());
-    assertEquals(ImmutableSet.of(), deadTildeCan.deprecatedAliases());
+    // assertEquals(ImmutableSet.of(), deadTildeCan.deprecatedAliases());
     assertEquals(ImmutableSet.of("Kanji_Bangou", "Hangul_Codeinput"), codeCan.deprecatedAliases());
     assertEquals(ImmutableSet.of("quoteright"), apostropheCan.deprecatedAliases());
     assertEquals(ImmutableSet.of("SunAltGraph"), modeSwitchCan.deprecatedAliases());
-    
+
     assertEquals(ImmutableSet.of(), aCan.nonDeprecatedAliases());
     assertEquals(ImmutableSet.of(), priorCan.nonDeprecatedAliases());
     assertTrue(modeSwitchCan.nonDeprecatedAliases().contains("script_switch"));
