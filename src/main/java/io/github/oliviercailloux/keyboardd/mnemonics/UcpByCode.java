@@ -13,19 +13,15 @@ import java.util.function.Function;
 
 /** Might consider removing this: only IMPLICIT_UCP_BY_CODE and CODE_BY_IMPLICIT_UCP are used. */
 class UcpByCode {
-  public static final ContiguousSet<Integer> IMPLICIT_UCPS = ContiguousSet.closed(0x100, 0x10F_FFF);
-  public static final ContiguousSet<Integer> IMPLICIT_UCP_KEYSYM_CODES =
-      ContiguousSet.closed(0x01_000_100, 0x01_10F_FFF);
-
   public static UcpByCode implicit() {
-    return new UcpByCode(ImmutableMap.of(), IMPLICIT_UCP_KEYSYM_CODES, IMPLICIT_UCPS);
+    return new UcpByCode(ImmutableMap.of(), ImplicitUcp.IMPLICIT_UCP_KEYSYM_CODES, ImplicitUcp.IMPLICIT_UCPS);
   }
 
   public static UcpByCode implicitAndExplicit(Map<Integer, Integer> ucpByCodeExplicit) {
-    ContiguousSet<Integer> domain = IMPLICIT_UCP_KEYSYM_CODES;
+    ContiguousSet<Integer> domain = ImplicitUcp.IMPLICIT_UCP_KEYSYM_CODES;
     ImmutableSet.Builder<Integer> domainBuilder = ImmutableSet.builder();
 
-    ContiguousSet<Integer> coDomain = IMPLICIT_UCPS;
+    ContiguousSet<Integer> coDomain = ImplicitUcp.IMPLICIT_UCPS;
     ImmutableSet.Builder<Integer> coDomainBuilder = ImmutableSet.builder();
 
     return new UcpByCode(ucpByCodeExplicit,

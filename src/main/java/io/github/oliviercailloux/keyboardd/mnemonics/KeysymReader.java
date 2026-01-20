@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * <li>The mnemonics that correspond to a given keysym code correspond to at most one UCP.</li>
  * <li>All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the
  * same keysym code, or exactly one of them corresponds to a keysym code in the range
- * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.</li>
+ * ImplicitUcp#IMPLICIT_UCP_KEYSYM_CODES.</li>
  * <li>Each entry in the set represents one entry in the source. There is no lookup logic, thus, for
  * example, an entry in the source that has as comment “deprecated alias for oslash” will be parsed
  * as a deprecated mnemonic with no associated UCP: it does not lookup the relevant UCP from the
@@ -248,7 +248,7 @@ class KeysymReader {
     /*
      * All non deprecated and non specific mnemonics corresponding to a given UCP correspond to the
      * same keysym code, or exactly one of them corresponds to a keysym code in the range
-     * UcpByCode#IMPLICIT_UCP_KEYSYM_CODES.
+     * ImplicitUcp#IMPLICIT_UCP_KEYSYM_CODES.
      */
     ImmutableSetMultimap<Integer,
         ParsedMnemonic> mnsByUcp = mns.stream().filter(m -> !m.deprecated())
@@ -262,7 +262,7 @@ class KeysymReader {
       verify(codesForUcp.size() >= 1);
       if (codesForUcp.size() >= 2) {
         ImmutableSet<Integer> implicitCodes =
-            Sets.intersection(codesForUcp, UcpByCode.IMPLICIT_UCP_KEYSYM_CODES).immutableCopy();
+            Sets.intersection(codesForUcp, ImplicitUcp.IMPLICIT_UCP_KEYSYM_CODES).immutableCopy();
         checkArgument(implicitCodes.size() == 1,
             "Ucp %s, mns %s.".formatted(ucp, mnsForUcp.toString()));
       }

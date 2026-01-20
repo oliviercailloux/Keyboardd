@@ -104,7 +104,7 @@ public class Mnemonics {
   private static int getCodeThatKeepsUcp(Set<ParsedMnemonic> parsedMns) {
     Comparator<ParsedMnemonic> mainComparator = Comparator
         .<ParsedMnemonic, Boolean>comparing(p -> !p.deprecated()).thenComparing(p -> !p.specific())
-        .thenComparing(p -> UcpByCode.IMPLICIT_UCP_KEYSYM_CODES.contains(p.code()));
+        .thenComparing(p -> ImplicitUcp.IMPLICIT_UCP_KEYSYM_CODES.contains(p.code()));
     Comparator<ParsedMnemonic> comparatorCompatibleWithEquals =
         mainComparator.thenComparing(ParsedMnemonic::mnemonic);
     ImmutableSortedSet<ParsedMnemonic> sortedMns =
