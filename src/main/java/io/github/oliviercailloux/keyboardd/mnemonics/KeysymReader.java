@@ -124,7 +124,8 @@ class KeysymReader {
   private static final ImmutableSet<Pattern> PATTERNS_START = ImmutableSet.of(P_XKB_NO_COMMENT,
       P_XKB_UNICODE_MORE_SPECIFIC, P_XKB_UNICODE_DEPRECATED, P_XKB_COMMENT);
   private static final ImmutableSet<Pattern> PATTERNS_COMMENTS =
-      ImmutableSet.of(P_XKB_COMMENT_NON_DEPRECATED_ALIAS, P_XKB_COMMENT_DEPRECATED_ALIAS, P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
+      ImmutableSet.of(P_XKB_COMMENT_NON_DEPRECATED_ALIAS, P_XKB_COMMENT_DEPRECATED_ALIAS,
+          P_XKB_COMMENT_UNICODE, P_XKB_COMMENT_DEPRECATED);
 
   /**
    * Returns the latest version of the mnemonics, as included in this library. This will evolve with
