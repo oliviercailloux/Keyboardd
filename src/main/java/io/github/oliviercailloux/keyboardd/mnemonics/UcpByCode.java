@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-/** TODO consider removing this, seems not useful. */
+/** Might consider removing this: only IMPLICIT_UCP_BY_CODE and CODE_BY_IMPLICIT_UCP are used. */
 class UcpByCode {
   public static final ContiguousSet<Integer> IMPLICIT_UCPS = ContiguousSet.closed(0x100, 0x10F_FFF);
   public static final ContiguousSet<Integer> IMPLICIT_UCP_KEYSYM_CODES =
